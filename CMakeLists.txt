@@ -5,8 +5,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3 -Wall -Wno-reorder -Wno-s
 
 file(GLOB SRC_GEOM ./Geometry/*.cpp ./Geometry/*.h)
 file(GLOB SRC_UTILS ./Utils/*.cpp ./Utils/*.h)
+file(GLOB SRC_RENDERER ./Renderer/*.h ./Renderer/*.cpp)
 
-set(SRC ${SRC_UTILS} ${SRC_GEOM})
+set(SRC ${SRC_UTILS} ${SRC_GEOM} ${SRC_RENDERER})
 
 include_directories(./include/GLEW)
 include_directories(./include/GLFW)

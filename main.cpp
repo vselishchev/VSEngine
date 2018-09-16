@@ -1,8 +1,9 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "Renderer/Renderer.h"
 
 int main()
 {
+  VSEngine::Renderer render(600,800, "MyWindow");
+  render.Start();
 
-    return 0;
+  return 0;
 }

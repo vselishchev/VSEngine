@@ -124,7 +124,7 @@ namespace Geometry
   {
     Matrix3df retMatrix;
 
-    if (std::abs(radian) < GeometryUtils::Tolerance)
+    if (abs(radian) < GeometryUtils::Tolerance)
     {
       return retMatrix;
     }
@@ -151,9 +151,9 @@ namespace Geometry
   {
     Matrix3df retMatrix;
 
-    if (std::abs(yaw) < GeometryUtils::Tolerance &&
-        std::abs(pitch) < GeometryUtils::Tolerance &&
-        std::abs(roll) < GeometryUtils::Tolerance)
+    if (abs(yaw) < GeometryUtils::Tolerance &&
+        abs(pitch) < GeometryUtils::Tolerance &&
+        abs(roll) < GeometryUtils::Tolerance)
     {
       return retMatrix;;
     }
@@ -181,7 +181,7 @@ namespace Geometry
   Matrix3df MakeRotationX(float radian)
   {
     Matrix3df matrix;
-    if (std::abs(radian) < GeometryUtils::Tolerance)
+    if (abs(radian) < GeometryUtils::Tolerance)
     {
       return matrix;
     }
@@ -200,7 +200,7 @@ namespace Geometry
   Matrix3df MakeRotationY(float radian)
   {
     Matrix3df matrix;
-    if (std::abs(radian) < GeometryUtils::Tolerance)
+    if (abs(radian) < GeometryUtils::Tolerance)
     {
       return matrix;
     }
@@ -219,7 +219,7 @@ namespace Geometry
   Matrix3df MakeRotationZ(float radian)
   {
     Matrix3df matrix;
-    if (std::abs(radian) < GeometryUtils::Tolerance)
+    if (abs(radian) < GeometryUtils::Tolerance)
     {
       return matrix;
     }
@@ -240,9 +240,9 @@ namespace Geometry
   {
     Matrix3df retMatrix;
 
-    if (std::abs(left - right) < GeometryUtils::Tolerance ||
-        std::abs(top - bottom) < GeometryUtils::Tolerance ||
-        std::abs(zFar - zNear) < GeometryUtils::Tolerance)
+    if (abs(left - right) < GeometryUtils::Tolerance ||
+        abs(top - bottom) < GeometryUtils::Tolerance ||
+        abs(zFar - zNear) < GeometryUtils::Tolerance)
     {
       return retMatrix;
     }
@@ -264,8 +264,8 @@ namespace Geometry
   Matrix3df MakePerspective(float fovY, float aspect,
                             float n, float f)
   {
-    if (std::abs(fovY - GeometryUtils::PI2) < GeometryUtils::Tolerance ||
-        std::abs(aspect) < GeometryUtils::Tolerance)
+    if (abs(fovY - GeometryUtils::PI2) < GeometryUtils::Tolerance ||
+        abs(aspect) < GeometryUtils::Tolerance)
     {
       return Matrix3df();
     }
@@ -290,9 +290,9 @@ namespace Geometry
   {
     Matrix3df matrix;
 
-    if (std::abs(right - left) < GeometryUtils::Tolerance ||
-        std::abs(top - bottom) < GeometryUtils::Tolerance ||
-        std::abs(n - f) < GeometryUtils::Tolerance ||
+    if (abs(right - left) < GeometryUtils::Tolerance ||
+        abs(top - bottom) < GeometryUtils::Tolerance ||
+        abs(n - f) < GeometryUtils::Tolerance ||
         (n - GeometryUtils::Tolerance < 0.0) ||
         (f - GeometryUtils::Tolerance < 0.0))
     {

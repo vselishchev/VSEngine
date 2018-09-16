@@ -23,7 +23,7 @@ namespace Geometry
     return (x + GeometryUtils::Tolerance) >= 0.0f &&
            (y + GeometryUtils::Tolerance) >= 0.0f &&
            (z + GeometryUtils::Tolerance) >= 0.0f &&
-           std::abs(x + y + z - 1.0f) <= GeometryUtils::Tolerance;
+           abs(x + y + z - 1.0f) <= GeometryUtils::Tolerance;
   }
 
   Point3df& Point3df::Homogenize()

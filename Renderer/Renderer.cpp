@@ -7,6 +7,9 @@
 
 #include <algorithm>
 
+#include "../Geometry/Matrix3df.h"
+#include "../Geometry/Utils.h"
+
 namespace VSEngine
 {
 namespace
@@ -44,7 +47,7 @@ GLuint LoadShader(const std::string &name, GLenum type)
     return 0;
   }
 
-  unsigned long readCount = fread(data, 1, filesize, file);
+  unsigned long readCount = static_cast<unsigned long>(fread(data, 1, filesize, file));
   fclose(file);
 
   if (readCount != filesize)
@@ -156,48 +159,103 @@ void Renderer::Start()
 
 void Renderer::RenderStart()
 {
-  static const GLfloat vertex_positions[] =
-  {
-      -0.25f,  0.25f, -0.25f,
-       0.25f,  0.25f, -0.25f,
-       0.25f,  0.25f,  0.25f,
-      -0.25f,  0.25f,  0.25f,
-      -0.25f, -0.25f, -0.25f,
-       0.25f, -0.25f, -0.25f,
-       0.25f, -0.25f,  0.25f,
-      -0.25f, -0.25f,  0.25f,
-  };
-
   static const GLushort vertex_indices[] =
   {
       0, 1, 2,
-      0, 2, 3,
-      1, 5, 6,
-      1, 6, 2,
-      4, 0, 3,
-      4, 3, 7,
-      5, 4, 7,
-      5, 7, 6,
-      3, 2, 6,
-      3, 6, 7,
-      0, 4, 5,
-      0, 5, 1
+      2, 1, 3,
+      2, 3, 4,
+      4, 3, 5,
+      4, 5, 6,
+      6, 5, 7,
+      6, 7, 0,
+      0, 7, 1,
+      6, 0, 2,
+      2, 4, 6,
+      7, 5, 3,
+      7, 3, 1
+  };
+
+  static const GLfloat vertex_positions[] =
+  {
+      -0.25f, -0.25f, -0.25f,
+      -0.25f,  0.25f, -0.25f,
+       0.25f, -0.25f, -0.25f,
+       0.25f,  0.25f, -0.25f,
+       0.25f, -0.25f,  0.25f,
+       0.25f,  0.25f,  0.25f,
+      -0.25f, -0.25f,  0.25f,
+      -0.25f,  0.25f,  0.25f,
   };
 
   if (!LoadShaders())
   {
     throw std::exception("Failed shaders loading!");
   }
+
+  mvMatrix = glGetUniformLocation(program, "mvMatrix");
+  projMatrix = glGetUniformLocation(program, "projMatrix");
+
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+
+  glGenBuffers(1, &posBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
+  glBufferData(GL_ARRAY_BUFFER,
+               sizeof(vertex_positions),
+               vertex_positions, GL_STATIC_DRAW);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+  glEnableVertexAttribArray(0);
+
+  glGenBuffers(1, &indexBuffer);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(vertex_indices),
+               vertex_indices, GL_STATIC_DRAW);
+
+  glEnable(GL_CULL_FACE);
+
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
 }
 
 void Renderer::RenderFinish()
 {
-
+  glDeleteVertexArrays(1, &vao);
+  glDeleteProgram(program);
+  glDeleteBuffers(1, &posBuffer);
+  glDeleteBuffers(1, &indexBuffer);
 }
 
 void Renderer::Render(double time)
 {
+  static const GLfloat green[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+  static const GLfloat one = 1.0f;
+  
+  glViewport(0, 0, appInfo.windowWidth, appInfo.windowHeight);
+  glClearBufferfv(GL_COLOR, 0, green);
+  glClearBufferfv(GL_DEPTH, 0, &one);
 
+  glUseProgram(program);
+
+  Geometry::Matrix3df projMatr =
+      Geometry::MakePerspective(50.0f, static_cast<float>(appInfo.windowWidth) /
+                                static_cast<float>(appInfo.windowHeight),
+                                0.1f,
+                                1000.0f);
+
+  glUniformMatrix4fv(projMatrix, 1, GL_FALSE, projMatr.GetForOGL());
+
+  float t = static_cast<float>(time) * 0.3f;
+
+  Geometry::Matrix3df mvMatr =
+      Geometry::MakeTranslation(Geometry::Vector3df(0.0f, 0.0f, -4.0f)) * 
+      Geometry::MakeTranslation(sinf(2.1f * t) * 0.5f,
+                                cosf(1.7f * t) * 0.5f,
+                                sinf(1.3f * t) * cos (1.5f * t) * 2.0f) *
+      Geometry::MakeRotationY(static_cast<float>(time) * 45.0f) *
+      Geometry::MakeRotationX(static_cast<float>(time) * 81.0f);
+
+  glUniformMatrix4fv(mvMatrix, 1, GL_FALSE, mvMatr.GetForOGL());
+  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 }
 
 bool Renderer::LoadShaders()

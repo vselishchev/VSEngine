@@ -86,16 +86,36 @@ namespace Geometry
     return matrix;
   }
 
+  const float* Matrix3df::GetForOGL() const
+  {
+    float *arr = new float[16];
+
+    for (int i = 0; i < 4; ++i)
+    {
+      for (int j = 0; j < 4; ++j)
+      {
+        arr[i * 4 + j] = data[j][i];
+      }
+    }
+
+    return arr;
+  }
+
   Matrix3df MakeTranslation(Vector3df const& translateDirection)
   {
     Matrix3df matrix;
 
     for (int i = 0; i < 3; ++i)
     {
-      matrix[i][3] = translateDirection.xyzw[i];
+      matrix[i][3] += translateDirection.xyzw[i];
     }
 
     return matrix;
+  }
+
+  Matrix3df MakeTranslation(float x, float y, float z)
+  {
+    return MakeTranslation(Vector3df(x, y, z));
   }
 
   Matrix3df MakeScale(float xScale, float yScale, float zScale)
@@ -120,19 +140,19 @@ namespace Geometry
     return matrix;
   }
 
-  Matrix3df MakeRotation(Vector3df const& axis, float radian)
+  Matrix3df MakeRotation(Vector3df const& axis, float degrees)
   {
     Matrix3df retMatrix;
 
-    if (std::abs(radian) < GeometryUtils::Tolerance)
+    if (abs(degrees) < GeometryUtils::Tolerance)
     {
       return retMatrix;
     }
 
     Vector3df unit_axis = axis.Normalized();
 
-    float c = cosf(radian);
-    float s = sinf(radian);
+    float c = cosf(GeometryUtils::DegreeToRadian(degrees));
+    float s = sinf(GeometryUtils::DegreeToRadian(degrees));
 
     retMatrix[0][0] = c + unit_axis.x * unit_axis.x * (1 - c);
     retMatrix[0][1] = unit_axis.x * unit_axis.y * (1 - c) - unit_axis.z * s;
@@ -151,19 +171,19 @@ namespace Geometry
   {
     Matrix3df retMatrix;
 
-    if (std::abs(yaw) < GeometryUtils::Tolerance &&
-        std::abs(pitch) < GeometryUtils::Tolerance &&
-        std::abs(roll) < GeometryUtils::Tolerance)
+    if (abs(yaw) < GeometryUtils::Tolerance &&
+        abs(pitch) < GeometryUtils::Tolerance &&
+        abs(roll) < GeometryUtils::Tolerance)
     {
       return retMatrix;;
     }
 
-    float cos_yaw = cosf(yaw);
-    float sin_yaw = sinf(yaw);
-    float cos_pitch = cosf(pitch);
-    float sin_pitch = sinf(pitch);
-    float cos_roll = cosf(roll);
-    float sin_roll = sinf(roll);
+    float cos_yaw = cosf(GeometryUtils::DegreeToRadian(yaw));
+    float sin_yaw = sinf(GeometryUtils::DegreeToRadian(yaw));
+    float cos_pitch = cosf(GeometryUtils::DegreeToRadian(pitch));
+    float sin_pitch = sinf(GeometryUtils::DegreeToRadian(pitch));
+    float cos_roll = cosf(GeometryUtils::DegreeToRadian(roll));
+    float sin_roll = sinf(GeometryUtils::DegreeToRadian(roll));
 
     retMatrix[0][0] = cos_yaw * cos_pitch;
     retMatrix[0][1] = cos_yaw * sin_pitch * sin_roll - sin_yaw * cos_roll;
@@ -178,16 +198,16 @@ namespace Geometry
     return retMatrix;
   }
 
-  Matrix3df MakeRotationX(float radian)
+  Matrix3df MakeRotationX(float degrees)
   {
     Matrix3df matrix;
-    if (std::abs(radian) < GeometryUtils::Tolerance)
+    if (abs(degrees) < GeometryUtils::Tolerance)
     {
       return matrix;
     }
 
-    float c = cosf(radian);
-    float s = sinf(radian);
+    float c = cosf(GeometryUtils::DegreeToRadian(degrees));
+    float s = sinf(GeometryUtils::DegreeToRadian(degrees));
 
     matrix[1][1] = c;
     matrix[2][2] = c;
@@ -197,16 +217,16 @@ namespace Geometry
     return matrix;
   }
 
-  Matrix3df MakeRotationY(float radian)
+  Matrix3df MakeRotationY(float degrees)
   {
     Matrix3df matrix;
-    if (std::abs(radian) < GeometryUtils::Tolerance)
+    if (abs(degrees) < GeometryUtils::Tolerance)
     {
       return matrix;
     }
 
-    float c = cosf(radian);
-    float s = sinf(radian);
+    float c = cosf(GeometryUtils::DegreeToRadian(degrees));
+    float s = sinf(GeometryUtils::DegreeToRadian(degrees));
 
     matrix[0][0] = c;
     matrix[2][2] = c;
@@ -216,16 +236,16 @@ namespace Geometry
     return matrix;
   }
 
-  Matrix3df MakeRotationZ(float radian)
+  Matrix3df MakeRotationZ(float degrees)
   {
     Matrix3df matrix;
-    if (std::abs(radian) < GeometryUtils::Tolerance)
+    if (abs(degrees) < GeometryUtils::Tolerance)
     {
       return matrix;
     }
 
-    float c = cosf(radian);
-    float s = sinf(radian);
+    float c = cosf(GeometryUtils::DegreeToRadian(degrees));
+    float s = sinf(GeometryUtils::DegreeToRadian(degrees));
 
     matrix[0][0] = c;
     matrix[1][1] = c;
@@ -240,9 +260,9 @@ namespace Geometry
   {
     Matrix3df retMatrix;
 
-    if (std::abs(left - right) < GeometryUtils::Tolerance ||
-        std::abs(top - bottom) < GeometryUtils::Tolerance ||
-        std::abs(zFar - zNear) < GeometryUtils::Tolerance)
+    if (abs(left - right) < GeometryUtils::Tolerance ||
+        abs(top - bottom) < GeometryUtils::Tolerance ||
+        abs(zFar - zNear) < GeometryUtils::Tolerance)
     {
       return retMatrix;
     }
@@ -264,13 +284,13 @@ namespace Geometry
   Matrix3df MakePerspective(float fovY, float aspect,
                             float n, float f)
   {
-    if (std::abs(fovY - GeometryUtils::PI2) < GeometryUtils::Tolerance ||
-        std::abs(aspect) < GeometryUtils::Tolerance)
+    if (abs(fovY - GeometryUtils::PI2) < GeometryUtils::Tolerance ||
+        abs(aspect) < GeometryUtils::Tolerance)
     {
       return Matrix3df();
     }
 
-    float k = 1.0f / tanf(fovY * 0.5f);
+    float k = 1.0f / tanf(GeometryUtils::DegreeToRadian(fovY * 0.5f));
 
     Matrix3df matrix;
 
@@ -290,9 +310,9 @@ namespace Geometry
   {
     Matrix3df matrix;
 
-    if (std::abs(right - left) < GeometryUtils::Tolerance ||
-        std::abs(top - bottom) < GeometryUtils::Tolerance ||
-        std::abs(n - f) < GeometryUtils::Tolerance ||
+    if (abs(right - left) < GeometryUtils::Tolerance ||
+        abs(top - bottom) < GeometryUtils::Tolerance ||
+        abs(n - f) < GeometryUtils::Tolerance ||
         (n - GeometryUtils::Tolerance < 0.0) ||
         (f - GeometryUtils::Tolerance < 0.0))
     {

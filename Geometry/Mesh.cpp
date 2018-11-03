@@ -73,7 +73,7 @@ Mesh::Mesh(std::string const& pathToFile)
       {
         std::vector<std::string> sublines;
         Utils::Split(elems[i], '/', std::back_inserter(sublines));
-        int sublinesCount = sublines.size();
+        int sublinesCount = static_cast<int>(sublines.size());
 
         triangle.vertices.xyz[i - 1] = std::atoi(sublines[0].c_str());
 

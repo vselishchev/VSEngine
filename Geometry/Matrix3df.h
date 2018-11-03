@@ -39,28 +39,6 @@ public:
     }
   }
 
-  /* Matrix3df(float vals[16])
-   {
-     for (int i = 0; i < 4; ++i)
-     {
-       for (int j = 0; j < 4; ++j)
-       {
-         data[i][j] = vals[i * 4 + j];
-       }
-     }
-   }
-
-   Matrix3df(float vals[4][4])
-   {
-     for (int i = 0; i < 4; ++i)
-     {
-       for (int j = 0; j < 4; ++j)
-       {
-         data[i][j] = vals[i][j];
-       }
-     }
-   }*/
-
   Matrix3df(const float vals[16])
   {
     for (int i = 0; i < 4; ++i)
@@ -118,9 +96,11 @@ public:
   Point3df operator*(Point3df const& p);
   Matrix3df operator*(Matrix3df const& rhs);
 
+  const float* GetForOGL() const;
 public:
   union
   {
+    float singleArray[16];
     float data[4][4];
     Vector3df rows[4];
   };
@@ -128,19 +108,20 @@ public:
 
 // Define matrix as translation transformation
 Matrix3df MakeTranslation(Vector3df const& translate_direction);
+Matrix3df MakeTranslation(float x, float y, float z);
 // Define matrix as scale transformation
 Matrix3df MakeScale(float x_scale, float y_scale, float z_scale);
 Matrix3df MakeScale(float scale);
 // Define matrix as rotation transformation
-// from rotation axis and angle in radians
-Matrix3df MakeRotation(Vector3df const& axis, float radian);
+// from rotation axis and angle in degrees
+Matrix3df MakeRotation(Vector3df const& axis, float degrees);
 
-Matrix3df MakeRotationX(float radian);
-Matrix3df MakeRotationY(float radian);
-Matrix3df MakeRotationZ(float radian);
+Matrix3df MakeRotationX(float degrees);
+Matrix3df MakeRotationY(float degrees);
+Matrix3df MakeRotationZ(float degrees);
 
 // Define matrix as rotation transformation
-// from from yaw, pitch and roll in radians
+// from from yaw, pitch and roll in degrees
 Matrix3df MakeRotation(float yaw, float pitch, float roll);
 
 // Create orthographic projection matrix
@@ -148,7 +129,7 @@ Matrix3df MakeOrthographic(float left, float right, float bottom,
                            float top, float zNear, float zFar);
 
 // Create Perspective matrix 
-// (fovY - in radians)
+// fovY - in degrees
 Matrix3df MakePerspective(float fovY, float aspect,
                           float zNear, float zFar);
 

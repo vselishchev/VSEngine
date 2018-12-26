@@ -34,7 +34,20 @@ namespace Geometry
     return *this;
   }
 
-  Vector3df Matrix3df::operator*(Vector3df const& vec)
+  Matrix3df& Matrix3df::operator=(const Matrix3df &rhs)
+  {
+    for (int i = 0; i < 4; ++i)
+    {
+      for (int j = i; j < 4; ++j)
+      {
+        data[i][j] = rhs.data[j][i];
+      }
+    }
+
+    return *this;
+  }
+
+  Vector3df Matrix3df::operator*(const Vector3df &vec)
   {
     Vector3df result;
 
@@ -49,7 +62,7 @@ namespace Geometry
     return result;
   }
 
-  Point3df Matrix3df::operator*(Point3df const& p)
+  Point3df Matrix3df::operator*(const Point3df &p)
   {
     Point3df result;
 
@@ -66,7 +79,7 @@ namespace Geometry
     return result;
   }
 
-  Matrix3df Matrix3df::operator*(Matrix3df const& rhs)
+  Matrix3df Matrix3df::operator*(const Matrix3df &rhs)
   {
     Matrix3df matrix;
 
@@ -101,7 +114,7 @@ namespace Geometry
     return arr;
   }
 
-  Matrix3df MakeTranslation(Vector3df const& translateDirection)
+  Matrix3df MakeTranslation(const Vector3df &translateDirection)
   {
     Matrix3df matrix;
 
@@ -140,7 +153,7 @@ namespace Geometry
     return matrix;
   }
 
-  Matrix3df MakeRotation(Vector3df const& axis, float degrees)
+  Matrix3df MakeRotation(const Vector3df &axis, float degrees)
   {
     Matrix3df retMatrix;
 
@@ -337,9 +350,9 @@ namespace Geometry
     return matrix;
   }
 
-  Matrix3df MakeLookAt(Point3df const& camera,
-                       Point3df const& target,
-                       Vector3df const& upDir)
+  Matrix3df MakeLookAt(const Point3df &camera,
+                       const Point3df &target,
+                       const Vector3df &upDir)
   {
     Vector3df f = (camera - target).Normalize();
     Vector3df up = upDir.Normalized();

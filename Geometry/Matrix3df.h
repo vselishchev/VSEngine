@@ -16,7 +16,7 @@ public:
     SetIdentity();
   }
 
-  Matrix3df(Matrix3df const& m)
+  Matrix3df(const Matrix3df &m)
   {
     for (int i = 0; i < 4; ++i)
     {
@@ -61,7 +61,7 @@ public:
     }
   }
 
-  inline Matrix3df(Vector3df const r[4])
+  inline Matrix3df(const Vector3df r[4])
   {
     rows[0] = r[0];
     rows[1] = r[1];
@@ -92,9 +92,11 @@ public:
     throw std::out_of_range("Index should be less than 4!");
   }
 
-  Vector3df operator*(Vector3df const& vec);
-  Point3df operator*(Point3df const& p);
-  Matrix3df operator*(Matrix3df const& rhs);
+  Matrix3df& operator=(const Matrix3df &rhs);
+
+  Vector3df operator*(const Vector3df &vec);
+  Point3df operator*(const Point3df &p);
+  Matrix3df operator*(const Matrix3df &rhs);
 
   const float* GetForOGL() const;
 public:
@@ -107,14 +109,16 @@ public:
 };
 
 // Define matrix as translation transformation
-Matrix3df MakeTranslation(Vector3df const& translate_direction);
+Matrix3df MakeTranslation(const Vector3df &translate_direction);
 Matrix3df MakeTranslation(float x, float y, float z);
+
 // Define matrix as scale transformation
 Matrix3df MakeScale(float x_scale, float y_scale, float z_scale);
 Matrix3df MakeScale(float scale);
+
 // Define matrix as rotation transformation
 // from rotation axis and angle in degrees
-Matrix3df MakeRotation(Vector3df const& axis, float degrees);
+Matrix3df MakeRotation(const Vector3df &axis, float degrees);
 
 Matrix3df MakeRotationX(float degrees);
 Matrix3df MakeRotationY(float degrees);
@@ -133,9 +137,9 @@ Matrix3df MakeOrthographic(float left, float right, float bottom,
 Matrix3df MakePerspective(float fovY, float aspect,
                           float zNear, float zFar);
 
-Matrix3df MakeLookAt(Point3df const& camera,
-                     Point3df const& target,
-                     Vector3df const& upDir);
+Matrix3df MakeLookAt(const Point3df &camera,
+                     const Point3df &target,
+                     const Vector3df &upDir);
 
 Matrix3df MakeFrustum(float left, float right, float bottom,
                       float top, float n, float f);

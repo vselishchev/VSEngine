@@ -1,11 +1,10 @@
-#include <string>
-
-#ifdef _WIN32
-#include <Windows.h>
-#endif // _WIN32
-
 #include <GL/glew.h>
 #include <glfw3.h>
+
+#include "../Components/Object.h"
+
+#include <list>
+#include <string>
 
 namespace VSEngine
 {
@@ -41,10 +40,6 @@ private:
                               GLsizei length,
                               const GLchar* message)
   {
-#ifdef _WIN32
-    OutputDebugStringA(message);
-    OutputDebugStringA("\n");
-#endif // _WIN32
   }
 
 public:
@@ -67,5 +62,7 @@ private:
   GLuint indexBuffer;
   GLuint mvMatrix;
   GLuint projMatrix;
+
+  std::list<Object> objects;
 };
 }

@@ -117,6 +117,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Components\Object.cpp" />
     <ClCompile Include="..\Geometry\Matrix3df.cpp" />
     <ClCompile Include="..\Geometry\Mesh.cpp" />
     <ClCompile Include="..\Geometry\Point2df.cpp" />
@@ -127,9 +128,9 @@
     <ClCompile Include="..\Utils\Color.cpp" />
     <ClCompile Include="..\Utils\CommonUtils.cpp" />
     <ClCompile Include="Entry.cpp" />
-    <ClCompile Include="Object.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Components\Object.h" />
     <ClInclude Include="..\Geometry\Matrix3df.h" />
     <ClInclude Include="..\Geometry\Mesh.h" />
     <ClInclude Include="..\Geometry\Point2df.h" />
@@ -139,7 +140,6 @@
     <ClInclude Include="..\Renderer\Renderer.h" />
     <ClInclude Include="..\Utils\Color.h" />
     <ClInclude Include="..\Utils\CommonUtils.h" />
-    <ClInclude Include="Object.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

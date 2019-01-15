@@ -12,19 +12,19 @@ namespace Geometry
 {
 struct Triple
 {
-  inline int& operator[](int &index)
+  inline unsigned short& operator[](unsigned short &index)
   {
     return xyz[index];
   }
 
   union
   {
-    int xyz[3];
+    unsigned short xyz[3];
     struct
     {
-      int x;
-      int y;
-      int z;
+      unsigned short x;
+      unsigned short y;
+      unsigned short z;
     };
   };
 };
@@ -93,6 +93,18 @@ public:
 
   Mesh Copy() const;
 
+  unsigned short VerticesCount() const { return static_cast<unsigned short>(vertices.size()); }
+  unsigned short IndicesCount() const { return static_cast<unsigned short>(faces.size()); }
+  unsigned short NormalsCount() const { return static_cast<unsigned short>(normals.size()); }
+  unsigned short TextureCoordsCount() const { return static_cast<unsigned short>(textureCoords.size()); }
+
+  float* GetSingleArrayVertices() const;
+  unsigned short* GetSingleArrayIndices() const;
+  float* GetSingleArrayNormals() const;
+  unsigned short* GetSingleArrayNormalIndices() const;
+
+  float* GetSingleArrayVerticesAndNormals() const;
+  unsigned short* GetSingleArrayVerticesAndNormalsIndices() const;
 public:
   BoundingBox bBox;
 

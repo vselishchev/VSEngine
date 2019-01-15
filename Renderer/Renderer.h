@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <glfw3.h>
 
-#include "../Components/Object.h"
+#include "../Components/SceneObject.h"
 
 #include <list>
 #include <string>
@@ -25,6 +25,8 @@ public:
   ~Renderer();
 
   void Start();
+
+  void AddSceneObject(const SceneObject &obj);
 
 private:
   void RenderStart();
@@ -57,12 +59,11 @@ private:
   GLFWwindow *window;
 
   GLuint program;
-  GLuint vao;
-  GLuint posBuffer;
-  GLuint indexBuffer;
-  GLuint mvMatrix;
   GLuint projMatrix;
 
-  std::list<Object> objects;
+  GLuint lightColor;
+  GLuint lightDirection;
+
+  std::list<SceneObject> sceneObjects;
 };
 }

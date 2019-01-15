@@ -18,7 +18,7 @@
     <Filter Include="Renderer">
       <UniqueIdentifier>{1cfb9c8f-1d10-4e1f-a49f-97b80732d38c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object">
+    <Filter Include="Scene">
       <UniqueIdentifier>{d3a1740f-cfd6-4cef-998f-7840fb9b89eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -53,8 +53,8 @@
     <ClCompile Include="Entry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Components\Object.cpp">
-      <Filter>Object</Filter>
+    <ClCompile Include="..\Components\SceneObject.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,8 +85,8 @@
     <ClInclude Include="..\Renderer\Renderer.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Components\Object.h">
-      <Filter>Object</Filter>
+    <ClInclude Include="..\Components\SceneObject.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

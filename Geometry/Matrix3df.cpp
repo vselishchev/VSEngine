@@ -99,6 +99,34 @@ namespace Geometry
     return matrix;
   }
 
+  Matrix3df Matrix3df::operator*=(const Matrix3df &rhs)
+  {
+    Matrix3df matrix;
+
+    for (int i = 0; i < 4; ++i)
+    {
+      for (int j = 0; j < 4; ++j)
+      {
+        matrix[i][j] = 0;
+
+        for (int k = 0; k < 4; ++k)
+        {
+          matrix[i][j] += data[i][k] * rhs[k][j];
+        }
+      }
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+      for (int j = 0; j < 4; ++j)
+      {
+        data[i][j] = matrix[i][j];
+      }
+    }
+
+    return *this;
+  }
+
   const float* Matrix3df::GetForOGL() const
   {
     float *arr = new float[16];

@@ -117,7 +117,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Components\Object.cpp" />
+    <ClCompile Include="..\Components\SceneObject.cpp" />
     <ClCompile Include="..\Geometry\Matrix3df.cpp" />
     <ClCompile Include="..\Geometry\Mesh.cpp" />
     <ClCompile Include="..\Geometry\Point2df.cpp" />
@@ -130,7 +130,7 @@
     <ClCompile Include="Entry.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Components\Object.h" />
+    <ClInclude Include="..\Components\SceneObject.h" />
     <ClInclude Include="..\Geometry\Matrix3df.h" />
     <ClInclude Include="..\Geometry\Mesh.h" />
     <ClInclude Include="..\Geometry\Point2df.h" />

@@ -97,6 +97,7 @@ public:
   Vector3df operator*(const Vector3df &vec);
   Point3df operator*(const Point3df &p);
   Matrix3df operator*(const Matrix3df &rhs);
+  Matrix3df operator*=(const Matrix3df &rhs);
 
   const float* GetForOGL() const;
 public:

@@ -1,5 +1,5 @@
-#ifndef _CPUGRAPHICS_UTILS_COMMONUTILS_H_
-#define _CPUGRAPHICS_UTILS_COMMONUTILS_H_
+#ifndef _VSENGINE_UTILS_COMMONUTILS_H_
+#define _VSENGINE_UTILS_COMMONUTILS_H_
 
 #include <string>
 #include <sstream>
@@ -18,4 +18,4 @@ namespace Utils
 	}
 }
 
-#endif //_CPUGRAPHICS_UTILS_COMMONUTILS_H_
+#endif //_VSENGINE_UTILS_COMMONUTILS_H_

@@ -21,6 +21,9 @@
     <Filter Include="Scene">
       <UniqueIdentifier>{d3a1740f-cfd6-4cef-998f-7840fb9b89eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scene\Components">
+      <UniqueIdentifier>{97227c04-02f2-4860-b8e6-3dc27063270a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Geometry\Matrix3df.cpp">
@@ -53,8 +56,14 @@
     <ClCompile Include="Entry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Components\SceneObject.cpp">
+    <ClCompile Include="..\Scene\Scene.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Scene\Components\SceneObject.cpp">
+      <Filter>Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Geometry\Vertex.cpp">
+      <Filter>Geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,8 +94,14 @@
     <ClInclude Include="..\Renderer\Renderer.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Components\SceneObject.h">
+    <ClInclude Include="..\Scene\Scene.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Scene\Components\SceneObject.h">
+      <Filter>Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Geometry\Vertex.h">
+      <Filter>Geometry</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

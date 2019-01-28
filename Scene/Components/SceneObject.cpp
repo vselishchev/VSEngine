@@ -60,11 +60,6 @@ float* SceneObject::GetVertices() const
   return mesh->GetSingleArrayVertices();
 }
 
-float* SceneObject::GetNormals() const
-{
-  return mesh->GetSingleArrayNormals();
-}
-
 float* SceneObject::GetVerticesAndNormals() const
 {
   return mesh->GetSingleArrayVerticesAndNormals();
@@ -75,16 +70,6 @@ unsigned short* SceneObject::GetIndices() const
   return mesh->GetSingleArrayIndices();
 }
 
-unsigned short* SceneObject::GetNormalIndices() const
-{
-  return mesh->GetSingleArrayNormalIndices();
-}
-
-unsigned short* SceneObject::GetVerticesAndNormalsIndices() const
-{
-  return mesh->GetSingleArrayVerticesAndNormalsIndices();
-}
-
 void SceneObject::BindObject(unsigned int programId)
 {
   glGenVertexArrays(1, &vao);
@@ -93,16 +78,20 @@ void SceneObject::BindObject(unsigned int programId)
 
   glBindVertexArray(vao);
 
+  float *verticesWithNormals = mesh->GetSingleArrayVerticesAndNormals();
+
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * mesh->VerticesCount() * 3, 
-               mesh->GetSingleArrayVertices(), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * mesh->VerticesCount() * 6, 
+               verticesWithNormals, GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * mesh->IndicesCount() * 3,
                mesh->GetSingleArrayIndices(), GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
   glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
   glBindVertexArray(0);
 

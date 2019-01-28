@@ -46,6 +46,11 @@ Mesh::Mesh(std::string const& pathToFile)
 
   std::vector<std::string> elems;
 
+  std::vector<Point3df> points;
+  std::vector<Triangle> triangles;
+  std::vector<Vector3df> normals;
+  std::vector<Point2df> textureCoords;
+
   while (!file.eof() && objCount < 2)
   {
     elems.clear();
@@ -73,13 +78,13 @@ Mesh::Mesh(std::string const& pathToFile)
       ++objCount;
     } else if (elems[0] == "v")
     {
-      Point3df vertex(std::strtof(elems[1].c_str(), nullptr),
+      Point3df point(std::strtof(elems[1].c_str(), nullptr),
                       std::strtof(elems[2].c_str(), nullptr),
                       std::strtof(elems[3].c_str(), nullptr));
 
-      bBox.AddPoint(vertex);
+      bBox.AddPoint(point);
 
-      vertices.push_back(vertex);
+      points.push_back(point);
     } else if (elems[0] == "vn")
     {
       normals.push_back(Vector3df(std::strtof(elems[1].c_str(), nullptr),
@@ -105,45 +110,131 @@ Mesh::Mesh(std::string const& pathToFile)
         Utils::Split(elems[i], '/', std::back_inserter(sublines));
         int sublinesCount = static_cast<int>(sublines.size());
 
-        triangle.vertices.xyz[i - 1] = std::atoi(sublines[0].c_str()) - 1;
+        triangle.vertices.xyz[i - 1] = std::atoi(sublines[0].c_str());
 
         if (sublinesCount > 1 && !sublines[1].empty())
         {
-          triangle.textureCoords.xyz[i - 1] = std::atoi(sublines[1].c_str()) - 1;
+          triangle.textureCoords.xyz[i - 1] = std::atoi(sublines[1].c_str());
         }
 
         if (sublinesCount > 2 && !sublines[2].empty())
         {
-          triangle.normals.xyz[i - 1] = std::atoi(sublines[2].c_str()) - 1;
+          triangle.normals.xyz[i - 1] = std::atoi(sublines[2].c_str());
         }
       }
 
-      faces.push_back(triangle);
+      triangles.push_back(triangle);
     }
 
     std::getline(file, line);
   }
+
+  MakeUnique(points, normals, textureCoords, triangles);
+}
+
+int GetValidIndex(int index, size_t pointsCount)
+{
+  if (index < 0)
+  {
+    index = static_cast<int>(pointsCount) - abs(index);
+  } else
+  {
+    --index;
+  }
+
+  return index;
+}
+
+void Mesh::MakeUnique(const std::vector<Point3df> &points,
+                      const std::vector<Vector3df> &normals,
+                      const std::vector<Point2df> &textureCoordinates,
+                      const std::vector<Triangle> &triangles)
+{
+  size_t pointsCount = points.size();
+  size_t normalsCount = normals.size();
+  size_t textureCoordsCount = textureCoordinates.size();
+
+  if (normalsCount > 0)
+  {
+    hasNormals = true;
+  }
+
+  if (textureCoordsCount > 0)
+  {
+    hasTextureCoordinates = true;
+  }
+
+  for (auto &face : triangles)
+  {
+    Triple newFace;
+    for (int i = 0; i < 3; ++i)
+    {
+      Point3df point = points[GetValidIndex(face.vertices.xyz[i], pointsCount)];
+      
+      Vector3df normal;
+      if (hasNormals)
+      {
+        normal = normals[GetValidIndex(face.normals.xyz[i], normalsCount)];
+      }
+
+      Point2df textureCoordinate;
+      if (hasTextureCoordinates)
+      {
+        textureCoordinate = textureCoordinates[GetValidIndex(face.textureCoords.xyz[i], normalsCount)];
+      }
+
+      Vertex vertexTest(point, normal, textureCoordinate);
+
+      int vertexID = GetVertexID(vertexTest);
+
+      if (vertexID == -1)
+      {
+        newFace.xyz[i] = static_cast<int>(vertices.size());
+        vertices.push_back(vertexTest);
+      } else
+      {
+        newFace.xyz[i] = vertexID;
+      }
+    }
+
+    faces.push_back(newFace);
+  }
+}
+
+int Mesh::GetVertexID(const Vertex &vert)
+{
+  for (size_t i = 0; i < vertices.size(); ++i)
+  {
+    if (vertices[i] == vert)
+    {
+      return static_cast<int>(i);
+    }
+  }
+
+  return -1;
 }
 
 Mesh Mesh::Copy() const
 {
-  std::vector<Point3df> vertices_(vertices);
-  std::vector<Triangle> faces_(faces);
-  std::vector<Vector3df> normals_(normals);
-  std::vector<Point2df> textures_(textureCoords);
+  std::vector<Vertex> vertices_(vertices);
+  std::vector<Triple> faces_(faces);
 
-  return Mesh(vertices_, faces_, normals_);
+  return Mesh(vertices_, faces_);
 }
 
 float* Mesh::GetSingleArrayVertices() const
 {
   float *result = new float[vertices.size() * 3];
 
-  for (int i = 0; i < vertices.size(); ++i)
+  int i = 0;
+  for (auto &vertex: vertices)
   {
-    result[i * 3] = vertices[i][0];
-    result[i * 3 + 1] = vertices[i][1];
-    result[i * 3 + 2] = vertices[i][2];
+    const Point3df &point = vertex.point;
+    result[i * 3] = point[0];
+    result[i * 3 + 1] = point[1];
+    result[i * 3 + 2] = point[2];
+
+    ++i;
   }
 
   return result;
@@ -153,39 +244,14 @@ unsigned short* Mesh::GetSingleArrayIndices() const
 {
   unsigned short *result = new unsigned short[faces.size() * 3];
 
-  for (short i = 0; i < faces.size(); ++i)
+  unsigned int i = 0;
+  for (const Triple &face: faces)
   {
-    result[i * 3] = faces[i].vertices.xyz[0];
-    result[i * 3 + 1] = faces[i].vertices.xyz[1];
-    result[i * 3 + 2] = faces[i].vertices.xyz[2];
-  }
+    result[i * 3] = face.x;
+    result[i * 3 + 1] = face.y;
+    result[i * 3 + 2] = face.z;
 
-  return result;
-}
-
-float* Mesh::GetSingleArrayNormals() const
-{
-  float *result = new float[normals.size() * 3];
-
-  for (int i = 0; i < normals.size(); ++i)
-  {
-    result[i * 3] = normals[i][0];
-    result[i * 3 + 1] = normals[i][1];
-    result[i * 3 + 2] = normals[i][2];
-  }
-
-  return result;
-}
-
-unsigned short* Mesh::GetSingleArrayNormalIndices() const
-{
-  unsigned short *result = new unsigned short[faces.size() * 3];
-
-  for (short i = 0; i < faces.size(); ++i)
-  {
-    result[i * 3] = faces[i].normals.xyz[0];
-    result[i * 3 + 1] = faces[i].normals.xyz[1];
-    result[i * 3 + 2] = faces[i].normals.xyz[2];
+    ++i;
   }
 
   return result;
@@ -193,51 +259,26 @@ unsigned short* Mesh::GetSingleArrayNormalIndices() const
 
 float* Mesh::GetSingleArrayVerticesAndNormals() const
 {
-  int normalsStart = static_cast<int>(vertices.size());
-  int normalsEnd = normalsStart + static_cast<unsigned int>(normals.size());
+  float *result = new float[vertices.size() * 6];
 
-  float *result = new float[normalsEnd * 3];
-
-  for (int i = 0; i < normalsStart; ++i)
+  int i = 0;
+  for (auto &vertex : vertices)
   {
-    result[i * 3] = vertices[i][0];
-    result[i * 3 + 1] = vertices[i][1];
-    result[i * 3 + 2] = vertices[i][2];
-  }
-  
-  for (int i = normalsStart; i < normalsEnd; ++i)
-  {
-    result[i * 3] = normals[i][0];
-    result[i * 3 + 1] = normals[i][1];
-    result[i * 3 + 2] = normals[i][2];
-  }
+    const Point3df &point = vertex.point;
+    const Vector3df &normal = vertex.normal;
 
-  return result;
-}
+    result[i * 6] = point[0];
+    result[i * 6 + 1] = point[1];
+    result[i * 6 + 2] = point[2];
+    result[i * 6 + 3] = normal[0];
+    result[i * 6 + 4] = normal[1];
+    result[i * 6 + 5] = normal[2];
 
-unsigned short* Mesh::GetSingleArrayVerticesAndNormalsIndices() const
-{
-  short facesSize = static_cast<unsigned short>(faces.size());
-
-  unsigned short *result = new unsigned short[facesSize * 6];
-
-  for (short i = 0; i < faces.size(); ++i)
-  {
-    result[i * 3] = faces[i].vertices.xyz[0];
-    result[i * 3 + 1] = faces[i].vertices.xyz[1];
-    result[i * 3 + 2] = faces[i].vertices.xyz[2];
-  }
-
-  short doubleFaceSize = facesSize * 2;
-
-  for (short i = facesSize; i < doubleFaceSize; ++i)
-  {
-    result[i * 3] = faces[i].normals.xyz[0];
-    result[i * 3 + 1] = faces[i].normals.xyz[1];
-    result[i * 3 + 2] = faces[i].normals.xyz[2];
+    ++i;
   }
 
   return result;
 }
+
 
 }

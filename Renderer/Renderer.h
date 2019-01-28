@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <glfw3.h>
 
-#include "../Components/SceneObject.h"
+#include "../Scene/Components/SceneObject.h"
 
 #include <list>
 #include <string>
@@ -62,7 +62,7 @@ private:
   GLuint projMatrix;
 
   GLuint lightColor;
-  GLuint lightDirection;
+  GLuint lightPosition;
 
   std::list<SceneObject> sceneObjects;
 };

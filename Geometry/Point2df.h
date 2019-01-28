@@ -1,5 +1,5 @@
-#ifndef _CPUGRAPHICS_GEOMETRY_POINT2DF_H_
-#define _CPUGRAPHICS_GEOMETRY_POINT2DF_H_
+#ifndef _VSENGINE_GEOMETRY_POINT2DF_H_
+#define _VSENGINE_GEOMETRY_POINT2DF_H_
 
 namespace Geometry
 {
@@ -117,6 +117,8 @@ public:
     return xyz[i];
   }
 
+  bool operator==(const Point2df &rhs) const;
+
 public:
   union
   {
@@ -138,4 +140,4 @@ public:
 };
 }
 
-#endif //_CPUGRAPHICS_GEOMETRY_POINT2DF_H_
+#endif //_VSENGINE_GEOMETRY_POINT2DF_H_

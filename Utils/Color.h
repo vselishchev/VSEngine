@@ -1,5 +1,5 @@
-#ifndef _CPUGRAPHICS_UTILS_COLOR_H_
-#define _CPUGRAPHICS_UTILS_COLOR_H_
+#ifndef _VSENGINE_UTILS_COLOR_H_
+#define _VSENGINE_UTILS_COLOR_H_
 
 namespace Utils
 {
@@ -50,4 +50,4 @@ namespace Utils
 	
 	static const Color defaultColor = Color();
 }
-#endif // _CPUGRAPHICS_UTILS_COLOR_H_
+#endif // _VSENGINE_UTILS_COLOR_H_

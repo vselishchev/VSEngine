@@ -95,7 +95,7 @@ Renderer::Renderer(int height, int width,
   program{ 0 },
   projMatrix{ 0 },
   lightColor{ 0 },
-  lightDirection{ 0 }
+  lightPosition{ 0 }
 {
   glfwInit();
 
@@ -170,7 +170,7 @@ void Renderer::RenderStart()
   projMatrix = glGetUniformLocation(program, "projMatrix");
 
   lightColor = glGetUniformLocation(program, "lightColor");
-  lightDirection = glGetUniformLocation(program, "lightDirection");
+  lightPosition = glGetUniformLocation(program, "lightPosition");
 
   glEnable(GL_CULL_FACE);
 
@@ -195,7 +195,7 @@ void Renderer::Render(double time)
   glUseProgram(program);
 
   glUniform3f(lightColor, 1.0f, 0.0f, 0.0f);
-  glUniform3f(lightDirection, 0.5773f, 0.5773f, 0.5773f);
+  glUniform3f(lightPosition, -20.0f, 30.0f, 20.0f);
 
   Geometry::Matrix3df projMatr =
     Geometry::MakePerspective(50.0f, static_cast<float>(appInfo.windowWidth) /

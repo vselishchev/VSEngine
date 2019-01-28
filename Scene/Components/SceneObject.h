@@ -1,6 +1,6 @@
 #pragma once
-#include "../Geometry/Matrix3df.h"
-#include "../Geometry/Mesh.h"
+#include "Geometry/Matrix3df.h"
+#include "Geometry/Mesh.h"
 
 #include <memory>
 
@@ -29,11 +29,8 @@ public:
   Geometry::Matrix3df GetTransformation() const;
 
   float* GetVertices() const;
-  float* GetNormals() const;
   float* GetVerticesAndNormals() const;
   unsigned short* GetIndices() const;
-  unsigned short* GetNormalIndices() const;
-  unsigned short* GetVerticesAndNormalsIndices() const;
 
 private:
   std::shared_ptr<Geometry::Mesh> mesh;

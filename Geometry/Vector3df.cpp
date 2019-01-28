@@ -58,4 +58,17 @@ namespace Geometry
 
     return result;
   }
+
+  bool Vector3df::operator==(const Vector3df &rhs) const
+  {
+    if (abs(x - rhs.x) < GeometryUtils::Tolerance &&
+        abs(y - rhs.y) < GeometryUtils::Tolerance &&
+        abs(z - rhs.z) < GeometryUtils::Tolerance)
+    {
+      return true;
+    }
+
+    return false;
+  }
+
 }

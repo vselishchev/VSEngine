@@ -1,5 +1,5 @@
-#ifndef _CPUGRAPHICS_GEOMETRY_MATRIX3DF_H_
-#define _CPUGRAPHICS_GEOMETRY_MATRIX3DF_H_
+#ifndef _VSENGINE_GEOMETRY_MATRIX3DF_H_
+#define _VSENGINE_GEOMETRY_MATRIX3DF_H_
 
 #include "Vector3df.h"
 #include "Point3df.h"
@@ -150,4 +150,4 @@ Matrix3df MakeViewportTransformation(float width, float height,
 
 }
 
-#endif // _CPUGRAPHICS_GEOMETRY_MATRIX3DF_H_
+#endif // _VSENGINE_GEOMETRY_MATRIX3DF_H_

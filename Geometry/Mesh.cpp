@@ -180,7 +180,7 @@ void Mesh::MakeUnique(const std::vector<Point3df> &points,
       Point2df textureCoordinate;
       if (hasTextureCoordinates)
       {
-        textureCoordinate = textureCoordinates[GetValidIndex(face.textureCoords.xyz[i], normalsCount)];
+        textureCoordinate = textureCoordinates[GetValidIndex(face.textureCoords.xyz[i], textureCoordsCount)];
       }
 
       Vertex vertexTest(point, normal, textureCoordinate);

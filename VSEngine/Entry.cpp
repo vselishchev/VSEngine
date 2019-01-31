@@ -5,7 +5,7 @@ int main()
 {
 	VSEngine::Renderer renderer(600,800, "VS Engine");
 
-  std::shared_ptr<Geometry::Mesh> m(new Geometry::Mesh("D:/Work/Cube.obj"));
+  std::shared_ptr<Geometry::Mesh> m(new Geometry::Mesh(/*"D:/Work/Cube.obj"*/"D:/Work/Models/teapot/teapot.obj"));
   VSEngine::SceneObject obj(m);
   obj.Translate(Geometry::Vector3df(0.0f, 0.0f, -4.0f));
   obj.Translate(Geometry::Vector3df(sinf(2.1f) * 0.5f,

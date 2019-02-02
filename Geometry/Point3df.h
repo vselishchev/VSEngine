@@ -1,5 +1,5 @@
-#ifndef _CPUGRAPHICS_GEOMETRY_POINT3DF_H_
-#define _CPUGRAPHICS_GEOMETRY_POINT3DF_H_
+#ifndef _VSENGINE_GEOMETRY_POINT3DF_H_
+#define _VSENGINE_GEOMETRY_POINT3DF_H_
 
 #include "Vector3df.h"
 
@@ -16,7 +16,7 @@ namespace Geometry
         z(0.0f),
         w(1.0f) {}
 
-    inline Point3df(float val):
+    inline explicit Point3df(float val):
         x(val),
         y(val),
         z(val),
@@ -138,6 +138,8 @@ namespace Geometry
       throw std::out_of_range("Index should be less than 4!");
     }
 
+    bool operator==(const Point3df &rhs) const;
+
     bool IsBarycentric();
 
     Point3df& Homogenize();
@@ -156,4 +158,4 @@ namespace Geometry
     };
   };
 }
-#endif // _CPUGRAPHICS_GEOMETRY_POINT3DF_H_
+#endif // _VSENGINE_GEOMETRY_POINT3DF_H_

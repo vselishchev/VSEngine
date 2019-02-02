@@ -1,5 +1,5 @@
-#ifndef _CPUGRAPHICS_UTILS_COLOR_H_
-#define _CPUGRAPHICS_UTILS_COLOR_H_
+#ifndef _VSENGINE_UTILS_COLOR_H_
+#define _VSENGINE_UTILS_COLOR_H_
 
 namespace Utils
 {
@@ -17,7 +17,7 @@ namespace Utils
 	    red(r), green(g), blue(b), alpha(255)
 	  {}
 	
-	  inline bool operator==(const Color &rhs)
+	  inline bool operator==(const Color &rhs) const
 	  {
 	    return red == rhs.red &&
 	      green == rhs.green &&
@@ -30,7 +30,7 @@ namespace Utils
 	
 	  Color operator+(const Color &c);
 	
-	  inline bool operator!=(const Color &rhs)
+	  inline bool operator!=(const Color &rhs) const
 	  {
 	    return !(*this == rhs);
 	  }
@@ -50,4 +50,4 @@ namespace Utils
 	
 	static const Color defaultColor = Color();
 }
-#endif // _CPUGRAPHICS_UTILS_COLOR_H_
+#endif // _VSENGINE_UTILS_COLOR_H_

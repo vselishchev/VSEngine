@@ -1,11 +1,13 @@
-#include <string>
-
-#ifdef _WIN32
-#include <Windows.h>
-#endif // _WIN32
+#ifndef _VSENGINE_RENDERER_H_
+#define _VSENGINE_RENDERER_H_
 
 #include <GL/glew.h>
 #include <glfw3.h>
+
+#include <list>
+#include <string>
+
+#include "Scene/Scene.h"
 
 namespace VSEngine
 {
@@ -22,11 +24,15 @@ private:
 public:
   Renderer() = delete;
   Renderer(int height, int width,
-           std::string title = "");
+           const std::string &title = "");
   ~Renderer();
 
   void Start();
 
+  void SetScene(std::shared_ptr<Scene> scene_)
+  {
+    scene = scene_;
+  }
 private:
   void RenderStart();
   void RenderFinish();
@@ -41,10 +47,6 @@ private:
                               GLsizei length,
                               const GLchar* message)
   {
-#ifdef _WIN32
-    OutputDebugStringA(message);
-    OutputDebugStringA("\n");
-#endif // _WIN32
   }
 
 public:
@@ -62,10 +64,10 @@ private:
   GLFWwindow *window;
 
   GLuint program;
-  GLuint vao;
-  GLuint posBuffer;
-  GLuint indexBuffer;
-  GLuint mvMatrix;
   GLuint projMatrix;
+
+  std::shared_ptr<Scene> scene;
 };
 }
+
+#endif //_VSENGINE_RENDERER_H_

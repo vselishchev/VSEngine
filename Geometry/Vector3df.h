@@ -1,5 +1,5 @@
-#ifndef _CPUGRAPHICS_GEOMETRY_VECTOR3DF_H_
-#define _CPUGRAPHICS_GEOMETRY_VECTOR3DF_H_
+#ifndef _VSENGINE_GEOMETRY_VECTOR3DF_H_
+#define _VSENGINE_GEOMETRY_VECTOR3DF_H_
 
 #include <math.h>
 #include <stdexcept>
@@ -15,7 +15,7 @@ namespace Geometry
         z(0.0f),
         w(0.0f) {}
 
-    inline Vector3df(float val):
+    inline explicit Vector3df(float val):
         x(val),
         y(val),
         z(val),
@@ -33,7 +33,7 @@ namespace Geometry
         z(_z),
         w(_w) {}
 
-    inline Vector3df(Vector3df const& vec):
+    inline Vector3df(const Vector3df &vec):
         x(vec.x),
         y(vec.y),
         z(vec.z),
@@ -65,31 +65,21 @@ namespace Geometry
     // Returns co-directional unit vector to current 
     Vector3df Normalized() const;
 
-    float Dot(Vector3df const& vec) const;
+    float Dot(const Vector3df &vec) const;
 
-    Vector3df Cross(Vector3df const& vec) const;
+    Vector3df Cross(const Vector3df &vec) const;
 
-    friend Vector3df operator-(Vector3df const& lhs, Vector3df const& rhs);
-    friend Vector3df operator+(Vector3df const& lhs, Vector3df const& rhs);
+    friend Vector3df operator-(const Vector3df &lhs, const Vector3df &rhs);
+    friend Vector3df operator+(const Vector3df &lhs, const Vector3df &rhs);
 
     inline float& operator[](int i)
     {
-      if (i < 4)
-      {
-        return xyzw[i];
-      }
-
-      throw std::out_of_range("Index should be less than 4!");
+      return xyzw[i];
     }
 
     inline float const& operator[](int i) const
     {
-      if (i < 4)
-      {
-        return xyzw[i];
-      }
-
-      throw std::out_of_range("Index should be less than 4!");
+      return xyzw[i];
     }
 
 
@@ -106,7 +96,9 @@ namespace Geometry
       return *this;
     }
 
-   inline Vector3df& operator=(Vector3df &&rhs)
+
+
+    inline Vector3df& operator=(Vector3df &&rhs)
     {
       if (this != &rhs)
       {
@@ -160,6 +152,8 @@ namespace Geometry
       return Vector3df(-x, -y, -z);
     }
 
+    bool operator==(const Vector3df &rhs) const;
+
   public:
     union
     {
@@ -175,4 +169,4 @@ namespace Geometry
   };
 }
 
-#endif // _CPUGRAPHICS_GEOMETRY_VECTOR3DF_H_
+#endif // _VSENGINE_GEOMETRY_VECTOR3DF_H_

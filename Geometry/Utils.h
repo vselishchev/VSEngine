@@ -1,5 +1,5 @@
-#ifndef _CPUGRAPHICS_GEOMETRY_UTILS_H_
-#define _CPUGRAPHICS_GEOMETRY_UTILS_H_
+#ifndef _VSENGINE_GEOMETRY_UTILS_H_
+#define _VSENGINE_GEOMETRY_UTILS_H_
 
 #include "Point3df.h"
 
@@ -44,4 +44,4 @@ namespace GeometryUtils
 
 }
 
-#endif // _CPUGRAPHICS_GEOMETRY_UTILS_H_
+#endif // _VSENGINE_GEOMETRY_UTILS_H_

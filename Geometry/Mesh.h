@@ -1,9 +1,10 @@
-#ifndef _CPUGRAPHICS_GEOMETRY_MESH_H_
-#define _CPUGRAPHICS_GEOMETRY_MESH_H_
+#ifndef _VSENGINE_GEOMETRY_MESH_H_
+#define _VSENGINE_GEOMETRY_MESH_H_
 
 #include "Point3df.h"
 #include "Point2df.h"
 #include "Vector3df.h"
+#include "Vertex.h"
 
 #include <vector>
 #include <limits>
@@ -12,6 +13,8 @@ namespace Geometry
 {
 struct Triple
 {
+  Triple() : x(-1), y(-1), z(-1) {}
+
   inline int& operator[](int &index)
   {
     return xyz[index];
@@ -60,49 +63,80 @@ public:
   Mesh() = delete;
 
   // Load mesh from *.obj file.
-  Mesh(std::string const& pathToFile);
+  explicit Mesh(std::string const& pathToFile);
 
   // Moves vectors
-  Mesh(std::vector<Point3df> &vertices_, std::vector<Triangle> &faces_, 
-       std::vector<Vector3df> normals_ = std::vector<Vector3df>(),
-       std::vector<Point2df> textures_ = std::vector<Point2df>())
+  Mesh(std::vector<Vertex> &vertices_, std::vector<Triple> &faces_):
+      hasNormals(false),
+      hasTextureCoordinates(false),
+      vertices(std::move(vertices_)),
+      faces(std::move(faces_))
   {
-    vertices = std::move(vertices_);
-    faces = std::move(faces_);
-    normals = std::move(normals_);
-    textureCoords = std::move(textures_);
   }
 
-  Mesh(Mesh &&m)
+  Mesh(Mesh &&m) :
+      objectName(m.objectName),
+      hasNormals(m.hasNormals),
+      hasTextureCoordinates(m.hasTextureCoordinates),
+      vertices(std::move(m.vertices)),
+      faces(std::move(m.faces))
   {
-    vertices = std::move(m.vertices);
-    faces = std::move(m.faces);
-    normals = std::move(m.normals);
-    textureCoords = std::move(m.textureCoords);
   }
 
   Mesh& operator=(Mesh &&m)
   {
     vertices = std::move(m.vertices);
     faces = std::move(m.faces);
-    normals = std::move(m.normals);
-    textureCoords = std::move(m.textureCoords);
+    hasNormals = m.hasNormals;
+    hasTextureCoordinates = m.hasTextureCoordinates;
+    objectName = m.objectName;
+
+    m.hasNormals = false;
+    m.hasTextureCoordinates = false;
+    m.objectName = "";
 
     return *this;
   }
 
   Mesh Copy() const;
 
+  unsigned short VerticesCount() const { return static_cast<unsigned short>(vertices.size()); }
+  unsigned short IndicesCount() const { return static_cast<unsigned short>(faces.size()); }
+
+  float* GetSingleArrayVertices() const;
+  unsigned short* GetSingleArrayIndices() const;
+
+  float* GetSingleArrayVerticesAndNormals() const;
+
+  bool HasNormals() const
+  {
+    return hasNormals;
+  }
+
+  bool HasTextureCoordinated() const
+  {
+    return hasTextureCoordinates;
+  }
+
+private:
+  void MakeUnique(const std::vector<Point3df> &points,
+                  const std::vector<Vector3df> &normals,
+                  const std::vector<Point2df> &textureCoordinates,
+                  const std::vector<Triangle> &faces);
+
+  int GetVertexID(const Vertex &vert) const;
 public:
   BoundingBox bBox;
-
-  std::vector<Point3df> vertices;
-  std::vector<Triangle> faces;
-  std::vector<Vector3df> normals;
-  std::vector<Point2df> textureCoords;
-
   std::string objectName;
+
+private:
+  bool hasNormals;
+  bool hasTextureCoordinates;
+
+  std::vector<Vertex> vertices;
+  std::vector<Triple> faces;
 };
+
 }
 
-#endif // _CPUGRAPHICS_GEOMETRY_MESH_H_
+#endif // _VSENGINE_GEOMETRY_MESH_H_

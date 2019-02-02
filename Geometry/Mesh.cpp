@@ -3,17 +3,37 @@
 
 #include <fstream>
 #include <stdlib.h>
+#include <algorithm>
 
 namespace Geometry
 {
-Mesh Mesh::Copy() const
+void BoundingBox::AddPoint(Point3df const& point)
 {
-  std::vector<Point3df> vertices_(vertices);
-  std::vector<Triangle> faces_(faces);
-  std::vector<Vector3df> normals_(normals);
-  std::vector<Point2df> textures_(textureCoords);
+  if (point.x < minPoint.x)
+  {
+    minPoint.x = point.x;
+  }
+  if (point.y < minPoint.y)
+  {
+    minPoint.y = point.y;
+  }
+  if (point.z < minPoint.z)
+  {
+    minPoint.z = point.z;
+  }
 
-  return Mesh(vertices_, faces_, normals_);
+  if (point.x > maxPoint.x)
+  {
+    maxPoint.x = point.x;
+  }
+  if (point.y > maxPoint.y)
+  {
+    maxPoint.y = point.y;
+  }
+  if (point.z > maxPoint.z)
+  {
+    maxPoint.z = point.z;
+  }
 }
 
 Mesh::Mesh(std::string const& pathToFile)
@@ -26,9 +46,24 @@ Mesh::Mesh(std::string const& pathToFile)
 
   std::vector<std::string> elems;
 
+  std::vector<Point3df> points;
+  std::vector<Triangle> triangles;
+  std::vector<Vector3df> normals;
+  std::vector<Point2df> textureCoords;
+
   while (!file.eof() && objCount < 2)
   {
     elems.clear();
+
+    std::string::iterator new_end =
+      std::unique(line.begin(), line.end(),
+                  [=](char lhs, char rhs) 
+    {
+      return (lhs == rhs) && (lhs == ' ');
+    });
+
+    line.erase(new_end, line.end());
+
     Utils::Split(line, ' ', std::back_inserter(elems));
 
     if (elems.empty())
@@ -43,13 +78,13 @@ Mesh::Mesh(std::string const& pathToFile)
       ++objCount;
     } else if (elems[0] == "v")
     {
-      Point3df vertex(std::strtof(elems[1].c_str(), nullptr),
+      Point3df point(std::strtof(elems[1].c_str(), nullptr),
                       std::strtof(elems[2].c_str(), nullptr),
                       std::strtof(elems[3].c_str(), nullptr));
 
-      bBox.AddPoint(vertex);
+      bBox.AddPoint(point);
 
-      vertices.push_back(vertex);
+      points.push_back(point);
     } else if (elems[0] == "vn")
     {
       normals.push_back(Vector3df(std::strtof(elems[1].c_str(), nullptr),
@@ -88,39 +123,162 @@ Mesh::Mesh(std::string const& pathToFile)
         }
       }
 
-      faces.push_back(triangle);
+      triangles.push_back(triangle);
     }
 
     std::getline(file, line);
   }
+
+  MakeUnique(points, normals, textureCoords, triangles);
 }
 
-void BoundingBox::AddPoint(Point3df const& point)
+int GetValidIndex(int index, size_t pointsCount)
 {
-  if (point.x < minPoint.x)
+  if (index < 0)
   {
-    minPoint.x = point.x;
-  }
-  if (point.y < minPoint.y)
+    index = static_cast<int>(pointsCount) - abs(index);
+  } else
   {
-    minPoint.y = point.y;
-  }
-  if (point.z < minPoint.z)
-  {
-    minPoint.z = point.z;
+    --index;
   }
 
-  if (point.x > maxPoint.x)
+  return index;
+}
+
+void Mesh::MakeUnique(const std::vector<Point3df> &points,
+                      const std::vector<Vector3df> &normals,
+                      const std::vector<Point2df> &textureCoordinates,
+                      const std::vector<Triangle> &triangles)
+{
+  size_t pointsCount = points.size();
+  size_t normalsCount = normals.size();
+  size_t textureCoordsCount = textureCoordinates.size();
+
+  if (normalsCount > 0)
   {
-    maxPoint.x = point.x;
+    hasNormals = true;
   }
-  if (point.y > maxPoint.y)
+
+  if (textureCoordsCount > 0)
   {
-    maxPoint.y = point.y;
+    hasTextureCoordinates = true;
   }
-  if (point.z > maxPoint.z)
+
+  for (auto &face : triangles)
   {
-    maxPoint.z = point.z;
+    Triple newFace;
+    for (int i = 0; i < 3; ++i)
+    {
+      Point3df point = points[GetValidIndex(face.vertices.xyz[i], pointsCount)];
+      
+      Vector3df normal;
+      if (hasNormals)
+      {
+        normal = normals[GetValidIndex(face.normals.xyz[i], normalsCount)];
+      }
+
+      Point2df textureCoordinate;
+      if (hasTextureCoordinates)
+      {
+        textureCoordinate = textureCoordinates[GetValidIndex(face.textureCoords.xyz[i], textureCoordsCount)];
+      }
+
+      Vertex vertexTest(point, normal, textureCoordinate);
+
+      int vertexID = GetVertexID(vertexTest);
+
+      if (vertexID == -1)
+      {
+        newFace.xyz[i] = static_cast<int>(vertices.size());
+        vertices.push_back(vertexTest);
+      } else
+      {
+        newFace.xyz[i] = vertexID;
+      }
+    }
+
+    faces.push_back(newFace);
   }
 }
+
+int Mesh::GetVertexID(const Vertex &vert) const
+{
+  for (size_t i = 0; i < vertices.size(); ++i)
+  {
+    if (vertices[i] == vert)
+    {
+      return static_cast<int>(i);
+    }
+  }
+
+  return -1;
+}
+
+Mesh Mesh::Copy() const
+{
+  std::vector<Vertex> vertices_(vertices);
+  std::vector<Triple> faces_(faces);
+
+  return Mesh(vertices_, faces_);
+}
+
+float* Mesh::GetSingleArrayVertices() const
+{
+  float *result = new float[vertices.size() * 3];
+
+  int i = 0;
+  for (auto &vertex: vertices)
+  {
+    const Point3df &point = vertex.point;
+    result[i * 3] = point[0];
+    result[i * 3 + 1] = point[1];
+    result[i * 3 + 2] = point[2];
+
+    ++i;
+  }
+
+  return result;
+}
+
+unsigned short* Mesh::GetSingleArrayIndices() const
+{
+  unsigned short *result = new unsigned short[faces.size() * 3];
+
+  unsigned int i = 0;
+  for (const Triple &face: faces)
+  {
+    result[i * 3] = static_cast<unsigned short>(face.x);
+    result[i * 3 + 1] = static_cast<unsigned short>(face.y);
+    result[i * 3 + 2] = static_cast<unsigned short>(face.z);
+
+    ++i;
+  }
+
+  return result;
+}
+
+float* Mesh::GetSingleArrayVerticesAndNormals() const
+{
+  float *result = new float[vertices.size() * 6];
+
+  int i = 0;
+  for (auto &vertex : vertices)
+  {
+    const Point3df &point = vertex.point;
+    const Vector3df &normal = vertex.normal;
+
+    result[i * 6] = point[0];
+    result[i * 6 + 1] = point[1];
+    result[i * 6 + 2] = point[2];
+    result[i * 6 + 3] = normal[0];
+    result[i * 6 + 4] = normal[1];
+    result[i * 6 + 5] = normal[2];
+
+    ++i;
+  }
+
+  return result;
+}
+
+
 }

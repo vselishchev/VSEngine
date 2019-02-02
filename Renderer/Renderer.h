@@ -1,10 +1,13 @@
+#ifndef _VSENGINE_RENDERER_H_
+#define _VSENGINE_RENDERER_H_
+
 #include <GL/glew.h>
 #include <glfw3.h>
 
-#include "../Scene/Components/SceneObject.h"
-
 #include <list>
 #include <string>
+
+#include "Scene/Scene.h"
 
 namespace VSEngine
 {
@@ -21,13 +24,15 @@ private:
 public:
   Renderer() = delete;
   Renderer(int height, int width,
-           std::string title = "");
+           const std::string &title = "");
   ~Renderer();
 
   void Start();
 
-  void AddSceneObject(const SceneObject &obj);
-
+  void SetScene(std::shared_ptr<Scene> scene_)
+  {
+    scene = scene_;
+  }
 private:
   void RenderStart();
   void RenderFinish();
@@ -61,9 +66,8 @@ private:
   GLuint program;
   GLuint projMatrix;
 
-  GLuint lightColor;
-  GLuint lightPosition;
-
-  std::list<SceneObject> sceneObjects;
+  std::shared_ptr<Scene> scene;
 };
 }
+
+#endif //_VSENGINE_RENDERER_H_

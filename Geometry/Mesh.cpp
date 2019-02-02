@@ -201,7 +201,7 @@ void Mesh::MakeUnique(const std::vector<Point3df> &points,
   }
 }
 
-int Mesh::GetVertexID(const Vertex &vert)
+int Mesh::GetVertexID(const Vertex &vert) const
 {
   for (size_t i = 0; i < vertices.size(); ++i)
   {
@@ -247,9 +247,9 @@ unsigned short* Mesh::GetSingleArrayIndices() const
   unsigned int i = 0;
   for (const Triple &face: faces)
   {
-    result[i * 3] = face.x;
-    result[i * 3 + 1] = face.y;
-    result[i * 3 + 2] = face.z;
+    result[i * 3] = static_cast<unsigned short>(face.x);
+    result[i * 3 + 1] = static_cast<unsigned short>(face.y);
+    result[i * 3 + 2] = static_cast<unsigned short>(face.z);
 
     ++i;
   }

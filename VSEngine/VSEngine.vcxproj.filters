@@ -104,4 +104,9 @@
       <Filter>Geometry</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include=".clang-tidy">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

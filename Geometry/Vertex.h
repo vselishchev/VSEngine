@@ -10,9 +10,9 @@ namespace Geometry
 class Vertex
 {
 public:
-  Vertex(const Point3df& point_,
-         Vector3df normal_,
-         Point2df textureCoord_);
+  Vertex(const Point3df &point_,
+         const Vector3df &normal_,
+         const Point2df &textureCoord_);
 
   inline Vertex(const Vertex &vertex) :
     point(vertex.point),
@@ -21,16 +21,13 @@ public:
   {}
 
   inline Vertex(Vertex &&vertex):
-    point(vertex.point),
-    normal(vertex.normal),
-    textureCoord(vertex.textureCoord)
+    point(std::move(vertex.point)),
+    normal(std::move(vertex.normal)),
+    textureCoord(std::move(vertex.textureCoord))
   {
-      vertex.point = Point3df();
-      vertex.normal = Vector3df();
-      vertex.textureCoord = Point2df();
   }
 
-  bool operator==(const Vertex &rhs);
+  bool operator==(const Vertex &rhs) const;
 
 public:
   Point3df point;

@@ -10,7 +10,7 @@ Point2df operator+(Point2df const& lhs, Point2df const& rhs)
 bool Point2df::operator==(const Point2df &rhs) const
 {
   if (abs(x - rhs.x) < GeometryUtils::Tolerance &&
-      abs(x - rhs.x) < GeometryUtils::Tolerance)
+      abs(y - rhs.y) < GeometryUtils::Tolerance)
   {
     return true;
   }

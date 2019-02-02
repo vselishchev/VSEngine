@@ -16,7 +16,7 @@ namespace Geometry
         z(0.0f),
         w(1.0f) {}
 
-    inline Point3df(float val):
+    inline explicit Point3df(float val):
         x(val),
         y(val),
         z(val),

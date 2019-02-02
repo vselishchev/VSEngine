@@ -12,7 +12,7 @@ public:
     z(0.0f)
   {}
 
-  inline Point2df(float val):
+  inline explicit Point2df(float val):
     x(val),
     y(val),
     z(val)

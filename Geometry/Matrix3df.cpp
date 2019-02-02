@@ -47,7 +47,7 @@ namespace Geometry
     return *this;
   }
 
-  Vector3df Matrix3df::operator*(const Vector3df &vec)
+  Vector3df Matrix3df::operator*(const Vector3df &vec) const
   {
     Vector3df result;
 
@@ -62,7 +62,7 @@ namespace Geometry
     return result;
   }
 
-  Point3df Matrix3df::operator*(const Point3df &p)
+  Point3df Matrix3df::operator*(const Point3df &p) const
   {
     Point3df result;
 
@@ -79,7 +79,7 @@ namespace Geometry
     return result;
   }
 
-  Matrix3df Matrix3df::operator*(const Matrix3df &rhs)
+  Matrix3df Matrix3df::operator*(const Matrix3df &rhs) const
   {
     Matrix3df matrix;
 

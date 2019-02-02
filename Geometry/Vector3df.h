@@ -15,7 +15,7 @@ namespace Geometry
         z(0.0f),
         w(0.0f) {}
 
-    inline Vector3df(float val):
+    inline explicit Vector3df(float val):
         x(val),
         y(val),
         z(val),

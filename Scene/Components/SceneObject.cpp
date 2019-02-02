@@ -5,7 +5,11 @@
 namespace VSEngine
 {
 SceneObject::SceneObject(std::shared_ptr<Geometry::Mesh> m):
-    mesh(m)
+    mesh(m),
+    vao(0),
+    vbo(0),
+    ebo(0),
+    modelMatrix(0)
 {
 }
 
@@ -18,16 +22,22 @@ SceneObject::~SceneObject()
 
 SceneObject::SceneObject(const SceneObject &obj): 
     mesh(obj.mesh),
-    transformation(obj.transformation)
+    transformation(obj.transformation),
+    vao(0),
+    vbo(0),
+    ebo(0),
+    modelMatrix(0)
 {
 }
 
 SceneObject::SceneObject(SceneObject &&obj):
-    mesh(obj.mesh),
-    transformation(obj.transformation)
+    mesh(std::move(obj.mesh)),
+    transformation(std::exchange(obj.transformation, Geometry::Matrix3df())),
+    vao(obj.vao),
+    vbo(obj.vbo),
+    ebo(obj.ebo),
+    modelMatrix(obj.modelMatrix)
 {
-  obj.mesh = nullptr;
-  obj.transformation = Geometry::Matrix3df();
 }
 
 void SceneObject::Scale(const Geometry::Vector3df &scale_)
@@ -48,6 +58,11 @@ void SceneObject::Rotate(const Geometry::Matrix3df &rotation_)
 void SceneObject::Translate(const Geometry::Vector3df &translation_)
 {
   transformation *= Geometry::MakeTranslation(translation_);
+}
+
+void SceneObject::Translate(float x, float y, float z)
+{
+  transformation *= Geometry::MakeTranslation(x, y, z);
 }
 
 Geometry::Matrix3df SceneObject::GetTransformation() const
@@ -95,14 +110,14 @@ void SceneObject::BindObject(unsigned int programId)
 
   glBindVertexArray(0);
 
-  mvMatrix = glGetUniformLocation(programId, "mvMatrix");
+  modelMatrix = glGetUniformLocation(programId, "modelMatrix");
 }
 
-void SceneObject::Render()
+void SceneObject::Render(double time)
 {
   glBindVertexArray(vao);
 
-  glUniformMatrix4fv(mvMatrix, 1, GL_FALSE, transformation.GetForOGL());
+  glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, transformation.GetForOGL());
 
   glDrawElements(GL_TRIANGLES, mesh->IndicesCount() * 3, GL_UNSIGNED_SHORT, 0);
 }

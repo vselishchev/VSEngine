@@ -63,29 +63,37 @@ public:
   Mesh() = delete;
 
   // Load mesh from *.obj file.
-  Mesh(std::string const& pathToFile);
+  explicit Mesh(std::string const& pathToFile);
 
   // Moves vectors
   Mesh(std::vector<Vertex> &vertices_, std::vector<Triple> &faces_):
       hasNormals(false),
-      hasTextureCoordinates(false)
+      hasTextureCoordinates(false),
+      vertices(std::move(vertices_)),
+      faces(std::move(faces_))
   {
-    vertices = std::move(vertices_);
-    faces = std::move(faces_);
   }
 
   Mesh(Mesh &&m) :
-      hasNormals(false),
-      hasTextureCoordinates(false)
+      objectName(m.objectName),
+      hasNormals(m.hasNormals),
+      hasTextureCoordinates(m.hasTextureCoordinates),
+      vertices(std::move(m.vertices)),
+      faces(std::move(m.faces))
   {
-    vertices = std::move(m.vertices);
-    faces = std::move(m.faces);
   }
 
   Mesh& operator=(Mesh &&m)
   {
     vertices = std::move(m.vertices);
     faces = std::move(m.faces);
+    hasNormals = m.hasNormals;
+    hasTextureCoordinates = m.hasTextureCoordinates;
+    objectName = m.objectName;
+
+    m.hasNormals = false;
+    m.hasTextureCoordinates = false;
+    m.objectName = "";
 
     return *this;
   }
@@ -116,7 +124,7 @@ private:
                   const std::vector<Point2df> &textureCoordinates,
                   const std::vector<Triangle> &faces);
 
-  int GetVertexID(const Vertex &vert);
+  int GetVertexID(const Vertex &vert) const;
 public:
   BoundingBox bBox;
   std::string objectName;
@@ -128,6 +136,7 @@ private:
   std::vector<Vertex> vertices;
   std::vector<Triple> faces;
 };
+
 }
 
 #endif // _VSENGINE_GEOMETRY_MESH_H_

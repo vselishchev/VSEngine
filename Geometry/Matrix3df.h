@@ -39,7 +39,7 @@ public:
     }
   }
 
-  Matrix3df(const float vals[16])
+  explicit Matrix3df(const float vals[16])
   {
     for (int i = 0; i < 4; ++i)
     {
@@ -50,7 +50,7 @@ public:
     }
   }
 
-  Matrix3df(const float vals[4][4])
+  explicit Matrix3df(const float vals[4][4])
   {
     for (int i = 0; i < 4; ++i)
     {
@@ -61,7 +61,7 @@ public:
     }
   }
 
-  inline Matrix3df(const Vector3df r[4])
+  inline explicit Matrix3df(const Vector3df r[4])
   {
     rows[0] = r[0];
     rows[1] = r[1];
@@ -74,29 +74,19 @@ public:
 
   inline Vector3df& operator[](int i)
   {
-    if (i < 4)
-    {
-      return rows[i];
-    }
-
-    throw std::out_of_range("Index should be less than 4!");
+    return rows[i];
   }
 
   inline const Vector3df& operator[](int i) const
   {
-    if (i < 4)
-    {
-      return rows[i];
-    }
-
-    throw std::out_of_range("Index should be less than 4!");
+    return rows[i];
   }
 
   Matrix3df& operator=(const Matrix3df &rhs);
 
-  Vector3df operator*(const Vector3df &vec);
-  Point3df operator*(const Point3df &p);
-  Matrix3df operator*(const Matrix3df &rhs);
+  Vector3df operator*(const Vector3df &vec) const;
+  Point3df operator*(const Point3df &p) const;
+  Matrix3df operator*(const Matrix3df &rhs) const;
   Matrix3df operator*=(const Matrix3df &rhs);
 
   const float* GetForOGL() const;

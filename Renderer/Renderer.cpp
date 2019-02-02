@@ -26,7 +26,7 @@ GLuint LoadShader(const std::string &name, GLenum type)
   std::replace(path.begin(), path.end(), '\\', '/');
 
   FILE *file = nullptr;
-  int filesize = 0;
+  unsigned long filesize = 0;
   char *data;
 
   fopen_s(&file, path.c_str(), "rb");
@@ -52,6 +52,7 @@ GLuint LoadShader(const std::string &name, GLenum type)
 
   if (readCount != filesize)
   {
+    delete[] data;
     return 0;
   }
 
@@ -61,6 +62,7 @@ GLuint LoadShader(const std::string &name, GLenum type)
 
   if (!shader)
   {
+    delete[] data;
     return 0;
   }
 
@@ -90,12 +92,11 @@ GLuint LoadShader(const std::string &name, GLenum type)
 }
 
 Renderer::Renderer(int height, int width,
-                   std::string title) :
+                   const std::string &title) :
   appInfo{ title, height, width, 4, 3 },
-  program{ 0 },
-  projMatrix{ 0 },
-  lightColor{ 0 },
-  lightPosition{ 0 }
+  window(nullptr),
+  program(0),
+  projMatrix(0)
 {
   glfwInit();
 
@@ -110,6 +111,8 @@ Renderer::Renderer(int height, int width,
 
 Renderer::~Renderer()
 {
+  glDeleteProgram(program);
+
   if (window)
   {
     glfwDestroyWindow(window);
@@ -162,20 +165,14 @@ void Renderer::RenderStart()
     throw std::exception("Failed shaders loading!");
   }
 
-  for (auto &object : sceneObjects)
-  {
-    object.BindObject(program);
-  }
-
   projMatrix = glGetUniformLocation(program, "projMatrix");
-
-  lightColor = glGetUniformLocation(program, "lightColor");
-  lightPosition = glGetUniformLocation(program, "lightPosition");
 
   glEnable(GL_CULL_FACE);
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
+
+  scene->LoadScene(program);
 }
 
 void Renderer::RenderFinish()
@@ -194,9 +191,6 @@ void Renderer::Render(double time)
 
   glUseProgram(program);
 
-  glUniform3f(lightColor, 1.0f, 0.0f, 0.0f);
-  glUniform3f(lightPosition, -20.0f, 30.0f, 20.0f);
-
   Geometry::Matrix3df projMatr =
     Geometry::MakePerspective(50.0f, static_cast<float>(appInfo.windowWidth) /
                               static_cast<float>(appInfo.windowHeight),
@@ -205,10 +199,7 @@ void Renderer::Render(double time)
 
   glUniformMatrix4fv(projMatrix, 1, GL_FALSE, projMatr.GetForOGL());
 
-  for (auto &object : sceneObjects)
-  {
-    object.Render();
-  }
+  scene->RenderScene(time);
 }
 
 bool Renderer::LoadShaders()
@@ -265,11 +256,6 @@ void APIENTRY Renderer::DebugCallback(GLenum source,
                                       GLvoid* userParam)
 {
   reinterpret_cast<Renderer*>(userParam)->OnDebugMessage(source, type, id, severity, length, message);
-}
-
-void Renderer::AddSceneObject(const SceneObject &obj)
-{
-  sceneObjects.push_back(obj);
 }
 
 }

@@ -13,6 +13,7 @@ class SceneObject
 public:
   SceneObject() = delete;
   explicit SceneObject(std::shared_ptr<Geometry::Mesh> m);
+  SceneObject(const std::vector<std::shared_ptr<Geometry::Mesh>> &m);
   SceneObject(const SceneObject &obj);
   SceneObject(SceneObject &&obj);
   ~SceneObject();
@@ -31,20 +32,13 @@ public:
 
   Geometry::Matrix3df GetTransformation() const;
 
-  float* GetVertices() const;
-  float* GetVerticesAndNormals() const;
-  unsigned short* GetIndices() const;
-
   void ResetTransform() { transformation = Geometry::Matrix3df(); }
 
 private:
-  std::shared_ptr<Geometry::Mesh> mesh;
+  std::vector<std::shared_ptr<Geometry::Mesh>> meshes;
 
   Geometry::Matrix3df transformation;
 
-  unsigned int vao;
-  unsigned int vbo;
-  unsigned int ebo;
   unsigned int modelMatrix;
 };
 

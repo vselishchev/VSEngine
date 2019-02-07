@@ -16,6 +16,8 @@ namespace Utils
 			*(result++) = item;
 		}
 	}
+
+  std::string ReplaceSlashes(const std::string &str);
 }
 
 #endif //_VSENGINE_UTILS_COMMONUTILS_H_

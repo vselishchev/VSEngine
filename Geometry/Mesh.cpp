@@ -1,9 +1,15 @@
 #include "Mesh.h"
-#include "../Utils/CommonUtils.h"
+
+#include "Utils/CommonUtils.h"
 
 #include <fstream>
 #include <stdlib.h>
 #include <algorithm>
+
+#include <GL/glew.h>
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "Utils/tiny_obj_loader.h"
 
 namespace Geometry
 {
@@ -51,7 +57,7 @@ Mesh::Mesh(std::string const& pathToFile)
   std::vector<Vector3df> normals;
   std::vector<Point2df> textureCoords;
 
-  while (!file.eof() && objCount < 2)
+  /*while (!file.eof() && objCount < 2)
   {
     elems.clear();
 
@@ -127,9 +133,27 @@ Mesh::Mesh(std::string const& pathToFile)
     }
 
     std::getline(file, line);
-  }
+  }*/
+
+  tinyobj::attrib_t attribs;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+
+  std::string warn;
+  std::string err;
+  std::size_t found = pathToFile.find_last_of("/\\");
+  std::string basedir = pathToFile.substr(0, found);
+
+  tinyobj::LoadObj(&attribs, &shapes, &materials, &warn, &err, pathToFile.c_str(), basedir.c_str());
 
   MakeUnique(points, normals, textureCoords, triangles);
+}
+
+Mesh::~Mesh()
+{
+  glDeleteVertexArrays(1, &vao);
+  glDeleteBuffers(1, &vbo);
+  glDeleteBuffers(1, &ebo);
 }
 
 int GetValidIndex(int index, size_t pointsCount)
@@ -280,5 +304,37 @@ float* Mesh::GetSingleArrayVerticesAndNormals() const
   return result;
 }
 
+void Mesh::BindMesh()
+{
+  glGenVertexArrays(1, &vao);
+  glGenBuffers(1, &vbo);
+  glGenBuffers(1, &ebo);
+
+  glBindVertexArray(vao);
+
+  float *verticesWithNormals = GetSingleArrayVerticesAndNormals();
+
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * VerticesCount() * 6,
+               verticesWithNormals, GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * IndicesCount() * 3,
+               GetSingleArrayIndices(), GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  glBindVertexArray(0);
+}
+
+void Mesh::Render(double time)
+{
+  glBindVertexArray(vao);
+
+  glDrawElements(GL_TRIANGLES, IndicesCount() * 3, GL_UNSIGNED_SHORT, 0);
+}
 
 }

@@ -70,7 +70,10 @@ public:
       hasNormals(false),
       hasTextureCoordinates(false),
       vertices(std::move(vertices_)),
-      faces(std::move(faces_))
+      faces(std::move(faces_)),
+      vao(0),
+      vbo(0),
+      ebo(0)
   {
   }
 
@@ -79,9 +82,14 @@ public:
       hasNormals(m.hasNormals),
       hasTextureCoordinates(m.hasTextureCoordinates),
       vertices(std::move(m.vertices)),
-      faces(std::move(m.faces))
+      faces(std::move(m.faces)),
+      vao(std::exchange(m.vao, 0)),
+      vbo(std::exchange(m.vbo, 0)),
+      ebo(std::exchange(m.ebo, 0))
   {
   }
+
+  ~Mesh();
 
   Mesh& operator=(Mesh &&m)
   {
@@ -118,6 +126,10 @@ public:
     return hasTextureCoordinates;
   }
 
+  void BindMesh();
+
+  void Render(double time);
+
 private:
   void MakeUnique(const std::vector<Point3df> &points,
                   const std::vector<Vector3df> &normals,
@@ -132,6 +144,10 @@ public:
 private:
   bool hasNormals;
   bool hasTextureCoordinates;
+
+  unsigned int vao;
+  unsigned int vbo;
+  unsigned int ebo;
 
   std::vector<Vertex> vertices;
   std::vector<Triple> faces;

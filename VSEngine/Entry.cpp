@@ -11,8 +11,8 @@ int main()
 
   std::shared_ptr<Geometry::Mesh> m(new Geometry::Mesh("D:/Work/Models/cube/cube.obj"));
   VSEngine::SceneObject obj(m);
-  obj.Rotate(Geometry::MakeRotationY(45.0f));
-  obj.Rotate(Geometry::MakeRotationX(45.0f));
+  //obj.Rotate(Geometry::MakeRotationY(45.0f));
+  //obj.Rotate(Geometry::MakeRotationX(45.0f));
  
   std::shared_ptr<VSEngine::Scene> scene(new VSEngine::Scene());
   scene->Translate(0, 0, -200);

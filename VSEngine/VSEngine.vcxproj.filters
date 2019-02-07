@@ -103,6 +103,9 @@
     <ClInclude Include="..\Geometry\Vertex.h">
       <Filter>Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="..\Utils\tiny_obj_loader.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy">

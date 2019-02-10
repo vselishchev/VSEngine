@@ -1,0 +1,1 @@
+Place Assimp *.dll near *.exe.

@@ -1,41 +1,105 @@
 #include "SceneObject.h"
 
 #include <GL/glew.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace VSEngine
 {
-SceneObject::SceneObject(std::shared_ptr<Geometry::Mesh> m):
-    mesh(m),
-    vao(0),
-    vbo(0),
-    ebo(0),
+SceneObject::SceneObject(const std::string &pathToFile):
     modelMatrix(0)
+{
+  auto iter = SceneObjects.find(pathToFile);
+  if (iter != SceneObjects.end())
+  {
+    meshes = iter->second->meshes;
+    return;
+  }
+
+  // TODO: Replace Assimp with own object loader
+  Assimp::Importer importer;
+
+  const aiScene *scene(importer.ReadFile(pathToFile,
+                                         aiProcess_GenNormals |
+                                         aiProcess_JoinIdenticalVertices |
+                                         aiProcess_Triangulate));
+
+  unsigned int meshesCount = scene->mNumMeshes;
+
+  for (unsigned int i = 0; i < meshesCount; ++i)
+  {
+    aiMesh *mesh = scene->mMeshes[i];
+
+    mesh->mMaterialIndex;
+
+    std::vector<VSEngine::Vertex> vertices;
+    
+    for (unsigned int j = 0; j < mesh->mNumVertices; ++j)
+    {
+      VSEngine::Vertex vertex;
+      aiVector3D point = mesh->mVertices[j];
+      vertex.point = Geometry::Point3df(point.x, point.y, point.z);
+
+      aiVector3D normal = mesh->mNormals[j];
+      vertex.normal = Geometry::Vector3df(normal.x, normal.y, normal.z);
+
+      //if (mesh->HasTextureCoords())
+      //{
+        //TODO: Add import of texture coordinates
+      //}
+
+      vertices.push_back(std::move(vertex));
+    }
+
+    std::vector<VSEngine::Triple> indices;
+
+    for (unsigned int j = 0; j < mesh->mNumFaces; ++j)
+    {
+      VSEngine::Triple triIndex;
+      aiFace face = mesh->mFaces[j];
+      triIndex.x = face.mIndices[0];
+      triIndex.y = face.mIndices[1];
+      triIndex.z = face.mIndices[2];
+
+      indices.push_back(triIndex);
+    }
+
+    std::shared_ptr<VSEngine::Mesh> resultingMesh(new VSEngine::Mesh(vertices, indices,
+                                                                     true, false));
+
+    meshes.push_back(resultingMesh);
+  }
+
+  VSEngine::SceneObjects.try_emplace(pathToFile, this);
+}
+
+SceneObject::SceneObject(std::shared_ptr<VSEngine::Mesh> m):
+    modelMatrix(0)
+{
+  meshes.push_back(m);
+}
+
+SceneObject::SceneObject(const std::vector<std::shared_ptr<VSEngine::Mesh>> &m):
+  meshes(m),
+  modelMatrix(0)
 {
 }
 
 SceneObject::~SceneObject()
 {
-  glDeleteVertexArrays(1, &vao);
-  glDeleteBuffers(1, &vbo);
-  glDeleteBuffers(1, &ebo);
 }
 
 SceneObject::SceneObject(const SceneObject &obj): 
-    mesh(obj.mesh),
+    meshes(obj.meshes),
     transformation(obj.transformation),
-    vao(0),
-    vbo(0),
-    ebo(0),
     modelMatrix(0)
 {
 }
 
 SceneObject::SceneObject(SceneObject &&obj):
-    mesh(std::move(obj.mesh)),
+    meshes(std::move(obj.meshes)),
     transformation(std::exchange(obj.transformation, Geometry::Matrix3df())),
-    vao(obj.vao),
-    vbo(obj.vbo),
-    ebo(obj.ebo),
     modelMatrix(obj.modelMatrix)
 {
 }
@@ -70,56 +134,24 @@ Geometry::Matrix3df SceneObject::GetTransformation() const
   return transformation;
 }
 
-float* SceneObject::GetVertices() const
-{
-  return mesh->GetSingleArrayVertices();
-}
-
-float* SceneObject::GetVerticesAndNormals() const
-{
-  return mesh->GetSingleArrayVerticesAndNormals();
-}
-
-unsigned short* SceneObject::GetIndices() const
-{
-  return mesh->GetSingleArrayIndices();
-}
-
 void SceneObject::BindObject(unsigned int programId)
 {
-  glGenVertexArrays(1, &vao);
-  glGenBuffers(1, &vbo);
-  glGenBuffers(1, &ebo);
-
-  glBindVertexArray(vao);
-
-  float *verticesWithNormals = mesh->GetSingleArrayVerticesAndNormals();
-
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * mesh->VerticesCount() * 6, 
-               verticesWithNormals, GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * mesh->IndicesCount() * 3,
-               mesh->GetSingleArrayIndices(), GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  glBindVertexArray(0);
+  for (auto &mesh : meshes)
+  {
+    mesh->BindMesh();
+  }
 
   modelMatrix = glGetUniformLocation(programId, "modelMatrix");
 }
 
 void SceneObject::Render(double time)
 {
-  glBindVertexArray(vao);
-
   glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, transformation.GetForOGL());
 
-  glDrawElements(GL_TRIANGLES, mesh->IndicesCount() * 3, GL_UNSIGNED_SHORT, 0);
+  for (auto &mesh : meshes)
+  {
+    mesh->Render(time);
+  }
 }
 
 }

@@ -1,5 +1,5 @@
 #include "Renderer/Renderer.h"
-#include "Geometry/Mesh.h"
+#include "ObjectModel/Mesh.h"
 #include "Scene/Scene.h"
 #include "Scene/Components/SceneObject.h"
 
@@ -9,14 +9,22 @@ int main()
 {
 	VSEngine::Renderer renderer(600,800, "VS Engine");
 
-  std::shared_ptr<Geometry::Mesh> m(new Geometry::Mesh("D:/Work/Models/cube/cube.obj"));
-  VSEngine::SceneObject obj(m);
-  obj.Rotate(Geometry::MakeRotationY(45.0f));
-  obj.Rotate(Geometry::MakeRotationX(45.0f));
- 
+  std::string filePath = "D:/Work/Models/teapot/teapot.obj";
+
+  std::shared_ptr<VSEngine::SceneObject> obj(new VSEngine::SceneObject(filePath));
+  obj->Rotate(Geometry::MakeRotationY(45.0f));
+  obj->Rotate(Geometry::MakeRotationX(45.0f));
+  obj->Translate(60.0f, 0.0f, 30.0f);
+
+  std::shared_ptr<VSEngine::SceneObject> obj2(new VSEngine::SceneObject(filePath));
+  obj2->Rotate(Geometry::MakeRotationY(-45.0f));
+  obj2->Rotate(Geometry::MakeRotationX(-45.0f));
+  obj2->Translate(-60.0f, -30.0f, -30.0f);
+
   std::shared_ptr<VSEngine::Scene> scene(new VSEngine::Scene());
-  scene->Translate(0, 0, -200);
+  scene->Translate(0, 0, -300);
   scene->AddSceneObject(obj);
+  scene->AddSceneObject(obj2);
 
   renderer.SetScene(scene);
 	renderer.Start();

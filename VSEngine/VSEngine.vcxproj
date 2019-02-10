@@ -47,7 +47,7 @@
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
@@ -56,7 +56,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -71,12 +71,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Geometry\Matrix3df.cpp" />
-    <ClCompile Include="..\Geometry\Mesh.cpp" />
     <ClCompile Include="..\Geometry\Point2df.cpp" />
     <ClCompile Include="..\Geometry\Point3df.cpp" />
     <ClCompile Include="..\Geometry\Utils.cpp" />
     <ClCompile Include="..\Geometry\Vector3df.cpp" />
-    <ClCompile Include="..\Geometry\Vertex.cpp" />
+    <ClCompile Include="..\ObjectModel\Mesh.cpp" />
+    <ClCompile Include="..\ObjectModel\Vertex.cpp" />
     <ClCompile Include="..\Renderer\Renderer.cpp" />
     <ClCompile Include="..\Scene\Components\SceneObject.cpp" />
     <ClCompile Include="..\Scene\Scene.cpp" />
@@ -86,17 +86,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Geometry\Matrix3df.h" />
-    <ClInclude Include="..\Geometry\Mesh.h" />
     <ClInclude Include="..\Geometry\Point2df.h" />
     <ClInclude Include="..\Geometry\Point3df.h" />
     <ClInclude Include="..\Geometry\Utils.h" />
     <ClInclude Include="..\Geometry\Vector3df.h" />
-    <ClInclude Include="..\Geometry\Vertex.h" />
+    <ClInclude Include="..\ObjectModel\Mesh.h" />
+    <ClInclude Include="..\ObjectModel\Vertex.h" />
     <ClInclude Include="..\Renderer\Renderer.h" />
     <ClInclude Include="..\Scene\Components\SceneObject.h" />
     <ClInclude Include="..\Scene\Scene.h" />
     <ClInclude Include="..\Utils\Color.h" />
     <ClInclude Include="..\Utils\CommonUtils.h" />
+    <ClInclude Include="..\Utils\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy" />

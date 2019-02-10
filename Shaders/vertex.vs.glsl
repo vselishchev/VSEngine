@@ -16,8 +16,9 @@ uniform mat4 modelMatrix;
 
 void main()
 {
-	gl_Position = projMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
-	vsOut.normal = mat3(modelMatrix) * normal;
+	mat4 mvMatrix = viewMatrix * modelMatrix;
+	gl_Position = projMatrix * mvMatrix * vec4(position, 1.0);
+	vsOut.normal = mat3(mvMatrix) * normal;
 	vsOut.fragmentPosition = vec3(modelMatrix * vec4(position, 1.0));
 	vsOut.color = vec3(0.0, 1.0, 0.0);
 }

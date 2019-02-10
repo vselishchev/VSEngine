@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <glfw3.h>
 #include <list>
+#include <memory>
 
 #include "Geometry/Matrix3df.h"
 
@@ -19,7 +20,7 @@ public:
   void LoadScene(GLuint program);
   void RenderScene(double time);
 
-  void AddSceneObject(const SceneObject &obj);
+  void AddSceneObject(std::shared_ptr<SceneObject> obj);
 
   void Scale(const Geometry::Vector3df &scale_);
   void Scale(float scale_);
@@ -32,7 +33,7 @@ public:
   Geometry::Matrix3df GetTransformation() const;
   void ResetTransformation();
 private:
-  std::list<SceneObject> sceneObjects;
+  std::list<std::shared_ptr<SceneObject>> sceneObjects;
 
   Geometry::Matrix3df transformation;
 

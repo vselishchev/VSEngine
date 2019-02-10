@@ -2,9 +2,10 @@
 #define _VSENGINE_SCENE_SCENECOMPONENTS_SCENEOBJECT_H_
 
 #include "Geometry/Matrix3df.h"
-#include "Geometry/Mesh.h"
+#include "ObjectModel/Mesh.h"
 
 #include <memory>
+#include <map>
 
 namespace VSEngine
 {
@@ -12,7 +13,9 @@ class SceneObject
 {
 public:
   SceneObject() = delete;
-  explicit SceneObject(std::shared_ptr<Geometry::Mesh> m);
+  explicit SceneObject(const std::string &pathToFile);
+  explicit SceneObject(std::shared_ptr<VSEngine::Mesh> m);
+  explicit SceneObject(const std::vector<std::shared_ptr<VSEngine::Mesh>> &m);
   SceneObject(const SceneObject &obj);
   SceneObject(SceneObject &&obj);
   ~SceneObject();
@@ -31,22 +34,17 @@ public:
 
   Geometry::Matrix3df GetTransformation() const;
 
-  float* GetVertices() const;
-  float* GetVerticesAndNormals() const;
-  unsigned short* GetIndices() const;
-
   void ResetTransform() { transformation = Geometry::Matrix3df(); }
 
 private:
-  std::shared_ptr<Geometry::Mesh> mesh;
+  std::vector<std::shared_ptr<VSEngine::Mesh>> meshes;
 
   Geometry::Matrix3df transformation;
 
-  unsigned int vao;
-  unsigned int vbo;
-  unsigned int ebo;
   unsigned int modelMatrix;
 };
+
+static std::map<std::string, std::shared_ptr<SceneObject>> SceneObjects;
 
 }
 

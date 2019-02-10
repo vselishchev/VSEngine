@@ -120,22 +120,12 @@ namespace Geometry
 
     inline float& operator[](int i)
     {
-      if (i < 4)
-      {
-        return xyzw[i];
-      }
-
-      throw std::out_of_range("Index should be less than 4!");
+      return xyzw[i];
     }
 
     inline const float& operator[](int i) const
     {
-      if (i < 4)
-      {
-        return xyzw[i];
-      }
-
-      throw std::out_of_range("Index should be less than 4!");
+      return xyzw[i];
     }
 
     bool operator==(const Point3df &rhs) const;

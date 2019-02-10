@@ -1,15 +1,15 @@
 #ifndef _VSENGINE_GEOMETRY_MESH_H_
 #define _VSENGINE_GEOMETRY_MESH_H_
 
-#include "Point3df.h"
-#include "Point2df.h"
-#include "Vector3df.h"
+#include "Geometry/Point3df.h"
+#include "Geometry/Point2df.h"
+#include "Geometry/Vector3df.h"
 #include "Vertex.h"
 
 #include <vector>
 #include <limits>
 
-namespace Geometry
+namespace VSEngine
 {
 struct Triple
 {
@@ -51,10 +51,10 @@ struct BoundingBox
   {
   }
 
-  Point3df minPoint;
-  Point3df maxPoint;
+  Geometry::Point3df minPoint;
+  Geometry::Point3df maxPoint;
 
-  void AddPoint(Point3df const& point);
+  void AddPoint(Geometry::Point3df const& point);
 };
 
 class Mesh
@@ -62,13 +62,11 @@ class Mesh
 public:
   Mesh() = delete;
 
-  // Load mesh from *.obj file.
-  explicit Mesh(std::string const& pathToFile);
-
   // Moves vectors
-  Mesh(std::vector<Vertex> &vertices_, std::vector<Triple> &faces_):
-      hasNormals(false),
-      hasTextureCoordinates(false),
+  Mesh(std::vector<Vertex> &vertices_, std::vector<Triple> &faces_, 
+       bool normals = true, bool textures = true):
+      hasNormals(normals),
+      hasTextureCoordinates(textures),
       vertices(std::move(vertices_)),
       faces(std::move(faces_)),
       vao(0),
@@ -79,8 +77,8 @@ public:
 
   Mesh(Mesh &&m) :
       objectName(m.objectName),
-      hasNormals(m.hasNormals),
-      hasTextureCoordinates(m.hasTextureCoordinates),
+      hasNormals(std::exchange(m.hasNormals, false)),
+      hasTextureCoordinates(std::exchange(m.hasTextureCoordinates, false)),
       vertices(std::move(m.vertices)),
       faces(std::move(m.faces)),
       vao(std::exchange(m.vao, 0)),
@@ -95,13 +93,12 @@ public:
   {
     vertices = std::move(m.vertices);
     faces = std::move(m.faces);
-    hasNormals = m.hasNormals;
-    hasTextureCoordinates = m.hasTextureCoordinates;
-    objectName = m.objectName;
-
-    m.hasNormals = false;
-    m.hasTextureCoordinates = false;
-    m.objectName = "";
+    hasNormals = std::exchange(m.hasNormals, false);
+    hasTextureCoordinates = std::exchange(m.hasTextureCoordinates, false);
+    objectName = std::exchange(m.objectName, "");
+    vao = std::exchange(vao, 0);
+    vbo = std::exchange(vbo, 0);
+    ebo = std::exchange(ebo, 0);
 
     return *this;
   }
@@ -130,13 +127,15 @@ public:
 
   void Render(double time);
 
-private:
+// TODO: Implement own object loader
+/*private:
   void MakeUnique(const std::vector<Point3df> &points,
                   const std::vector<Vector3df> &normals,
                   const std::vector<Point2df> &textureCoordinates,
                   const std::vector<Triangle> &faces);
 
-  int GetVertexID(const Vertex &vert) const;
+  int GetVertexID(const Vertex &vert) const;*/
+
 public:
   BoundingBox bBox;
   std::string objectName;

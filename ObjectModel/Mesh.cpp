@@ -8,12 +8,9 @@
 
 #include <GL/glew.h>
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "Utils/tiny_obj_loader.h"
-
-namespace Geometry
+namespace VSEngine
 {
-void BoundingBox::AddPoint(Point3df const& point)
+void BoundingBox::AddPoint(Geometry::Point3df const& point)
 {
   if (point.x < minPoint.x)
   {
@@ -42,113 +39,6 @@ void BoundingBox::AddPoint(Point3df const& point)
   }
 }
 
-Mesh::Mesh(std::string const& pathToFile)
-{
-  std::ifstream file(pathToFile);
-
-  std::string line;
-
-  int objCount = 0; // Parse only first object in file
-
-  std::vector<std::string> elems;
-
-  std::vector<Point3df> points;
-  std::vector<Triangle> triangles;
-  std::vector<Vector3df> normals;
-  std::vector<Point2df> textureCoords;
-
-  /*while (!file.eof() && objCount < 2)
-  {
-    elems.clear();
-
-    std::string::iterator new_end =
-      std::unique(line.begin(), line.end(),
-                  [=](char lhs, char rhs) 
-    {
-      return (lhs == rhs) && (lhs == ' ');
-    });
-
-    line.erase(new_end, line.end());
-
-    Utils::Split(line, ' ', std::back_inserter(elems));
-
-    if (elems.empty())
-    {
-      std::getline(file, line);
-      continue;
-    }
-
-    if (elems[0] == "o")
-    {
-      objectName = std::string(line.begin() + 2, line.end());
-      ++objCount;
-    } else if (elems[0] == "v")
-    {
-      Point3df point(std::strtof(elems[1].c_str(), nullptr),
-                      std::strtof(elems[2].c_str(), nullptr),
-                      std::strtof(elems[3].c_str(), nullptr));
-
-      bBox.AddPoint(point);
-
-      points.push_back(point);
-    } else if (elems[0] == "vn")
-    {
-      normals.push_back(Vector3df(std::strtof(elems[1].c_str(), nullptr),
-                                  std::strtof(elems[2].c_str(), nullptr),
-                                  std::strtof(elems[3].c_str(), nullptr)));
-    } else if (elems[0] == "vt")
-    {
-      Point2df point;
-      point.x = std::strtof(elems[1].c_str(), nullptr);
-      point.y = std::strtof(elems[2].c_str(), nullptr);
-      if (elems.size() > 3)
-      {
-        point.z = std::strtof(elems[3].c_str(), nullptr);
-      }
-
-      textureCoords.push_back(point);
-    } else if (elems[0] == "f")
-    {
-      Triangle triangle;
-      for (int i = 1; i < 4; ++i)
-      {
-        std::vector<std::string> sublines;
-        Utils::Split(elems[i], '/', std::back_inserter(sublines));
-        int sublinesCount = static_cast<int>(sublines.size());
-
-        triangle.vertices.xyz[i - 1] = std::atoi(sublines[0].c_str());
-
-        if (sublinesCount > 1 && !sublines[1].empty())
-        {
-          triangle.textureCoords.xyz[i - 1] = std::atoi(sublines[1].c_str());
-        }
-
-        if (sublinesCount > 2 && !sublines[2].empty())
-        {
-          triangle.normals.xyz[i - 1] = std::atoi(sublines[2].c_str());
-        }
-      }
-
-      triangles.push_back(triangle);
-    }
-
-    std::getline(file, line);
-  }*/
-
-  tinyobj::attrib_t attribs;
-  std::vector<tinyobj::shape_t> shapes;
-  std::vector<tinyobj::material_t> materials;
-
-  std::string warn;
-  std::string err;
-  std::size_t found = pathToFile.find_last_of("/\\");
-  std::string basedir = pathToFile.substr(0, found);
-
-  tinyobj::LoadObj(&attribs, &shapes, &materials, &warn, &err, pathToFile.c_str(), basedir.c_str());
-
-  MakeUnique(points, normals, textureCoords, triangles);
-}
-
 Mesh::~Mesh()
 {
   glDeleteVertexArrays(1, &vao);
@@ -156,6 +46,8 @@ Mesh::~Mesh()
   glDeleteBuffers(1, &ebo);
 }
 
+// TODO: Implement own object loader
+/*
 int GetValidIndex(int index, size_t pointsCount)
 {
   if (index < 0)
@@ -237,6 +129,7 @@ int Mesh::GetVertexID(const Vertex &vert) const
 
   return -1;
 }
+*/
 
 Mesh Mesh::Copy() const
 {
@@ -253,7 +146,7 @@ float* Mesh::GetSingleArrayVertices() const
   int i = 0;
   for (auto &vertex: vertices)
   {
-    const Point3df &point = vertex.point;
+    const Geometry::Point3df &point = vertex.point;
     result[i * 3] = point[0];
     result[i * 3 + 1] = point[1];
     result[i * 3 + 2] = point[2];
@@ -288,8 +181,8 @@ float* Mesh::GetSingleArrayVerticesAndNormals() const
   int i = 0;
   for (auto &vertex : vertices)
   {
-    const Point3df &point = vertex.point;
-    const Vector3df &normal = vertex.normal;
+    const Geometry::Point3df &point = vertex.point;
+    const Geometry::Vector3df &normal = vertex.normal;
 
     result[i * 6] = point[0];
     result[i * 6 + 1] = point[1];

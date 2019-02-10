@@ -1,10 +1,10 @@
 #include "Vertex.h"
 
-namespace Geometry
+namespace VSEngine
 {
-Vertex::Vertex(const Point3df& point_,
-               const Vector3df &normal_,
-               const Point2df &textureCoord_):
+Vertex::Vertex(const Geometry::Point3df& point_,
+               const Geometry::Vector3df &normal_,
+               const Geometry::Point2df &textureCoord_):
     point(point_),
     normal(normal_),
     textureCoord(textureCoord_)

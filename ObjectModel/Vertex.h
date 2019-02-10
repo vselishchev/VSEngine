@@ -5,14 +5,16 @@
 #include "Geometry/Point2df.h"
 #include "Geometry/Vector3df.h"
 
-namespace Geometry
+namespace VSEngine
 {
 class Vertex
 {
 public:
-  Vertex(const Point3df &point_,
-         const Vector3df &normal_,
-         const Point2df &textureCoord_);
+  Vertex() = default;
+
+  Vertex(const Geometry::Point3df &point_,
+         const Geometry::Vector3df &normal_,
+         const Geometry::Point2df &textureCoord_);
 
   inline Vertex(const Vertex &vertex) :
     point(vertex.point),
@@ -30,11 +32,11 @@ public:
   bool operator==(const Vertex &rhs) const;
 
 public:
-  Point3df point;
-  Vector3df normal;
-  Point2df textureCoord;
+  Geometry::Point3df point;
+  Geometry::Vector3df normal;
+  Geometry::Point2df textureCoord;
 };
 
 }
 
-#endif
+#endif // _VSENGINE_GEOMETRY_VERTEX_H_

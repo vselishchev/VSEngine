@@ -11,11 +11,11 @@ namespace Utils
 	{
 		std::stringstream ss(str);
 		std::string item;
-        while (std::getline(ss, item, delim))
-        {
-			*(result++) = item;
-		}
-	}
+    while (std::getline(ss, item, delim))
+    {
+      *(result++) = item;
+    }
+  }
 
   std::string ReplaceSlashes(const std::string &str);
 }

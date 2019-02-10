@@ -19,7 +19,7 @@ void Scene::LoadScene(GLuint program_)
   program = program_;
   for (auto &object : sceneObjects)
   {
-    object.BindObject(program);
+    object->BindObject(program);
   }
 
   lightColor = glGetUniformLocation(program, "lightColor");
@@ -39,11 +39,11 @@ void Scene::RenderScene(double time)
 
   for (auto &object : sceneObjects)
   {
-    object.Render(time);
+    object->Render(time);
   }
 }
 
-void Scene::AddSceneObject(const SceneObject &obj)
+void Scene::AddSceneObject(std::shared_ptr<SceneObject> obj)
 {
   sceneObjects.push_back(obj);
 }

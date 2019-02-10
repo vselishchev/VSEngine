@@ -24,12 +24,12 @@
     <Filter Include="Scene\Components">
       <UniqueIdentifier>{97227c04-02f2-4860-b8e6-3dc27063270a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ObjectModel">
+      <UniqueIdentifier>{daa5e147-6697-451b-9c45-ed33c044587e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Geometry\Matrix3df.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Geometry\Mesh.cpp">
       <Filter>Geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\Geometry\Point2df.cpp">
@@ -62,15 +62,15 @@
     <ClCompile Include="..\Scene\Components\SceneObject.cpp">
       <Filter>Scene\Components</Filter>
     </ClCompile>
-    <ClCompile Include="..\Geometry\Vertex.cpp">
-      <Filter>Geometry</Filter>
+    <ClCompile Include="..\ObjectModel\Mesh.cpp">
+      <Filter>ObjectModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjectModel\Vertex.cpp">
+      <Filter>ObjectModel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Geometry\Matrix3df.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Geometry\Mesh.h">
       <Filter>Geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\Geometry\Point2df.h">
@@ -100,11 +100,14 @@
     <ClInclude Include="..\Scene\Components\SceneObject.h">
       <Filter>Scene\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\Geometry\Vertex.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Utils\tiny_obj_loader.h">
+    <ClInclude Include="..\Utils\stb_image.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ObjectModel\Mesh.h">
+      <Filter>ObjectModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ObjectModel\Vertex.h">
+      <Filter>ObjectModel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

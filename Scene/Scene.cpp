@@ -73,6 +73,11 @@ void Scene::Translate(float x, float y, float z)
   transformation *= Geometry::MakeTranslation(x, y, z);
 }
 
+void Scene::SetTransformation(const Geometry::Matrix3df &transform)
+{
+  transformation = transform;
+}
+
 Geometry::Matrix3df Scene::GetTransformation() const
 {
   return transformation;

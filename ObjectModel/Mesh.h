@@ -71,8 +71,10 @@ public:
       faces(std::move(faces_)),
       vao(0),
       vbo(0),
-      ebo(0)
+      ebo(0),
+      texture(0)
   {
+    hasTextureCoordinates = textures;
   }
 
   Mesh(Mesh &&m) :
@@ -83,7 +85,8 @@ public:
       faces(std::move(m.faces)),
       vao(std::exchange(m.vao, 0)),
       vbo(std::exchange(m.vbo, 0)),
-      ebo(std::exchange(m.ebo, 0))
+      ebo(std::exchange(m.ebo, 0)),
+      texture(std::exchange(m.texture, 0))
   {
   }
 
@@ -99,6 +102,7 @@ public:
     vao = std::exchange(vao, 0);
     vbo = std::exchange(vbo, 0);
     ebo = std::exchange(ebo, 0);
+    texture = std::exchange(m.texture, 0);
 
     return *this;
   }
@@ -108,10 +112,11 @@ public:
   unsigned short VerticesCount() const { return static_cast<unsigned short>(vertices.size()); }
   unsigned short IndicesCount() const { return static_cast<unsigned short>(faces.size()); }
 
-  float* GetSingleArrayVertices() const;
   unsigned short* GetSingleArrayIndices() const;
 
+  float* GetSingleArrayVertices() const;
   float* GetSingleArrayVerticesAndNormals() const;
+  float* GetSingleArrayVerticesAndNormalsAndTextures() const;
 
   bool HasNormals() const
   {
@@ -139,7 +144,8 @@ public:
 public:
   BoundingBox bBox;
   std::string objectName;
-
+  
+  std::string texturePath;
 private:
   bool hasNormals;
   bool hasTextureCoordinates;
@@ -147,6 +153,8 @@ private:
   unsigned int vao;
   unsigned int vbo;
   unsigned int ebo;
+
+  unsigned int texture;
 
   std::vector<Vertex> vertices;
   std::vector<Triple> faces;

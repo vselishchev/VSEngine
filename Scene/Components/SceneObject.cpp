@@ -31,10 +31,23 @@ SceneObject::SceneObject(const std::string &pathToFile):
   {
     aiMesh *mesh = scene->mMeshes[i];
 
-    mesh->mMaterialIndex;
+    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+
+    unsigned int diffuseTexturesCount =
+        material->GetTextureCount(aiTextureType_DIFFUSE);
+
+    std::string texturePath;
+    aiString texPath;
+    if (diffuseTexturesCount > 0 &&
+        material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
+    {
+      texturePath = texPath.C_Str();
+    }
 
     std::vector<VSEngine::Vertex> vertices;
-    
+
+    bool hasTexture = false;
+
     for (unsigned int j = 0; j < mesh->mNumVertices; ++j)
     {
       VSEngine::Vertex vertex;
@@ -44,10 +57,12 @@ SceneObject::SceneObject(const std::string &pathToFile):
       aiVector3D normal = mesh->mNormals[j];
       vertex.normal = Geometry::Vector3df(normal.x, normal.y, normal.z);
 
-      //if (mesh->HasTextureCoords())
-      //{
-        //TODO: Add import of texture coordinates
-      //}
+      if (mesh->HasTextureCoords(0))
+      {
+        hasTexture = true;
+        aiVector3D textureCoord = mesh->mTextureCoords[0][j];
+        vertex.textureCoord = Geometry::Point2df(textureCoord.x, textureCoord.y);
+      }
 
       vertices.push_back(std::move(vertex));
     }
@@ -66,7 +81,12 @@ SceneObject::SceneObject(const std::string &pathToFile):
     }
 
     std::shared_ptr<VSEngine::Mesh> resultingMesh(new VSEngine::Mesh(vertices, indices,
-                                                                     true, false));
+                                                                     true, hasTexture));
+
+    std::size_t found = pathToFile.find_last_of("/\\");
+    std::string fileFolder = pathToFile.substr(0, found);
+
+    resultingMesh->texturePath = fileFolder + "/" + texturePath;
 
     meshes.push_back(resultingMesh);
   }

@@ -382,21 +382,26 @@ namespace Geometry
                        const Point3df &target,
                        const Vector3df &upDir)
   {
-    Vector3df f = (camera - target).Normalize();
+    Vector3df forward = (camera - target).Normalize();
     Vector3df up = upDir.Normalized();
+    Vector3df right = up.Cross(forward).Normalized();
+    Vector3df upDirection = forward.Cross(right);
 
-    Vector3df s = up.Cross(f).Normalized();
-    Vector3df u = f.Cross(s);
+    const Vector3df cameraAsVector(camera.x, camera.y, camera.z);
 
-    const Vector3df cameraAsVector(-camera.x, -camera.y, -camera.z);
+    upDirection.w = -upDirection.Dot(cameraAsVector);
+    right.w = -right.Dot(cameraAsVector);
+    forward.w = -forward.Dot(cameraAsVector);
 
-    s.w = s.Dot(cameraAsVector);
-    u.w = u.Dot(cameraAsVector);
-    f.w = f.Dot(cameraAsVector);
+    Matrix3df resultMatrix;
+    for (int i = 0; i < 4; ++i)
+    {
+      resultMatrix.rows[i] = Vector3df(right[i], upDirection[i], forward[i], 0.0f);
+    }
 
-    const Vector3df vectors[4] = {s, u, f, Vector3df(0.0f, 0.0f, 0.0f, 1.0f)};
+    resultMatrix.data[3][3] = 1.0f;
 
-    return Matrix3df(vectors);
+    return std::move(resultMatrix);
   }
 
   Matrix3df MakeViewportTransformation(float width, float height,

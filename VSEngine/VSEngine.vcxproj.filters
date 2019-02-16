@@ -100,14 +100,14 @@
     <ClInclude Include="..\Scene\Components\SceneObject.h">
       <Filter>Scene\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\Utils\stb_image.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\ObjectModel\Mesh.h">
       <Filter>ObjectModel</Filter>
     </ClInclude>
     <ClInclude Include="..\ObjectModel\Vertex.h">
       <Filter>ObjectModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utils\stb_image.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

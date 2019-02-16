@@ -10,7 +10,10 @@ in VS_OUT
 	vec3 color;
 	vec3 normal;
 	vec3 fragmentPosition;
+	vec2 textureCoord;
 } fsIn;
+
+uniform sampler2D textureSample;
 
 void main()
 {
@@ -22,7 +25,8 @@ void main()
 	float diff = max(dot(normal, lightDir), 0.0);
 	vec3 diffuse = diff * lightDir;
 
-	vec3 result = (ambient + diffuse) * fsIn.color;
+	vec4 textureColor = texture(textureSample, fsIn.textureCoord);
+	vec4 result = mix(textureColor, vec4(ambient + diffuse, 1.0), 0.5);
 
-	color = vec4(result, 1.0);
+	color = result;
 }

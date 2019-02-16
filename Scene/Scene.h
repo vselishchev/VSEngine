@@ -30,6 +30,7 @@ public:
   void Translate(const Geometry::Vector3df &translation_);
   void Translate(float x, float y, float z);
 
+  void SetTransformation(const Geometry::Matrix3df &transform);
   Geometry::Matrix3df GetTransformation() const;
   void ResetTransformation();
 private:

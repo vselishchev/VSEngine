@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <algorithm>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "Utils/stb_image.h"
+
 #include <GL/glew.h>
 
 namespace VSEngine
@@ -197,6 +200,33 @@ float* Mesh::GetSingleArrayVerticesAndNormals() const
   return result;
 }
 
+float* Mesh::GetSingleArrayVerticesAndNormalsAndTextures() const
+{
+  float *result = new float[vertices.size() * 8];
+
+  int i = 0;
+  for (auto &vertex : vertices)
+  {
+    const Geometry::Point3df &point = vertex.point;
+    result[i * 8] = point.x;
+    result[i * 8 + 1] = point.y;
+    result[i * 8 + 2] = point.z;
+
+    const Geometry::Vector3df &normal = vertex.normal;
+    result[i * 8 + 3] = normal.x;
+    result[i * 8 + 4] = normal.y;
+    result[i * 8 + 5] = normal.z;
+
+    const Geometry::Point2df &textureCoord = vertex.textureCoord;
+    result[i * 8 + 6] = textureCoord.u;
+    result[i * 8 + 7] = textureCoord.v;
+
+    ++i;
+  }
+
+  return result;
+}
+
 void Mesh::BindMesh()
 {
   glGenVertexArrays(1, &vao);
@@ -205,26 +235,72 @@ void Mesh::BindMesh()
 
   glBindVertexArray(vao);
 
-  float *verticesWithNormals = GetSingleArrayVerticesAndNormals();
+  float *verticesData = nullptr;
+
+  int perVertexElems = 6;
+
+  if (hasTextureCoordinates)
+  {
+    verticesData = GetSingleArrayVerticesAndNormalsAndTextures();
+    perVertexElems = 8;
+  }
+  else
+  {
+    verticesData = GetSingleArrayVerticesAndNormals();
+  }
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * VerticesCount() * 6,
-               verticesWithNormals, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * VerticesCount() * perVertexElems,
+               verticesData, GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * IndicesCount() * 3,
                GetSingleArrayIndices(), GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
+                        perVertexElems * sizeof(float), nullptr);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 
+                        perVertexElems * sizeof(float), 
+                        (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
+  if (hasTextureCoordinates)
+  {
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 
+                          perVertexElems * sizeof(float), 
+                          (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+  }
+
   glBindVertexArray(0);
+
+  // Load texture
+  int width = 0, height = 0, channelsCount = 0;
+  unsigned char *data = 
+    stbi_load(texturePath.c_str(), &width, &height, &channelsCount, 0);
+
+  if (data)
+  {
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(data);
+  }
 }
 
 void Mesh::Render(double time)
 {
+  glBindTexture(GL_TEXTURE_2D, texture);
   glBindVertexArray(vao);
 
   glDrawElements(GL_TRIANGLES, IndicesCount() * 3, GL_UNSIGNED_SHORT, 0);

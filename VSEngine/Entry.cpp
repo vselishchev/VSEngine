@@ -22,7 +22,9 @@ int main()
   obj2->Translate(-60.0f, -30.0f, -30.0f);
 
   std::shared_ptr<VSEngine::Scene> scene(new VSEngine::Scene());
-  scene->Translate(0, 0, -300);
+  scene->SetTransformation(Geometry::MakeLookAt(Geometry::Point3df(0, 0, -300), 
+                                                Geometry::Point3df(0, 0, 0), 
+                                                Geometry::Vector3df(0, 1, 0)));
   scene->AddSceneObject(obj);
   scene->AddSceneObject(obj2);
 

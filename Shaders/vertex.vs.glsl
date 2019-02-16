@@ -2,12 +2,14 @@
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
+layout (location = 2) in vec2 textureCoord;
 
 out VS_OUT
 {
 	vec3 color;
 	vec3 normal;
 	vec3 fragmentPosition;
+	vec2 textureCoord;
 } vsOut;
 
 uniform mat4 projMatrix;
@@ -21,4 +23,5 @@ void main()
 	vsOut.normal = mat3(mvMatrix) * normal;
 	vsOut.fragmentPosition = vec3(modelMatrix * vec4(position, 1.0));
 	vsOut.color = vec3(0.0, 1.0, 0.0);
+	vsOut.textureCoord = textureCoord;
 }

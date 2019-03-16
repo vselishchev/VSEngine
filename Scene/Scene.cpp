@@ -14,10 +14,14 @@ Scene::Scene() :
 {
 }
 
+Scene::~Scene()
+{
+}
+
 void Scene::LoadScene(GLuint program_)
 {
   program = program_;
-  for (auto &object : sceneObjects)
+  for (SceneObject *object : sceneObjects)
   {
     object->BindObject(program);
   }
@@ -37,15 +41,15 @@ void Scene::RenderScene(double time)
   
   glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, transformation.GetForOGL());
 
-  for (auto &object : sceneObjects)
+  for (SceneObject *object : sceneObjects)
   {
     object->Render(time);
   }
 }
 
-void Scene::AddSceneObject(std::shared_ptr<SceneObject> obj)
+void Scene::AddSceneObject(SceneObject *object)
 {
-  sceneObjects.push_back(obj);
+  sceneObjects.push_back(object);
 }
 
 void Scene::Scale(const Geometry::Vector3df &scale_)

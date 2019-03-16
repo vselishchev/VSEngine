@@ -68,6 +68,9 @@
     <ClCompile Include="..\ObjectModel\Vertex.cpp">
       <Filter>ObjectModel</Filter>
     </ClCompile>
+    <ClCompile Include="..\Scene\Components\SceneObjectCollection.cpp">
+      <Filter>Scene\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Geometry\Matrix3df.h">
@@ -108,6 +111,9 @@
     </ClInclude>
     <ClInclude Include="..\Utils\stb_image.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Scene\Components\SceneObjectCollection.h">
+      <Filter>Scene\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -7,20 +7,23 @@
 
 namespace VSEngine
 {
-SceneObject::SceneObject(const std::string &pathToFile):
-    modelMatrix(0)
+SceneObjectsCollection SceneObjectsMap;
+
+SceneObject::SceneObject(const std::string &path):
+    modelMatrix(0),
+    pathToFile(path)
 {
-  auto iter = SceneObjects.find(pathToFile);
-  if (iter != SceneObjects.end())
+  SceneObject *object = SceneObjectsMap.GetSceneObject(path);
+  if (object)
   {
-    meshes = iter->second->meshes;
+    meshes = object->meshes;
     return;
   }
 
   // TODO: Replace Assimp with own object loader
   Assimp::Importer importer;
 
-  const aiScene *scene(importer.ReadFile(pathToFile,
+  const aiScene *scene(importer.ReadFile(path,
                                          aiProcess_GenNormals |
                                          aiProcess_JoinIdenticalVertices |
                                          aiProcess_Triangulate));
@@ -91,7 +94,7 @@ SceneObject::SceneObject(const std::string &pathToFile):
     meshes.push_back(resultingMesh);
   }
 
-  VSEngine::SceneObjects.try_emplace(pathToFile, this);
+  VSEngine::SceneObjectsMap.AddSceneObject(this);
 }
 
 SceneObject::SceneObject(std::shared_ptr<VSEngine::Mesh> m):
@@ -108,6 +111,7 @@ SceneObject::SceneObject(const std::vector<std::shared_ptr<VSEngine::Mesh>> &m):
 
 SceneObject::~SceneObject()
 {
+
 }
 
 SceneObject::SceneObject(const SceneObject &obj): 

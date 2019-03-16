@@ -5,7 +5,7 @@
 #include "ObjectModel/Mesh.h"
 
 #include <memory>
-#include <map>
+#include "SceneObjectCollection.h"
 
 namespace VSEngine
 {
@@ -13,7 +13,7 @@ class SceneObject
 {
 public:
   SceneObject() = delete;
-  explicit SceneObject(const std::string &pathToFile);
+  explicit SceneObject(const std::string &path);
   explicit SceneObject(std::shared_ptr<VSEngine::Mesh> m);
   explicit SceneObject(const std::vector<std::shared_ptr<VSEngine::Mesh>> &m);
   SceneObject(const SceneObject &obj);
@@ -36,15 +36,15 @@ public:
 
   void ResetTransform() { transformation = Geometry::Matrix3df(); }
 
+  const std::string& GetFilePath() const { return pathToFile; }
 private:
   std::vector<std::shared_ptr<VSEngine::Mesh>> meshes;
-
   Geometry::Matrix3df transformation;
-
+  std::string pathToFile;
   unsigned int modelMatrix;
 };
 
-static std::map<std::string, std::shared_ptr<SceneObject>> SceneObjects;
+extern SceneObjectsCollection SceneObjectsMap;
 
 }
 

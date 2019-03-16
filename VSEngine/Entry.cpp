@@ -11,12 +11,12 @@ int main()
 
   std::string filePath = "D:/Work/Models/teapot/teapot.obj";
 
-  std::shared_ptr<VSEngine::SceneObject> obj(new VSEngine::SceneObject(filePath));
+  VSEngine::SceneObject *obj = new VSEngine::SceneObject(filePath);
   obj->Rotate(Geometry::MakeRotationY(45.0f));
   obj->Rotate(Geometry::MakeRotationX(45.0f));
   obj->Translate(60.0f, 0.0f, 30.0f);
 
-  std::shared_ptr<VSEngine::SceneObject> obj2(new VSEngine::SceneObject(filePath));
+  VSEngine::SceneObject *obj2 = new VSEngine::SceneObject(filePath);
   obj2->Rotate(Geometry::MakeRotationY(-45.0f));
   obj2->Rotate(Geometry::MakeRotationX(-45.0f));
   obj2->Translate(-60.0f, -30.0f, -30.0f);

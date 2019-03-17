@@ -63,6 +63,8 @@ private:
   ApplicationInfo appInfo;
   GLFWwindow *window;
 
+  Geometry::Matrix3df projectionMatrix;
+
   GLuint program;
   GLuint projMatrix;
 

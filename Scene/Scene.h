@@ -4,9 +4,9 @@
 #include <GL/glew.h>
 #include <glfw3.h>
 #include <vector>
-#include <memory>
 
 #include "Geometry/Matrix3df.h"
+#include "Scene/Components/Camera.h"
 
 namespace VSEngine
 {
@@ -23,21 +23,11 @@ public:
 
   void AddSceneObject(SceneObject *object);
 
-  void Scale(const Geometry::Vector3df &scale_);
-  void Scale(float scale_);
-
-  void Rotate(const Geometry::Matrix3df &rotation_);
-
-  void Translate(const Geometry::Vector3df &translation_);
-  void Translate(float x, float y, float z);
-
-  void SetTransformation(const Geometry::Matrix3df &transform);
-  Geometry::Matrix3df GetTransformation() const;
-  void ResetTransformation();
+  void SetCamera(const Camera &camera);
 private:
   std::vector<SceneObject*> sceneObjects;
 
-  Geometry::Matrix3df transformation;
+  Camera camera;
 
   GLuint program;
   GLuint viewMatrix;

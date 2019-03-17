@@ -2,6 +2,7 @@
 #include "ObjectModel/Mesh.h"
 #include "Scene/Scene.h"
 #include "Scene/Components/SceneObject.h"
+#include "Scene/Components/Camera.h"
 
 #include <memory>
 
@@ -22,11 +23,14 @@ int main()
   obj2->Translate(-60.0f, -30.0f, -30.0f);
 
   std::shared_ptr<VSEngine::Scene> scene(new VSEngine::Scene());
-  scene->SetTransformation(Geometry::MakeLookAt(Geometry::Point3df(0, 0, -300), 
-                                                Geometry::Point3df(0, 0, 0), 
-                                                Geometry::Vector3df(0, 1, 0)));
+
   scene->AddSceneObject(obj);
   scene->AddSceneObject(obj2);
+
+  VSEngine::Camera cam(Geometry::Point3df(0.0f, 0.0f, 300.0f),
+                       Geometry::Vector3df(0.0f, 0.0f, -1.0f),
+                       Geometry::Vector3df(0.0f, 1.0f, 0.0f));
+  scene->SetCamera(cam);
 
   renderer.SetScene(scene);
 	renderer.Start();

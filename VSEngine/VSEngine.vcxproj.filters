@@ -71,6 +71,9 @@
     <ClCompile Include="..\Scene\Components\SceneObjectCollection.cpp">
       <Filter>Scene\Components</Filter>
     </ClCompile>
+    <ClCompile Include="..\Scene\Components\Camera.cpp">
+      <Filter>Scene\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Geometry\Matrix3df.h">
@@ -113,6 +116,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\Scene\Components\SceneObjectCollection.h">
+      <Filter>Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Scene\Components\Camera.h">
       <Filter>Scene\Components</Filter>
     </ClInclude>
   </ItemGroup>

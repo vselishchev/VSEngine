@@ -11,7 +11,7 @@ Camera::Camera(const glm::vec3 &pos,
     frontDirection(front),
     upDirection(up)
 {
-  viewMatrix = glm::lookAt(pos, pos - front, up);
+  Update();
 }
 
 Camera::Camera(const Camera &cam) : 
@@ -19,7 +19,7 @@ Camera::Camera(const Camera &cam) :
     frontDirection(cam.frontDirection),
     upDirection(cam.upDirection)
 {
-  viewMatrix = glm::lookAt(position, position - frontDirection, upDirection);
+  Update();
 }
 
 void Camera::operator=(const Camera &cam)
@@ -28,17 +28,82 @@ void Camera::operator=(const Camera &cam)
   frontDirection = cam.frontDirection;
   upDirection = cam.upDirection;
 
-  isNeedUpdate = true;
-  viewMatrix = glm::lookAt(position, position - frontDirection, upDirection);
+  Update();
+}
+
+void Camera::Set(const glm::vec3 &pos,
+                 const glm::vec3 &front,
+                 const glm::vec3 &up)
+{
+  position = pos;
+  frontDirection = front;
+  upDirection = up;
+
+  Update();
+}
+
+void Camera::SetSpeed(float speed)
+{
+  cameraSpeed = speed;
+}
+
+void Camera::MoveCamera(MoveDirection direction)
+{
+  switch (direction)
+  {
+  case MoveDirection::Left:
+    position += glm::normalize(glm::cross(frontDirection, upDirection)) * cameraSpeed;
+    Update();
+    break;
+  case MoveDirection::Right:
+    position -= glm::normalize(glm::cross(frontDirection, upDirection)) * cameraSpeed;
+    Update();
+    break;
+  case MoveDirection::Forward:
+    position -= frontDirection * cameraSpeed;
+    Update();
+    break;
+  case MoveDirection::Back:
+    position += frontDirection * cameraSpeed;
+    Update();
+    break;
+  default:
+    break;
+  }
+}
+
+void Camera::RotateCamera(float deltaYaw, float deltaPitch)
+{
+  static const float sensitivity = 0.03f;
+  
+  yaw += deltaYaw * sensitivity;
+  pitch += deltaPitch * sensitivity;
+
+  if (pitch > 89.0f)
+  {
+    pitch = 89.0f;
+  }
+  else if (pitch < -89.0f)
+  {
+    pitch = -89.0f;
+  }
+
+  frontDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+  frontDirection.y = sin(glm::radians(pitch));
+  frontDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+  frontDirection = glm::normalize(frontDirection);
+
+  Update();
 }
 
 const glm::mat4& Camera::GetViewMatrix()
 {
-  if (isNeedUpdate)
-  {
-    viewMatrix = glm::lookAt(position, position - frontDirection, upDirection);
-  }
-
   return viewMatrix;
+}
+
+void Camera::Update()
+{
+  viewMatrix = glm::lookAt(position, position - frontDirection, upDirection);
 }
 }

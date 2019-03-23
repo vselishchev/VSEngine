@@ -33,6 +33,24 @@ public:
   {
     scene = scene_;
   }
+
+  Scene* GetScene() const
+  {
+    return scene.get();
+  }
+
+  int GetViewportHeight() const
+  {
+    return appInfo.windowHeight;
+  }
+
+  int GetViewportWidth() const
+  {
+    return appInfo.windowWidth;
+  }
+
+  void UpdateFoV(float deltaFoV);
+
 private:
   void RenderStart();
   void RenderFinish();
@@ -49,6 +67,7 @@ private:
   {
   }
 
+  void ProcessKeyInput();
 public:
   struct ApplicationInfo
   {
@@ -60,6 +79,8 @@ public:
   };
 
 private:
+  float fov = 45.0f;
+
   ApplicationInfo appInfo;
   GLFWwindow *window;
 

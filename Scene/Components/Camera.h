@@ -6,6 +6,14 @@
 
 namespace VSEngine
 {
+enum class MoveDirection
+{
+  Left,
+  Right,
+  Forward,
+  Back
+};
+
 class Camera
 {
 public:
@@ -17,15 +25,28 @@ public:
 
   void operator=(const Camera &cam);
 
+  void Set(const glm::vec3 &pos,
+           const glm::vec3 &front,
+           const glm::vec3 &up);
+  void SetSpeed(float speed);
+
+  void MoveCamera(MoveDirection direction);
+  void RotateCamera(float deltaYaw, float deltaPitch);
+
   const glm::mat4& GetViewMatrix();
+private:
+  void Update();
 
 private:
   glm::vec3 position;
   glm::vec3 frontDirection;
   glm::vec3 upDirection;
 
+  float yaw = -90.0f;
+  float pitch = 0.0f;
+
   glm::mat4 viewMatrix;
-  bool isNeedUpdate = true;
+  float cameraSpeed = 0.02f;
 };
 
 }

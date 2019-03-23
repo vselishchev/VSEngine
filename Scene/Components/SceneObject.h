@@ -1,7 +1,6 @@
 #ifndef _VSENGINE_SCENE_SCENECOMPONENTS_SCENEOBJECT_H_
 #define _VSENGINE_SCENE_SCENECOMPONENTS_SCENEOBJECT_H_
 
-#include "Geometry/Matrix3df.h"
 #include "ObjectModel/Mesh.h"
 
 #include <memory>
@@ -24,22 +23,23 @@ public:
 
   void Render(double time);
 
-  void Scale(const Geometry::Vector3df &scale_);
+  void Scale(const glm::vec3 &scale_);
   void Scale(float scale_);
 
-  void Rotate(const Geometry::Matrix3df &rotation_);
+  void Rotate(const glm::mat4 &rotation_);
+  void Rotate(const glm::vec3 &axis, float radians);
 
-  void Translate(const Geometry::Vector3df &translation_);
+  void Translate(const glm::vec3 &translation_);
   void Translate(float x, float y, float z);
 
-  Geometry::Matrix3df GetTransformation() const;
+  const glm::mat4& GetTransformation() const;
 
-  void ResetTransform() { transformation = Geometry::Matrix3df(); }
+  void ResetTransform() { transformation = glm::mat4(1.0f); }
 
   const std::string& GetFilePath() const { return pathToFile; }
 private:
   std::vector<std::shared_ptr<VSEngine::Mesh>> meshes;
-  Geometry::Matrix3df transformation;
+  glm::mat4 transformation = glm::mat4(1.0f);
   std::string pathToFile;
   unsigned int modelMatrix;
 };

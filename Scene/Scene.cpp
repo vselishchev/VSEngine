@@ -1,8 +1,9 @@
 #include "Scene.h"
 #include "Components/SceneObject.h"
-#include "Geometry/Matrix3df.h"
 
 #include <GL/glew.h>
+
+#include <glm/gtc/type_ptr.hpp>
 
 namespace VSEngine
 {
@@ -39,7 +40,7 @@ void Scene::RenderScene(double time)
   glUniform3f(lightColor, 1.0f, 0.0f, 0.0f);
   glUniform3f(lightPosition, 100.0f, 100.0f, 100.0f);
   
-  glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, transformation.GetForOGL());
+  glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(transformation));
 
   for (SceneObject *object : sceneObjects)
   {
@@ -52,44 +53,44 @@ void Scene::AddSceneObject(SceneObject *object)
   sceneObjects.push_back(object);
 }
 
-void Scene::Scale(const Geometry::Vector3df &scale_)
+void Scene::Scale(const glm::vec3 &scale_)
 {
-  transformation *= Geometry::MakeScale(scale_.x, scale_.y, scale_.z);
+  transformation *= glm::scale(glm::mat4(1.0f), scale_);
 }
 
 void Scene::Scale(float scale_)
 {
-  transformation *= Geometry::MakeScale(scale_);
+  transformation *= glm::scale(glm::mat4(1.0f), glm::vec3(scale_, scale_, scale_));
 }
 
-void Scene::Rotate(const Geometry::Matrix3df &rotation_)
+void Scene::Rotate(const glm::mat4 &rotation_)
 {
   transformation *= rotation_;
 }
 
-void Scene::Translate(const Geometry::Vector3df &translation_)
+void Scene::Translate(const glm::vec3 &translation_)
 {
-  transformation *= Geometry::MakeTranslation(translation_);
+  transformation *= glm::translate(glm::mat4(1.0f), translation_);
 }
 
 void Scene::Translate(float x, float y, float z)
 {
-  transformation *= Geometry::MakeTranslation(x, y, z);
+  transformation *= glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
 }
 
-void Scene::SetTransformation(const Geometry::Matrix3df &transform)
+void Scene::SetTransformation(const glm::mat4 &transform)
 {
   transformation = transform;
 }
 
-Geometry::Matrix3df Scene::GetTransformation() const
+const glm::mat4& Scene::GetTransformation() const
 {
   return transformation;
 }
 
 void Scene::ResetTransformation()
 {
-  transformation = Geometry::Matrix3df();
+  transformation = glm::mat4(1.0f);
 }
 
 }

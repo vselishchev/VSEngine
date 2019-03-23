@@ -1,9 +1,7 @@
 #ifndef _VSENGINE_GEOMETRY_VERTEX_H_
 #define _VSENGINE_GEOMETRY_VERTEX_H_
 
-#include "Geometry/Point3df.h"
-#include "Geometry/Point2df.h"
-#include "Geometry/Vector3df.h"
+#include <glm/glm.hpp>
 
 namespace VSEngine
 {
@@ -12,9 +10,9 @@ class Vertex
 public:
   Vertex() = default;
 
-  Vertex(const Geometry::Point3df &point_,
-         const Geometry::Vector3df &normal_,
-         const Geometry::Point2df &textureCoord_);
+  Vertex(const glm::vec4 &point_,
+         const glm::vec4 &normal_,
+         const glm::vec3 &textureCoord_);
 
   inline Vertex(const Vertex &vertex) :
     point(vertex.point),
@@ -32,9 +30,9 @@ public:
   bool operator==(const Vertex &rhs) const;
 
 public:
-  Geometry::Point3df point;
-  Geometry::Vector3df normal;
-  Geometry::Point2df textureCoord;
+  glm::vec4 point;
+  glm::vec4 normal;
+  glm::vec3 textureCoord;
 };
 
 }

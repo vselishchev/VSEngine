@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 
-#include "Geometry/Matrix3df.h"
+#include "glm/glm.hpp"
 
 namespace VSEngine
 {
@@ -23,21 +23,21 @@ public:
 
   void AddSceneObject(SceneObject *object);
 
-  void Scale(const Geometry::Vector3df &scale_);
+  void Scale(const glm::vec3 &scale_);
   void Scale(float scale_);
 
-  void Rotate(const Geometry::Matrix3df &rotation_);
+  void Rotate(const glm::mat4 &rotation_);
 
-  void Translate(const Geometry::Vector3df &translation_);
+  void Translate(const glm::vec3 &translation_);
   void Translate(float x, float y, float z);
 
-  void SetTransformation(const Geometry::Matrix3df &transform);
-  Geometry::Matrix3df GetTransformation() const;
+  void SetTransformation(const glm::mat4 &transform);
+  const glm::mat4& GetTransformation() const;
   void ResetTransformation();
 private:
   std::vector<SceneObject*> sceneObjects;
 
-  Geometry::Matrix3df transformation;
+  glm::mat4 transformation;
 
   GLuint program;
   GLuint viewMatrix;

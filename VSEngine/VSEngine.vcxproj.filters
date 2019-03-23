@@ -9,9 +9,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Geometry">
-      <UniqueIdentifier>{872c4f3f-6723-4adc-ab6d-80045db8d305}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Utils">
       <UniqueIdentifier>{7d6e650a-a3f6-49a9-99c2-1a4a72c9ed1b}</UniqueIdentifier>
     </Filter>
@@ -29,21 +26,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Geometry\Matrix3df.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Geometry\Point2df.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Geometry\Point3df.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Geometry\Utils.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Geometry\Vector3df.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\Utils\Color.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
@@ -73,21 +55,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Geometry\Matrix3df.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Geometry\Point2df.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Geometry\Point3df.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Geometry\Utils.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Geometry\Vector3df.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\Utils\Color.h">
       <Filter>Utils</Filter>
     </ClInclude>

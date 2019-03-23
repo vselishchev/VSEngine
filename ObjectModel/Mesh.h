@@ -1,9 +1,6 @@
 #ifndef _VSENGINE_GEOMETRY_MESH_H_
 #define _VSENGINE_GEOMETRY_MESH_H_
 
-#include "Geometry/Point3df.h"
-#include "Geometry/Point2df.h"
-#include "Geometry/Vector3df.h"
 #include "Vertex.h"
 
 #include <vector>
@@ -51,10 +48,10 @@ struct BoundingBox
   {
   }
 
-  Geometry::Point3df minPoint;
-  Geometry::Point3df maxPoint;
+  glm::vec3 minPoint;
+  glm::vec3 maxPoint;
 
-  void AddPoint(Geometry::Point3df const& point);
+  void AddPoint(glm::vec3 const& point);
 };
 
 class Mesh

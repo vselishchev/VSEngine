@@ -5,6 +5,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace VSEngine
 {
 SceneObjectsCollection SceneObjectsMap;
@@ -55,16 +58,18 @@ SceneObject::SceneObject(const std::string &path):
     {
       VSEngine::Vertex vertex;
       aiVector3D point = mesh->mVertices[j];
-      vertex.point = Geometry::Point3df(point.x, point.y, point.z);
+      vertex.point = glm::vec4(point.x, point.y, point.z, 1.0f);
 
       aiVector3D normal = mesh->mNormals[j];
-      vertex.normal = Geometry::Vector3df(normal.x, normal.y, normal.z);
+      vertex.normal = glm::vec4(normal.x, normal.y, normal.z, 0.0f);
 
       if (mesh->HasTextureCoords(0))
       {
         hasTexture = true;
         aiVector3D textureCoord = mesh->mTextureCoords[0][j];
-        vertex.textureCoord = Geometry::Point2df(textureCoord.x, textureCoord.y);
+        vertex.textureCoord = glm::vec3(textureCoord.x, 
+                                        textureCoord.y, 
+                                        textureCoord.z);
       }
 
       vertices.push_back(std::move(vertex));
@@ -123,37 +128,42 @@ SceneObject::SceneObject(const SceneObject &obj):
 
 SceneObject::SceneObject(SceneObject &&obj):
     meshes(std::move(obj.meshes)),
-    transformation(std::exchange(obj.transformation, Geometry::Matrix3df())),
+    transformation(std::exchange(obj.transformation, glm::mat4(1.0f))),
     modelMatrix(obj.modelMatrix)
 {
 }
 
-void SceneObject::Scale(const Geometry::Vector3df &scale_)
+void SceneObject::Scale(const glm::vec3 &scale_)
 {
-  transformation *= Geometry::MakeScale(scale_.x, scale_.y, scale_.z);
+  transformation *= glm::scale(glm::mat4(1.0f), scale_);
 }
 
 void SceneObject::Scale(float scale_)
 {
-  transformation *= Geometry::MakeScale(scale_);
+  transformation *= glm::scale(glm::mat4(1.0f), glm::vec3(scale_, scale_ ,scale_));
 }
 
-void SceneObject::Rotate(const Geometry::Matrix3df &rotation_)
+void SceneObject::Rotate(const glm::mat4 &rotation_)
 {
   transformation *= rotation_;
 }
 
-void SceneObject::Translate(const Geometry::Vector3df &translation_)
+void SceneObject::Rotate(const glm::vec3 &axis, float radians)
 {
-  transformation *= Geometry::MakeTranslation(translation_);
+  transformation = glm::rotate(transformation, radians, axis);
+}
+
+void SceneObject::Translate(const glm::vec3 &translation_)
+{
+  transformation *= glm::translate(glm::mat4(1.0f), translation_);
 }
 
 void SceneObject::Translate(float x, float y, float z)
 {
-  transformation *= Geometry::MakeTranslation(x, y, z);
+  transformation *= glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
 }
 
-Geometry::Matrix3df SceneObject::GetTransformation() const
+const glm::mat4& SceneObject::GetTransformation() const
 {
   return transformation;
 }
@@ -170,7 +180,7 @@ void SceneObject::BindObject(unsigned int programId)
 
 void SceneObject::Render(double time)
 {
-  glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, transformation.GetForOGL());
+  glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, glm::value_ptr(transformation));
 
   for (auto &mesh : meshes)
   {

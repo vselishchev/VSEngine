@@ -144,7 +144,7 @@ void Renderer::Start()
   RenderStart();
 
   projectionMatrix =
-      Geometry::MakePerspective(50.0f, static_cast<float>(appInfo.windowWidth) /
+      Geometry::MakePerspective(90.0f, static_cast<float>(appInfo.windowWidth) /
                                 static_cast<float>(appInfo.windowHeight),
                                 0.1f,
                                 1000.0f);
@@ -197,7 +197,9 @@ void Renderer::Render(double time)
 
   glUseProgram(program);
 
-  glUniformMatrix4fv(projMatrix, 1, GL_FALSE, projectionMatrix.GetForOGL());
+  const float *projMat = projectionMatrix.GetForOGL();
+  glUniformMatrix4fv(projMatrix, 1, GL_FALSE, projMat);
+  delete[] projMat;
 
   scene->RenderScene(time);
 }

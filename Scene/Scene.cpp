@@ -42,7 +42,9 @@ void Scene::RenderScene(double time)
   glUniform3f(lightColor, 1.0f, 0.0f, 0.0f);
   glUniform3f(lightPosition, 100.0f, 100.0f, 100.0f);
   
-  glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, camera.GetViewMatrix().GetForOGL());
+  const float *viewMatr = camera.GetViewMatrix().GetForOGL();
+  glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, viewMatr);
+  delete[] viewMatr;
 
   for (SceneObject *object : sceneObjects)
   {

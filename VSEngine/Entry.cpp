@@ -27,13 +27,24 @@ int main()
   scene->AddSceneObject(obj);
   scene->AddSceneObject(obj2);
 
-  VSEngine::Camera cam(Geometry::Point3df(0.0f, 0.0f, 300.0f),
+  VSEngine::Camera cam(Geometry::Point3df(0.0f, 0.0f, -300.0f),
                        Geometry::Vector3df(0.0f, 0.0f, -1.0f),
                        Geometry::Vector3df(0.0f, 1.0f, 0.0f));
+  const float *res1 = cam.GetViewMatrix().GetForOGL();
+
+  Geometry::Matrix3df matr = Geometry::MakeLookAt(Geometry::Point3df(0.0f, 0.0f, -300.0f),
+                                                  Geometry::Point3df(0.0f, 0.0f, 0.0f),
+                                                  Geometry::Vector3df(0.0f, 1.0f, 0.0f));
+
+  const float *res2 = matr.GetForOGL();
+
   scene->SetCamera(cam);
 
   renderer.SetScene(scene);
 	renderer.Start();
 	
+  delete[] res1;
+  delete[] res2;
+
 	return 0;
 }

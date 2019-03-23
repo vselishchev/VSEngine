@@ -58,8 +58,14 @@ void Camera::CalculateLookAt()
   {
     viewMatrix.rows[i] = Geometry::Vector3df(right[i], upDir[i], front[i], 0.0f);
   }
-
+  /*
+  viewMatrix.rows[0] = right;
+  viewMatrix.rows[1] = upDir;
+  viewMatrix.rows[2] = front;
+  */
   viewMatrix.data[3][3] = 1.0f;
+
+  viewMatrix.Transpose();
 
   isNeedUpdate = false;
 }

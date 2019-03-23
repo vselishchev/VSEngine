@@ -143,8 +143,8 @@ void Renderer::Start()
   RenderStart();
 
   projectionMatrix =
-    glm::perspective(90.0f, static_cast<float>(appInfo.windowWidth) /
-                     static_cast<float>(appInfo.windowHeight), 0.1f, 1000.0f);
+      glm::perspective(90.0f, static_cast<float>(appInfo.windowWidth) /
+                       static_cast<float>(appInfo.windowHeight), 0.1f, 1000.0f);
 
   bool running{true};
   do

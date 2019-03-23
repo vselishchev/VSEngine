@@ -4,8 +4,8 @@
 #include <GL/glew.h>
 #include <glfw3.h>
 #include <vector>
-#include <memory>
 
+#include "Scene/Components/Camera.h"
 #include "glm/glm.hpp"
 
 namespace VSEngine
@@ -23,27 +23,19 @@ public:
 
   void AddSceneObject(SceneObject *object);
 
-  void Scale(const glm::vec3 &scale_);
-  void Scale(float scale_);
+  void SetCamera(const Camera &camera);
 
-  void Rotate(const glm::mat4 &rotation_);
-
-  void Translate(const glm::vec3 &translation_);
-  void Translate(float x, float y, float z);
-
-  void SetTransformation(const glm::mat4 &transform);
-  const glm::mat4& GetTransformation() const;
-  void ResetTransformation();
 private:
+  Camera camera = Camera(glm::vec3(0.0f, 1.0f, 0.0f),
+                         glm::vec3(0.0f, -1.0f, 0.0f),
+                         glm::vec3(0.0f, 1.0f, 0.0f));
   std::vector<SceneObject*> sceneObjects;
 
-  glm::mat4 transformation;
+  GLuint program = 0;
+  GLuint viewMatrix = 0;
 
-  GLuint program;
-  GLuint viewMatrix;
-
-  GLuint lightColor;
-  GLuint lightPosition;
+  GLuint lightColor = 0;
+  GLuint lightPosition = 0;
 };
 
 }

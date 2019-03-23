@@ -2,6 +2,7 @@
 #include "ObjectModel/Mesh.h"
 #include "Scene/Scene.h"
 #include "Scene/Components/SceneObject.h"
+#include "Scene/Components/Camera.h"
 
 #include <glm/ext/matrix_transform.hpp>
 
@@ -24,14 +25,17 @@ int main()
   obj2->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(-45.0f));
 
   std::shared_ptr<VSEngine::Scene> scene(new VSEngine::Scene());
-  scene->SetTransformation(glm::lookAt(glm::vec3(0.0f, 0.0f, -200.0f), 
-                                       glm::vec3(0.0f, 0.0f, 0.0f), 
-                                       glm::vec3(0.0f, 1.0f, 0.0f)));
   scene->AddSceneObject(obj);
   scene->AddSceneObject(obj2);
 
+  VSEngine::Camera cam(glm::vec3(0.0f, 0.0f, -200.0f),
+                       glm::vec3(0.0f, 0.0f, -1.0f),
+                       glm::vec3(0.0f, 1.0f, 0.0f));
+ 
+  scene->SetCamera(cam);
+
   renderer.SetScene(scene);
 	renderer.Start();
-	
+
 	return 0;
 }

@@ -13,7 +13,7 @@
 
 namespace VSEngine
 {
-void BoundingBox::AddPoint(Geometry::Point3df const& point)
+void BoundingBox::AddPoint(const glm::vec3 &point)
 {
   if (point.x < minPoint.x)
   {
@@ -149,7 +149,7 @@ float* Mesh::GetSingleArrayVertices() const
   int i = 0;
   for (auto &vertex: vertices)
   {
-    const Geometry::Point3df &point = vertex.point;
+    const glm::vec4 &point = vertex.point;
     result[i * 3] = point[0];
     result[i * 3 + 1] = point[1];
     result[i * 3 + 2] = point[2];
@@ -184,8 +184,8 @@ float* Mesh::GetSingleArrayVerticesAndNormals() const
   int i = 0;
   for (auto &vertex : vertices)
   {
-    const Geometry::Point3df &point = vertex.point;
-    const Geometry::Vector3df &normal = vertex.normal;
+    const glm::vec4 &point = vertex.point;
+    const glm::vec4 &normal = vertex.normal;
 
     result[i * 6] = point[0];
     result[i * 6 + 1] = point[1];
@@ -207,19 +207,19 @@ float* Mesh::GetSingleArrayVerticesAndNormalsAndTextures() const
   int i = 0;
   for (auto &vertex : vertices)
   {
-    const Geometry::Point3df &point = vertex.point;
+    const glm::vec4 &point = vertex.point;
     result[i * 8] = point.x;
     result[i * 8 + 1] = point.y;
     result[i * 8 + 2] = point.z;
 
-    const Geometry::Vector3df &normal = vertex.normal;
+    const glm::vec4 &normal = vertex.normal;
     result[i * 8 + 3] = normal.x;
     result[i * 8 + 4] = normal.y;
     result[i * 8 + 5] = normal.z;
 
-    const Geometry::Point2df &textureCoord = vertex.textureCoord;
-    result[i * 8 + 6] = textureCoord.u;
-    result[i * 8 + 7] = textureCoord.v;
+    const glm::vec3 &textureCoord = vertex.textureCoord;
+    result[i * 8 + 6] = textureCoord.x;
+    result[i * 8 + 7] = textureCoord.y;
 
     ++i;
   }
@@ -252,10 +252,13 @@ void Mesh::BindMesh()
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * VerticesCount() * perVertexElems,
                verticesData, GL_STATIC_DRAW);
+  delete[] verticesData;
 
+  const unsigned short *indices = GetSingleArrayIndices();
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * IndicesCount() * 3,
-               GetSingleArrayIndices(), GL_STATIC_DRAW);
+               indices, GL_STATIC_DRAW);
+  delete[] indices;
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
                         perVertexElems * sizeof(float), nullptr);

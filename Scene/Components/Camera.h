@@ -1,7 +1,7 @@
 #ifndef _VSENGINE_SCENE_SCENECOMPONENTS_CAMERA_H_
 #define _VSENGINE_SCENE_SCENECOMPONENTS_CAMERA_H_
 
-#include <Geometry/Matrix3df.h>
+#include <glm/glm.hpp>
 #include "Utils/CommonUtils.h"
 
 namespace VSEngine
@@ -10,23 +10,21 @@ class Camera
 {
 public:
   Camera() = delete;
-  Camera(const Geometry::Point3df &pos,
-         const Geometry::Vector3df &front,
-         const Geometry::Vector3df &up);
+  Camera(const glm::vec3 &pos,
+         const glm::vec3 &front,
+         const glm::vec3 &up);
   Camera(const Camera &cam);
 
   void operator=(const Camera &cam);
 
-  const Geometry::Matrix3df& GetViewMatrix();
-private:
-  void CalculateLookAt();
+  const glm::mat4& GetViewMatrix();
 
 private:
-  Geometry::Point3df position;
-  Geometry::Vector3df frontDirection;
-  Geometry::Vector3df upDirection;
+  glm::vec3 position;
+  glm::vec3 frontDirection;
+  glm::vec3 upDirection;
 
-  Geometry::Matrix3df viewMatrix;
+  glm::mat4 viewMatrix;
   bool isNeedUpdate = true;
 };
 

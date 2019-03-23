@@ -6,9 +6,8 @@
 #endif
 
 #include <algorithm>
-
-#include "../Geometry/Matrix3df.h"
-#include "../Geometry/Utils.h"
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 namespace VSEngine
 {
@@ -144,10 +143,8 @@ void Renderer::Start()
   RenderStart();
 
   projectionMatrix =
-      Geometry::MakePerspective(90.0f, static_cast<float>(appInfo.windowWidth) /
-                                static_cast<float>(appInfo.windowHeight),
-                                0.1f,
-                                1000.0f);
+      glm::perspective(90.0f, static_cast<float>(appInfo.windowWidth) /
+                       static_cast<float>(appInfo.windowHeight), 0.1f, 1000.0f);
 
   bool running{true};
   do
@@ -197,9 +194,7 @@ void Renderer::Render(double time)
 
   glUseProgram(program);
 
-  const float *projMat = projectionMatrix.GetForOGL();
-  glUniformMatrix4fv(projMatrix, 1, GL_FALSE, projMat);
-  delete[] projMat;
+  glUniformMatrix4fv(projMatrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
   scene->RenderScene(time);
 }

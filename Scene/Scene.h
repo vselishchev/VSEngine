@@ -5,8 +5,8 @@
 #include <glfw3.h>
 #include <vector>
 
-#include "Geometry/Matrix3df.h"
 #include "Scene/Components/Camera.h"
+#include "glm/glm.hpp"
 
 namespace VSEngine
 {
@@ -24,16 +24,18 @@ public:
   void AddSceneObject(SceneObject *object);
 
   void SetCamera(const Camera &camera);
+
 private:
+  Camera camera = Camera(glm::vec3(0.0f, 1.0f, 0.0f),
+                         glm::vec3(0.0f, -1.0f, 0.0f),
+                         glm::vec3(0.0f, 1.0f, 0.0f));
   std::vector<SceneObject*> sceneObjects;
 
-  Camera camera;
+  GLuint program = 0;
+  GLuint viewMatrix = 0;
 
-  GLuint program;
-  GLuint viewMatrix;
-
-  GLuint lightColor;
-  GLuint lightPosition;
+  GLuint lightColor = 0;
+  GLuint lightPosition = 0;
 };
 
 }

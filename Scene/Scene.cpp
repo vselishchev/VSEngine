@@ -1,19 +1,13 @@
 #include "Scene.h"
 #include "Components/SceneObject.h"
-#include "Geometry/Matrix3df.h"
 
 #include <GL/glew.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace VSEngine
 {
-Scene::Scene() :
-    program{ 0 },
-    viewMatrix{ 0 },
-    lightColor{ 0 },
-    lightPosition{ 0 },
-    camera(Geometry::Point3df(0.0f, 1.0f, 0.0f),
-           Geometry::Vector3df(0.0f, -1.0f, 0.0f),
-           Geometry::Vector3df(0.0f, 1.0f, 0.0f))
+Scene::Scene()
 {
 }
 
@@ -41,10 +35,8 @@ void Scene::RenderScene(double time)
 
   glUniform3f(lightColor, 1.0f, 0.0f, 0.0f);
   glUniform3f(lightPosition, 100.0f, 100.0f, 100.0f);
-  
-  const float *viewMatr = camera.GetViewMatrix().GetForOGL();
-  glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, viewMatr);
-  delete[] viewMatr;
+
+  glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 
   for (SceneObject *object : sceneObjects)
   {

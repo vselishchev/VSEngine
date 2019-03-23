@@ -1,15 +1,17 @@
 #include "Camera.h"
 
+#include <glm/ext/matrix_transform.hpp>
+
 namespace VSEngine
 {
-Camera::Camera(const Geometry::Point3df &pos,
-               const Geometry::Vector3df &front,
-               const Geometry::Vector3df &up) :
+Camera::Camera(const glm::vec3 &pos,
+               const glm::vec3 &front,
+               const glm::vec3 &up) :
     position(pos),
     frontDirection(front),
     upDirection(up)
 {
-  CalculateLookAt();
+  viewMatrix = glm::lookAt(pos, pos - front, up);
 }
 
 Camera::Camera(const Camera &cam) : 
@@ -17,7 +19,7 @@ Camera::Camera(const Camera &cam) :
     frontDirection(cam.frontDirection),
     upDirection(cam.upDirection)
 {
-  CalculateLookAt();
+  viewMatrix = glm::lookAt(position, position - frontDirection, upDirection);
 }
 
 void Camera::operator=(const Camera &cam)
@@ -27,47 +29,16 @@ void Camera::operator=(const Camera &cam)
   upDirection = cam.upDirection;
 
   isNeedUpdate = true;
-  CalculateLookAt();
+  viewMatrix = glm::lookAt(position, position - frontDirection, upDirection);
 }
 
-const Geometry::Matrix3df& Camera::GetViewMatrix()
+const glm::mat4& Camera::GetViewMatrix()
 {
   if (isNeedUpdate)
   {
-    CalculateLookAt();
+    viewMatrix = glm::lookAt(position, position - frontDirection, upDirection);
   }
 
   return viewMatrix;
 }
-
-void Camera::CalculateLookAt()
-{
-  Geometry::Vector3df front = frontDirection.Normalized();
-  Geometry::Vector3df up = upDirection.Normalized();
-  Geometry::Vector3df right = up.Cross(front).Normalized();
-  Geometry::Vector3df upDir = front.Cross(right);
-
-  const Geometry::Vector3df cameraPosAsVector(position.x, position.y, position.z);
-
-  upDir.w = -upDir.Dot(cameraPosAsVector);
-  right.w = -right.Dot(cameraPosAsVector);
-  front.w = -front.Dot(cameraPosAsVector);
-
-  viewMatrix = Geometry::Matrix3df();
-  for (int i = 0; i < 4; ++i)
-  {
-    viewMatrix.rows[i] = Geometry::Vector3df(right[i], upDir[i], front[i], 0.0f);
-  }
-  /*
-  viewMatrix.rows[0] = right;
-  viewMatrix.rows[1] = upDir;
-  viewMatrix.rows[2] = front;
-  */
-  viewMatrix.data[3][3] = 1.0f;
-
-  viewMatrix.Transpose();
-
-  isNeedUpdate = false;
-}
-
 }

@@ -2,9 +2,9 @@
 
 namespace VSEngine
 {
-Vertex::Vertex(const Geometry::Point3df& point_,
-               const Geometry::Vector3df &normal_,
-               const Geometry::Point2df &textureCoord_):
+Vertex::Vertex(const glm::vec4 &point_,
+               const glm::vec4 &normal_,
+               const glm::vec3 &textureCoord_):
     point(point_),
     normal(normal_),
     textureCoord(textureCoord_)

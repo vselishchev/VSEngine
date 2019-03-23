@@ -70,11 +70,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Geometry\Matrix3df.cpp" />
-    <ClCompile Include="..\Geometry\Point2df.cpp" />
-    <ClCompile Include="..\Geometry\Point3df.cpp" />
-    <ClCompile Include="..\Geometry\Utils.cpp" />
-    <ClCompile Include="..\Geometry\Vector3df.cpp" />
     <ClCompile Include="..\ObjectModel\Mesh.cpp" />
     <ClCompile Include="..\ObjectModel\Vertex.cpp" />
     <ClCompile Include="..\Renderer\Renderer.cpp" />
@@ -87,11 +82,6 @@
     <ClCompile Include="Entry.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Geometry\Matrix3df.h" />
-    <ClInclude Include="..\Geometry\Point2df.h" />
-    <ClInclude Include="..\Geometry\Point3df.h" />
-    <ClInclude Include="..\Geometry\Utils.h" />
-    <ClInclude Include="..\Geometry\Vector3df.h" />
     <ClInclude Include="..\ObjectModel\Mesh.h" />
     <ClInclude Include="..\ObjectModel\Vertex.h" />
     <ClInclude Include="..\Renderer\Renderer.h" />

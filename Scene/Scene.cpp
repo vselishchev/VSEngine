@@ -36,6 +36,11 @@ void Scene::RenderScene(double time)
   glUniform3f(lightColor, 1.0f, 0.0f, 0.0f);
   glUniform3f(lightPosition, 100.0f, 100.0f, 100.0f);
 
+  static double prevTime = 0;
+  float delta = static_cast<float>(time - prevTime);
+  camera.SetSpeed(delta * 20.0f);
+  prevTime = time;
+
   glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 
   for (SceneObject *object : sceneObjects)
@@ -52,6 +57,16 @@ void Scene::AddSceneObject(SceneObject *object)
 void Scene::SetCamera(const Camera &cam)
 {
   camera = cam;
+}
+
+void Scene::MoveCamera(MoveDirection direction)
+{
+  camera.MoveCamera(direction);
+}
+
+void Scene::RotateCamera(float deltaYaw, float deltaPitch)
+{
+  camera.RotateCamera(deltaYaw, deltaPitch);
 }
 
 }

@@ -8,18 +8,20 @@
 
 #include <memory>
 
+VSEngine::Renderer renderer(600, 800, "VS Engine");
+
 int main()
 {
-	VSEngine::Renderer renderer(600,800, "VS Engine");
-
   std::string filePath = "D:/Work/Models/teapot/teapot.obj";
 
   VSEngine::SceneObject *obj = new VSEngine::SceneObject(filePath);
+  obj->Scale(0.1f);
   obj->Translate(60.0f, 0.0f, 30.0f);
   obj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(45.0f));
   obj->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(45.0f));
 
   VSEngine::SceneObject *obj2 = new VSEngine::SceneObject(filePath);
+  obj2->Scale(0.1f);
   obj2->Translate(-60.0f, -30.0f, -30.0f);
   obj2->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-45.0f));
   obj2->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(-45.0f));
@@ -28,7 +30,7 @@ int main()
   scene->AddSceneObject(obj);
   scene->AddSceneObject(obj2);
 
-  VSEngine::Camera cam(glm::vec3(0.0f, 0.0f, -200.0f),
+  VSEngine::Camera cam(glm::vec3(0.0f, 0.0f, -100.0f),
                        glm::vec3(0.0f, 0.0f, -1.0f),
                        glm::vec3(0.0f, 1.0f, 0.0f));
  

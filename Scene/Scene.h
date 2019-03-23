@@ -24,7 +24,8 @@ public:
   void AddSceneObject(SceneObject *object);
 
   void SetCamera(const Camera &camera);
-
+  void MoveCamera(MoveDirection direction);
+  void RotateCamera(float deltaYaw, float deltaPitch);
 private:
   Camera camera = Camera(glm::vec3(0.0f, 1.0f, 0.0f),
                          glm::vec3(0.0f, -1.0f, 0.0f),

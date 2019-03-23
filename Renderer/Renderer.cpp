@@ -9,19 +9,24 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
+extern VSEngine::Renderer renderer;
+
 namespace VSEngine
 {
+void MouseCallbacks(GLFWwindow *window, double xPos, double yPos); 
+void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset);
+
 namespace
 {
 GLuint LoadShader(const std::string &name, GLenum type)
 {
-  char *exePath = getcwd(nullptr, 260);
-  if (!exePath)
+  std::string exePath = getcwd(nullptr, 260);
+  if (exePath.empty())
   {
     return 0;
   }
 
-  std::string path = std::string(exePath) + "/../Shaders/" + name;
+  std::string path = exePath + "/../Shaders/" + name;
   std::replace(path.begin(), path.end(), '\\', '/');
 
   FILE *file = nullptr;
@@ -138,18 +143,23 @@ void Renderer::Start()
   glDebugMessageCallback((GLDEBUGPROC)DebugCallback, this);
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+  glfwSetCursorPosCallback(window, MouseCallbacks);
+  glfwSetScrollCallback(window, ScrollCallback);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   RenderStart();
 
   projectionMatrix =
-      glm::perspective(90.0f, static_cast<float>(appInfo.windowWidth) /
+      glm::perspective(fov, static_cast<float>(appInfo.windowWidth) /
                        static_cast<float>(appInfo.windowHeight), 0.1f, 1000.0f);
 
   bool running{true};
   do
   {
-    Render(glfwGetTime());
+    double time = glfwGetTime();
+    ProcessKeyInput();
+
+    Render(time);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -197,6 +207,46 @@ void Renderer::Render(double time)
   glUniformMatrix4fv(projMatrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
   scene->RenderScene(time);
+}
+
+void Renderer::ProcessKeyInput()
+{
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+  {
+    scene->MoveCamera(MoveDirection::Forward);
+  }
+  else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+  {
+    scene->MoveCamera(MoveDirection::Back);
+  }
+  else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+  {
+    scene->MoveCamera(MoveDirection::Left);
+  }
+  else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+  {
+    scene->MoveCamera(MoveDirection::Right);
+  }
+}
+
+void Renderer::UpdateFoV(float deltaFoV)
+{
+  if (fov > 1.0f && fov < 50.0f)
+  {
+    fov -= deltaFoV;
+  }
+  else if (fov <= 1.0f)
+  {
+    fov = 1.0f;
+  }
+  else if (fov >= 50.0f)
+  {
+    fov = 50.0f;
+  }
+
+  projectionMatrix =
+      glm::perspective(fov, static_cast<float>(appInfo.windowWidth) /
+                       static_cast<float>(appInfo.windowHeight), 0.1f, 1000.0f);
 }
 
 bool Renderer::LoadShaders()
@@ -253,6 +303,35 @@ void APIENTRY Renderer::DebugCallback(GLenum source,
                                       GLvoid* userParam)
 {
   reinterpret_cast<Renderer*>(userParam)->OnDebugMessage(source, type, id, severity, length, message);
+}
+
+void MouseCallbacks(GLFWwindow *window, double xPos, double yPos)
+{
+  static bool firstRun = true;
+
+  static float lastX = renderer.GetViewportWidth() / 2.0f;
+  static float lastY = renderer.GetViewportHeight() / 2.0f;
+
+  if (!firstRun)
+  {
+    float deltaYaw = static_cast<float>(xPos) - lastX;
+    float deltaPitch = static_cast<float>(yPos) - lastY;
+
+    renderer.GetScene()->RotateCamera(deltaYaw, deltaPitch);
+  }
+  else
+  {
+    firstRun = false;
+  }
+
+  lastX = static_cast<float>(xPos);
+  lastY = static_cast<float>(yPos);
+}
+
+void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+{
+  static float sensitivity = 0.05f;
+  renderer.UpdateFoV(static_cast<float>(yOffset) * sensitivity);
 }
 
 }

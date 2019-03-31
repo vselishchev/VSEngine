@@ -30,7 +30,7 @@ int main()
   scene->AddSceneObject(obj);
   scene->AddSceneObject(obj2);
 
-  VSEngine::Camera cam(glm::vec3(0.0f, 0.0f, -100.0f),
+  VSEngine::Camera cam(glm::vec3(0.0f, 0.0f, -50.0f),
                        glm::vec3(0.0f, 0.0f, -1.0f),
                        glm::vec3(0.0f, 1.0f, 0.0f));
  

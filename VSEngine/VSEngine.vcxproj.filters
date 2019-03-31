@@ -24,6 +24,9 @@
     <Filter Include="ObjectModel">
       <UniqueIdentifier>{daa5e147-6697-451b-9c45-ed33c044587e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{af0f908d-bd88-425b-ac4a-20276b44865a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Utils\Color.cpp">
@@ -55,6 +58,15 @@
     </ClCompile>
     <ClCompile Include="..\Scene\Components\Camera.cpp">
       <Filter>Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Scene\Components\Light.cpp">
+      <Filter>Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Utils\ShaderProgram.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Utils\Shader.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,10 +100,31 @@
     <ClInclude Include="..\Scene\Components\Camera.h">
       <Filter>Scene\Components</Filter>
     </ClInclude>
+    <ClInclude Include="..\Scene\Components\Light.h">
+      <Filter>Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utils\ShaderProgram.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utils\Shader.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-tidy">
       <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\Shaders\fragment.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\vertex.vs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Light.fs.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Shaders\Light.vs.glsl">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

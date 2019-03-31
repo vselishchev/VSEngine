@@ -1,6 +1,6 @@
 #include "Color.h"
 
-namespace Utils
+namespace VSUtils
 {
   Color Color::operator*(float value) const
   {

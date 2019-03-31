@@ -127,7 +127,7 @@ public:
 
   void BindMesh();
 
-  void Render(double time);
+  void Render(double time) const;
 
 // TODO: Implement own object loader
 /*private:

@@ -8,12 +8,13 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Utils/ShaderProgram.h"
+
 namespace VSEngine
 {
 SceneObjectsCollection SceneObjectsMap;
 
 SceneObject::SceneObject(const std::string &path):
-    modelMatrix(0),
     pathToFile(path)
 {
   SceneObject *object = SceneObjectsMap.GetSceneObject(path);
@@ -102,15 +103,13 @@ SceneObject::SceneObject(const std::string &path):
   VSEngine::SceneObjectsMap.AddSceneObject(this);
 }
 
-SceneObject::SceneObject(std::shared_ptr<VSEngine::Mesh> m):
-    modelMatrix(0)
+SceneObject::SceneObject(std::shared_ptr<VSEngine::Mesh> m)
 {
   meshes.push_back(m);
 }
 
 SceneObject::SceneObject(const std::vector<std::shared_ptr<VSEngine::Mesh>> &m):
-  meshes(m),
-  modelMatrix(0)
+  meshes(m)
 {
 }
 
@@ -121,15 +120,13 @@ SceneObject::~SceneObject()
 
 SceneObject::SceneObject(const SceneObject &obj): 
     meshes(obj.meshes),
-    transformation(obj.transformation),
-    modelMatrix(0)
+    transformation(obj.transformation)
 {
 }
 
 SceneObject::SceneObject(SceneObject &&obj):
     meshes(std::move(obj.meshes)),
-    transformation(std::exchange(obj.transformation, glm::mat4(1.0f))),
-    modelMatrix(obj.modelMatrix)
+    transformation(std::exchange(obj.transformation, glm::mat4(1.0f)))
 {
 }
 
@@ -168,19 +165,19 @@ const glm::mat4& SceneObject::GetTransformation() const
   return transformation;
 }
 
-void SceneObject::BindObject(unsigned int programId)
+void SceneObject::BindObject(VSUtils::ShaderProgram *shaderProg)
 {
   for (auto &mesh : meshes)
   {
     mesh->BindMesh();
   }
 
-  modelMatrix = glGetUniformLocation(programId, "modelMatrix");
+  shaderProgram = shaderProg;
 }
 
 void SceneObject::Render(double time)
 {
-  glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, glm::value_ptr(transformation));
+  shaderProgram->SetMat4("modelMatrix", transformation);
 
   for (auto &mesh : meshes)
   {

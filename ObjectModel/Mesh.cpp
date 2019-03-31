@@ -237,16 +237,21 @@ void Mesh::BindMesh()
 
   float *verticesData = nullptr;
 
-  int perVertexElems = 6;
+  int perVertexElems = 3;
 
   if (hasTextureCoordinates)
   {
     verticesData = GetSingleArrayVerticesAndNormalsAndTextures();
     perVertexElems = 8;
   }
-  else
+  else if (hasNormals)
   {
     verticesData = GetSingleArrayVerticesAndNormals();
+    perVertexElems = 6;
+  }
+  else
+  {
+    verticesData = GetSingleArrayVertices();
   }
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -264,10 +269,13 @@ void Mesh::BindMesh()
                         perVertexElems * sizeof(float), nullptr);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 
-                        perVertexElems * sizeof(float), 
-                        (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
+  if (hasNormals)
+  {
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                          perVertexElems * sizeof(float),
+                          (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+  }
 
   if (hasTextureCoordinates)
   {
@@ -301,9 +309,12 @@ void Mesh::BindMesh()
   }
 }
 
-void Mesh::Render(double time)
+void Mesh::Render(double time) const
 {
-  glBindTexture(GL_TEXTURE_2D, texture);
+  if (texture)
+  {
+    glBindTexture(GL_TEXTURE_2D, texture);
+  }
   glBindVertexArray(vao);
 
   glDrawElements(GL_TRIANGLES, IndicesCount() * 3, GL_UNSIGNED_SHORT, 0);

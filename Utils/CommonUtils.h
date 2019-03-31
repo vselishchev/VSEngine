@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-namespace Utils
+namespace VSUtils
 {
 	template<typename Out>
 	void Split(std::string const& str, char delim, Out result)

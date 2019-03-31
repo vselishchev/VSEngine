@@ -6,7 +6,14 @@
 #include <vector>
 
 #include "Scene/Components/Camera.h"
+#include "Scene/Components/Light.h"
+
 #include "glm/glm.hpp"
+
+namespace VSUtils
+{
+class ShaderProgram;
+}
 
 namespace VSEngine
 {
@@ -18,8 +25,8 @@ public:
   explicit Scene();
   virtual ~Scene();
 
-  void LoadScene(GLuint program);
-  void RenderScene(double time);
+  void LoadScene(VSUtils::ShaderProgram *shaderProg);
+  void RenderScene(double time, const glm::mat4 &projMatrix);
 
   void AddSceneObject(SceneObject *object);
 
@@ -32,11 +39,10 @@ private:
                          glm::vec3(0.0f, 1.0f, 0.0f));
   std::vector<SceneObject*> sceneObjects;
 
-  GLuint program = 0;
-  GLuint viewMatrix = 0;
+  Light light;
+  VSUtils::ShaderProgram *lightShader = nullptr;
 
-  GLuint lightColor = 0;
-  GLuint lightPosition = 0;
+  VSUtils::ShaderProgram *shaderProgram = nullptr;
 };
 
 }

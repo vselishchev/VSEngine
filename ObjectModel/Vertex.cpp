@@ -18,4 +18,13 @@ bool Vertex::operator==(const Vertex &rhs) const
          textureCoord == rhs.textureCoord;
 }
 
+const Vertex& Vertex::operator=(const Vertex &rhs)
+{
+  point = rhs.point;
+  normal = rhs.normal;
+  textureCoord = rhs.textureCoord;
+
+  return *this;
+}
+
 }

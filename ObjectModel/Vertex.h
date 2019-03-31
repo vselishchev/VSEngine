@@ -29,6 +29,8 @@ public:
 
   bool operator==(const Vertex &rhs) const;
 
+  const Vertex& operator=(const Vertex &rhs);
+
 public:
   glm::vec4 point;
   glm::vec4 normal;

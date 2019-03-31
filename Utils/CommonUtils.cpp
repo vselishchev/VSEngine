@@ -1,6 +1,6 @@
 #include "CommonUtils.h"
 
-namespace Utils
+namespace VSUtils
 {
 std::string ReplaceSlashes(const std::string &str)
 {

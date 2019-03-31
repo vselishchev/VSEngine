@@ -6,6 +6,11 @@
 #include <memory>
 #include "SceneObjectCollection.h"
 
+namespace VSUtils
+{
+class ShaderProgram;
+}
+
 namespace VSEngine
 {
 class SceneObject
@@ -19,7 +24,7 @@ public:
   SceneObject(SceneObject &&obj);
   ~SceneObject();
 
-  void BindObject(unsigned int programId);
+  void BindObject(VSUtils::ShaderProgram *shaderProg);
 
   void Render(double time);
 
@@ -41,7 +46,7 @@ private:
   std::vector<std::shared_ptr<VSEngine::Mesh>> meshes;
   glm::mat4 transformation = glm::mat4(1.0f);
   std::string pathToFile;
-  unsigned int modelMatrix;
+  VSUtils::ShaderProgram *shaderProgram;
 };
 
 extern SceneObjectsCollection SceneObjectsMap;

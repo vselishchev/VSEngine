@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "Components/SceneObject.h"
+#include "Utils/ShaderProgram.h"
 
 #include <GL/glew.h>
 
@@ -13,40 +14,61 @@ Scene::Scene()
 
 Scene::~Scene()
 {
+  delete lightShader;
 }
 
-void Scene::LoadScene(GLuint program_)
+void Scene::LoadScene(VSUtils::ShaderProgram *shaderProg)
 {
-  program = program_;
+  shaderProgram = shaderProg;
   for (SceneObject *object : sceneObjects)
   {
-    object->BindObject(program);
+    object->BindObject(shaderProgram);
   }
 
-  lightColor = glGetUniformLocation(program, "lightColor");
-  lightPosition = glGetUniformLocation(program, "lightPosition");
+  if (!lightShader)
+  {
+    lightShader = new VSUtils::ShaderProgram();
+  }
 
-  viewMatrix = glGetUniformLocation(program, "viewMatrix");
+  lightShader->SetVertexShader("Light.vs.glsl");
+  lightShader->SetFragmentShader("Light.fs.glsl");
+  lightShader->CompileProgram();
+
+  light.SetShaderProgram(lightShader);
+  light.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+  light.SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
-void Scene::RenderScene(double time)
+void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
 {
-  glUseProgram(program);
+  if (shaderProgram)
+  {
+    shaderProgram->UseProgram();
 
-  glUniform3f(lightColor, 1.0f, 0.0f, 0.0f);
-  glUniform3f(lightPosition, 100.0f, 100.0f, 100.0f);
+    shaderProgram->SetMat4("projMatrix", projMatrix);
+    shaderProgram->SetVec3("lightColor", light.GetColor());
+    shaderProgram->SetVec3("lightPosition", light.GetPosition());
 
-  static double prevTime = 0;
-  float delta = static_cast<float>(time - prevTime);
-  camera.SetSpeed(delta * 20.0f);
-  prevTime = time;
+    static double prevTime = 0;
+    float delta = static_cast<float>(time - prevTime);
+    camera.SetSpeed(delta * 20.0f);
+    prevTime = time;
 
-  glUniformMatrix4fv(viewMatrix, 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+    shaderProgram->SetMat4("viewMatrix", camera.GetViewMatrix());
+  }
 
   for (SceneObject *object : sceneObjects)
   {
     object->Render(time);
   }
+
+  // Render light source as box if needed
+  /*
+  lightShader->UseProgram();
+  lightShader->SetMat4("viewMatrix", camera.GetViewMatrix());
+  lightShader->SetMat4("projMatrix", projMatrix);
+
+  light.RenderRepresentation(time);*/
 }
 
 void Scene::AddSceneObject(SceneObject *object)

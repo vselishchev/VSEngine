@@ -8,6 +8,7 @@
 #include <string>
 
 #include "Scene/Scene.h"
+#include "Utils/ShaderProgram.h"
 
 namespace VSEngine
 {
@@ -56,8 +57,6 @@ private:
   void RenderFinish();
   void Render(double time);
 
-  bool LoadShaders();
-
   virtual void OnDebugMessage(GLenum source,
                               GLenum type,
                               GLuint id,
@@ -86,8 +85,7 @@ private:
 
   glm::mat4 projectionMatrix;
 
-  GLuint program;
-  GLuint projMatrix;
+  VSUtils::ShaderProgram program;
 
   std::shared_ptr<Scene> scene;
 };

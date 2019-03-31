@@ -74,11 +74,14 @@
     <ClCompile Include="..\ObjectModel\Vertex.cpp" />
     <ClCompile Include="..\Renderer\Renderer.cpp" />
     <ClCompile Include="..\Scene\Components\Camera.cpp" />
+    <ClCompile Include="..\Scene\Components\Light.cpp" />
     <ClCompile Include="..\Scene\Components\SceneObject.cpp" />
     <ClCompile Include="..\Scene\Components\SceneObjectCollection.cpp" />
     <ClCompile Include="..\Scene\Scene.cpp" />
     <ClCompile Include="..\Utils\Color.cpp" />
     <ClCompile Include="..\Utils\CommonUtils.cpp" />
+    <ClCompile Include="..\Utils\Shader.cpp" />
+    <ClCompile Include="..\Utils\ShaderProgram.cpp" />
     <ClCompile Include="Entry.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -86,14 +89,21 @@
     <ClInclude Include="..\ObjectModel\Vertex.h" />
     <ClInclude Include="..\Renderer\Renderer.h" />
     <ClInclude Include="..\Scene\Components\Camera.h" />
+    <ClInclude Include="..\Scene\Components\Light.h" />
     <ClInclude Include="..\Scene\Components\SceneObject.h" />
     <ClInclude Include="..\Scene\Components\SceneObjectCollection.h" />
     <ClInclude Include="..\Scene\Scene.h" />
     <ClInclude Include="..\Utils\Color.h" />
     <ClInclude Include="..\Utils\CommonUtils.h" />
+    <ClInclude Include="..\Utils\Shader.h" />
+    <ClInclude Include="..\Utils\ShaderProgram.h" />
     <ClInclude Include="..\Utils\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Shaders\fragment.fs.glsl" />
+    <None Include="..\Shaders\Light.fs.glsl" />
+    <None Include="..\Shaders\Light.vs.glsl" />
+    <None Include="..\Shaders\vertex.vs.glsl" />
     <None Include=".clang-tidy" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,9 +1,8 @@
 #ifndef _VSENGINE_UTILS_COLOR_H_
 #define _VSENGINE_UTILS_COLOR_H_
 
-namespace Utils
+namespace VSUtils
 {
-	
 	struct Color
 	{
 	  inline Color(): red(0), green(0), blue(0), alpha(0) {}

@@ -2,31 +2,43 @@
 
 out vec4 color;
 
-uniform vec3 lightColor;
-uniform vec3 lightPosition;
-
 in VS_OUT 
 {
-	vec3 color;
 	vec3 normal;
 	vec3 fragmentPosition;
 	vec2 textureCoord;
 } fsIn;
 
+uniform vec3 meshColor;
+
+uniform vec3 lightColor;
+uniform vec3 lightPosition;
+
+uniform vec3 viewPosition;
+
 uniform sampler2D textureSample;
 
 void main()
 {
+	// ambient part
 	float ambientStrength = 0.1;
 	vec3 ambient = lightColor * ambientStrength;
 
+	// diffuse part
 	vec3 normal = normalize(fsIn.normal);
 	vec3 lightDir = normalize(lightPosition - fsIn.fragmentPosition);
 	float diff = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = diff * lightDir;
+	vec3 diffuse = diff * lightColor;
 
-	vec4 textureColor = texture(textureSample, fsIn.textureCoord);
-	vec4 result = mix(textureColor, vec4(ambient + diffuse, 1.0), 0.5);
+	// specular part
+	float specularStrength = 0.5;
+	vec3 viewDir = normalize(viewPosition - fsIn.fragmentPosition);
+	vec3 reflectDir = reflect(-lightDir, normal);
+	float spec = pow(max(dot(reflectDir, viewDir), 0.0), 32);
+	vec3 specular = specularStrength * spec * lightColor;
+
+	//vec4 textureColor = texture(textureSample, fsIn.textureCoord);
+	vec4 result = vec4((diffuse + ambient + specular) * meshColor, 1.0);
 
 	color = result;
 }

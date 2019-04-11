@@ -15,16 +15,20 @@ int main()
   std::string filePath = "D:/Work/Models/teapot/teapot.obj";
 
   VSEngine::SceneObject *obj = new VSEngine::SceneObject(filePath);
-  obj->Scale(0.1f);
+  obj->Scale(0.5f);
   obj->Translate(60.0f, 0.0f, 30.0f);
   obj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(45.0f));
   obj->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(45.0f));
 
+  obj->SetObjectColor(glm::vec3(0.0f, 1.0f, 0.0f));
+
   VSEngine::SceneObject *obj2 = new VSEngine::SceneObject(filePath);
-  obj2->Scale(0.1f);
+  obj2->Scale(0.5f);
   obj2->Translate(-60.0f, -30.0f, -30.0f);
   obj2->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-45.0f));
   obj2->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(-45.0f));
+
+  obj2->SetObjectColor(glm::vec3(1.0f, 0.0f, 0.0f));
 
   std::shared_ptr<VSEngine::Scene> scene(new VSEngine::Scene());
   scene->AddSceneObject(obj);

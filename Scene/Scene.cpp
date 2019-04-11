@@ -4,8 +4,6 @@
 
 #include <GL/glew.h>
 
-#include <glm/gtc/type_ptr.hpp>
-
 namespace VSEngine
 {
 Scene::Scene()
@@ -35,8 +33,8 @@ void Scene::LoadScene(VSUtils::ShaderProgram *shaderProg)
   lightShader->CompileProgram();
 
   light.SetShaderProgram(lightShader);
-  light.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-  light.SetColor(glm::vec3(1.0f, 0.0f, 0.0f));
+  light.SetPosition(glm::vec3(20.0f, 10.0f, 0.0f));
+  light.SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
@@ -48,6 +46,8 @@ void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
     shaderProgram->SetMat4("projMatrix", projMatrix);
     shaderProgram->SetVec3("lightColor", light.GetColor());
     shaderProgram->SetVec3("lightPosition", light.GetPosition());
+
+    shaderProgram->SetVec3("viewPosition", camera.GetViewPosition());
 
     static double prevTime = 0;
     float delta = static_cast<float>(time - prevTime);
@@ -63,12 +63,11 @@ void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
   }
 
   // Render light source as box if needed
-  /*
   lightShader->UseProgram();
   lightShader->SetMat4("viewMatrix", camera.GetViewMatrix());
   lightShader->SetMat4("projMatrix", projMatrix);
 
-  light.RenderRepresentation(time);*/
+  light.RenderRepresentation(time);
 }
 
 void Scene::AddSceneObject(SceneObject *object)

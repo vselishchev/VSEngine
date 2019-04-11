@@ -51,8 +51,10 @@ GLuint ShaderProgram::CompileProgram()
     glGetProgramInfoLog(program, 4096, nullptr, buffer);
 
     fprintf(stderr, "program: %s\n", buffer);
-    return false;
+    return 0;
   }
+
+  return program;
 }
 
 bool ShaderProgram::UseProgram() const

@@ -42,11 +42,16 @@ public:
   void ResetTransform() { transformation = glm::mat4(1.0f); }
 
   const std::string& GetFilePath() const { return pathToFile; }
+
+  void SetObjectColor(const glm::vec3 &col);
 private:
+  glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+
   std::vector<std::shared_ptr<VSEngine::Mesh>> meshes;
   glm::mat4 transformation = glm::mat4(1.0f);
   std::string pathToFile;
-  VSUtils::ShaderProgram *shaderProgram;
+
+  VSUtils::ShaderProgram *shaderProgram = nullptr;
 };
 
 extern SceneObjectsCollection SceneObjectsMap;

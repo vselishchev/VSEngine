@@ -45,7 +45,7 @@ void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
 
     shaderProgram->SetMat4("projMatrix", projMatrix);
     shaderProgram->SetVec3("lightColor", light.GetColor());
-    shaderProgram->SetVec3("lightPosition", light.GetPosition());
+    shaderProgram->SetVec3("lightPosition", camera.GetViewMatrix() * glm::vec4(light.GetPosition(), 1.0f));
 
     shaderProgram->SetVec3("viewPosition", camera.GetViewPosition());
 

@@ -181,8 +181,14 @@ void SceneObject::Render(double time)
 
   for (auto &mesh : meshes)
   {
+    shaderProgram->SetVec3("meshColor", color);
     mesh->Render(time);
   }
+}
+
+void SceneObject::SetObjectColor(const glm::vec3 &col)
+{
+  color = col;
 }
 
 }

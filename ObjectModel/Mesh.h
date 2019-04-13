@@ -61,17 +61,12 @@ public:
 
   // Moves vectors
   Mesh(std::vector<Vertex> &vertices_, std::vector<Triple> &faces_, 
-       bool normals = true, bool textures = true):
+       bool normals = false, bool textures = false):
       hasNormals(normals),
       hasTextureCoordinates(textures),
       vertices(std::move(vertices_)),
-      faces(std::move(faces_)),
-      vao(0),
-      vbo(0),
-      ebo(0),
-      texture(0)
+      faces(std::move(faces_))
   {
-    hasTextureCoordinates = textures;
   }
 
   Mesh(Mesh &&m) :
@@ -144,14 +139,14 @@ public:
   
   std::string texturePath;
 private:
-  bool hasNormals;
-  bool hasTextureCoordinates;
+  bool hasNormals = false;
+  bool hasTextureCoordinates = false;
 
-  unsigned int vao;
-  unsigned int vbo;
-  unsigned int ebo;
+  unsigned int vao = 0;
+  unsigned int vbo = 0;
+  unsigned int ebo = 0;
 
-  unsigned int texture;
+  unsigned int texture = 0;
 
   std::vector<Vertex> vertices;
   std::vector<Triple> faces;

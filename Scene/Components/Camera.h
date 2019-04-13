@@ -33,7 +33,9 @@ public:
   void MoveCamera(MoveDirection direction);
   void RotateCamera(float deltaYaw, float deltaPitch);
 
-  const glm::mat4& GetViewMatrix();
+  const glm::mat4& GetViewMatrix() const;
+
+  const glm::vec3& GetViewPosition() const;
 private:
   void Update();
 

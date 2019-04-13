@@ -97,9 +97,14 @@ void Camera::RotateCamera(float deltaYaw, float deltaPitch)
   Update();
 }
 
-const glm::mat4& Camera::GetViewMatrix()
+const glm::mat4& Camera::GetViewMatrix() const
 {
   return viewMatrix;
+}
+
+const glm::vec3& Camera::GetViewPosition() const
+{
+  return position;
 }
 
 void Camera::Update()

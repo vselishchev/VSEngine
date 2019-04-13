@@ -19,7 +19,7 @@ void main()
 {
 	mat4 mvMatrix = viewMatrix * modelMatrix;
 	gl_Position = projMatrix * mvMatrix * vec4(position, 1.0);
-	vsOut.normal = mat3(modelMatrix) * normal; //mat3(transpose(inverse(modelMatrix))) * normal; // calculate normal matrix on the CPU and send as uniform
-	vsOut.fragmentPosition = vec3(modelMatrix * vec4(position, 1.0));
+	vsOut.normal = mat3(mvMatrix) * normal; //mat3(transpose(inverse(mvMatrix))) * normal; // calculate normal matrix on the CPU and send as uniform
+	vsOut.fragmentPosition = vec3(mvMatrix * vec4(position, 1.0));
 	vsOut.textureCoord = textureCoord;
 }

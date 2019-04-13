@@ -14,8 +14,6 @@ uniform vec3 meshColor;
 uniform vec3 lightColor;
 uniform vec3 lightPosition;
 
-uniform vec3 viewPosition;
-
 uniform sampler2D textureSample;
 
 void main()
@@ -32,7 +30,7 @@ void main()
 
 	// specular part
 	float specularStrength = 0.5;
-	vec3 viewDir = normalize(viewPosition - fsIn.fragmentPosition);
+	vec3 viewDir = -normalize(fsIn.fragmentPosition);
 	vec3 reflectDir = reflect(-lightDir, normal);
 	float spec = pow(max(dot(reflectDir, viewDir), 0.0), 32);
 	vec3 specular = specularStrength * spec * lightColor;

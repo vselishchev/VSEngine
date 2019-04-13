@@ -21,7 +21,7 @@ GLuint LoadShader(const std::string &name, GLenum type)
     return 0;
   }
 
-  std::string path = exePath + "/../Shaders/" + name;
+  std::string path = exePath + "/../../Shaders/" + name;
   std::replace(path.begin(), path.end(), '\\', '/');
 
   std::ifstream file(path.c_str());

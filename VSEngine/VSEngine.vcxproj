@@ -77,6 +77,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\ObjectModel\Material.cpp" />
     <ClCompile Include="..\ObjectModel\Mesh.cpp" />
     <ClCompile Include="..\ObjectModel\Vertex.cpp" />
     <ClCompile Include="..\Renderer\Renderer.cpp" />
@@ -92,6 +93,7 @@
     <ClCompile Include="Entry.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\ObjectModel\Material.h" />
     <ClInclude Include="..\ObjectModel\Mesh.h" />
     <ClInclude Include="..\ObjectModel\Vertex.h" />
     <ClInclude Include="..\Renderer\Renderer.h" />

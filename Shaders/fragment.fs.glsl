@@ -11,29 +11,45 @@ in VS_OUT
 
 uniform vec3 meshColor;
 
-uniform vec3 lightColor;
-uniform vec3 lightPosition;
-
 uniform sampler2D textureSample;
+
+struct Light
+{
+	vec3 position;
+
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+
+uniform Light light;
+
+struct Material
+{
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	float shininess;
+};
+
+uniform Material material;
 
 void main()
 {
 	// ambient part
-	float ambientStrength = 0.1;
-	vec3 ambient = lightColor * ambientStrength;
+	vec3 ambient = light.ambient * material.ambient;
 
 	// diffuse part
 	vec3 normal = normalize(fsIn.normal);
-	vec3 lightDir = normalize(lightPosition - fsIn.fragmentPosition);
+	vec3 lightDir = normalize(light.position - fsIn.fragmentPosition);
 	float diff = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = diff * lightColor;
+	vec3 diffuse = light.diffuse * (diff * material.diffuse);
 
 	// specular part
-	float specularStrength = 0.5;
 	vec3 viewDir = -normalize(fsIn.fragmentPosition);
 	vec3 reflectDir = reflect(-lightDir, normal);
-	float spec = pow(max(dot(reflectDir, viewDir), 0.0), 32);
-	vec3 specular = specularStrength * spec * lightColor;
+	float spec = pow(max(dot(reflectDir, viewDir), 0.0), material.shininess);
+	vec3 specular = light.specular * (spec * material.specular);
 
 	//vec4 textureColor = texture(textureSample, fsIn.textureCoord);
 	vec4 result = vec4((diffuse + ambient + specular) * meshColor, 1.0);

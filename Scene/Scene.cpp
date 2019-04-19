@@ -34,7 +34,9 @@ void Scene::LoadScene(VSUtils::ShaderProgram *shaderProg)
 
   light.SetShaderProgram(lightShader);
   light.SetPosition(glm::vec3(20.0f, 10.0f, 0.0f));
-  light.SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+  light.SetColor(glm::vec3(1.0f));
+  light.SetAmbient(glm::vec3(0.5f));
+  light.SetDiffuse(glm::vec3(0.5f));
 }
 
 void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
@@ -44,10 +46,11 @@ void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
     shaderProgram->UseProgram();
 
     shaderProgram->SetMat4("projMatrix", projMatrix);
-    shaderProgram->SetVec3("lightColor", light.GetColor());
-    shaderProgram->SetVec3("lightPosition", camera.GetViewMatrix() * glm::vec4(light.GetPosition(), 1.0f));
 
-    shaderProgram->SetVec3("viewPosition", camera.GetViewPosition());
+    shaderProgram->SetVec3("light.ambient", light.GetColor() * light.GetAmbient());
+    shaderProgram->SetVec3("light.diffuse", light.GetColor() * light.GetDiffuse());
+    shaderProgram->SetVec3("light.specular", light.GetColor() * light.GetSpecular());
+    shaderProgram->SetVec3("light.position", camera.GetViewMatrix() * glm::vec4(light.GetPosition(), 1.0f));
 
     static double prevTime = 0;
     float delta = static_cast<float>(time - prevTime);

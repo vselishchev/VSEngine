@@ -12,23 +12,24 @@ VSEngine::Renderer renderer(600, 800, "VS Engine");
 
 int main()
 {
-  std::string filePath = "D:/Work/Models/teapot/teapot.obj";
+  std::string filePath1 = "D:/Work/Models/teapot/teapot.obj";
 
-  VSEngine::SceneObject *obj = new VSEngine::SceneObject(filePath);
+  VSEngine::SceneObject *obj = new VSEngine::SceneObject(filePath1);
   obj->Scale(0.5f);
+  obj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
+  obj->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), 45.0f);
   obj->Translate(60.0f, 0.0f, 30.0f);
-  obj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(45.0f));
-  obj->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(45.0f));
-
   obj->SetObjectColor(glm::vec3(0.0f, 1.0f, 0.0f));
+  obj->SetMeshesMaterial(VSEngine::Jade);
 
-  VSEngine::SceneObject *obj2 = new VSEngine::SceneObject(filePath);
-  obj2->Scale(0.5f);
-  obj2->Translate(-60.0f, -30.0f, -30.0f);
-  obj2->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), glm::radians(-45.0f));
-  obj2->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), glm::radians(-45.0f));
-
+  std::string filePath2 = "D:/Work/Models/cube/cube.obj";
+  VSEngine::SceneObject *obj2 = new VSEngine::SceneObject(filePath2);
+  obj2->Scale(20.0f);
+  obj2->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), -45.0f);
+  obj2->Rotate(glm::vec3(1.0f, 0.0f, 0.0f), -45.0f);
+  obj2->Translate(-30.0f, 0.0f, -30.0f);
   obj2->SetObjectColor(glm::vec3(1.0f, 0.0f, 0.0f));
+  obj2->SetMeshesMaterial(VSEngine::Obsidian);
 
   std::shared_ptr<VSEngine::Scene> scene(new VSEngine::Scene());
   scene->AddSceneObject(obj);
@@ -40,8 +41,8 @@ int main()
  
   scene->SetCamera(cam);
 
-  renderer.SetScene(scene);
-	renderer.Start();
+  renderer.SetScene(scene.get());
+  renderer.Start();
 
-	return 0;
+  return 0;
 }

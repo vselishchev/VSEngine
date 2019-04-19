@@ -30,14 +30,14 @@ public:
 
   void Start();
 
-  void SetScene(std::shared_ptr<Scene> scene_)
+  void SetScene(Scene *scene_)
   {
     scene = scene_;
   }
 
   Scene* GetScene() const
   {
-    return scene.get();
+    return scene;
   }
 
   int GetViewportHeight() const
@@ -78,8 +78,6 @@ public:
   };
 
 private:
-  float fov = 45.0f;
-
   ApplicationInfo appInfo;
   GLFWwindow *window;
 
@@ -87,7 +85,9 @@ private:
 
   VSUtils::ShaderProgram program;
 
-  std::shared_ptr<Scene> scene;
+  Scene *scene = nullptr;
+
+  float fov = 45.0f;
 };
 }
 

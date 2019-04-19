@@ -2,6 +2,7 @@
 #define _VSENGINE_GEOMETRY_MESH_H_
 
 #include "Vertex.h"
+#include "Material.h"
 
 #include <vector>
 #include <limits>
@@ -120,6 +121,16 @@ public:
     return hasTextureCoordinates;
   }
 
+  void SetMaterial(const Material &mat)
+  {
+    material = mat;
+  }
+
+  const Material& GetMaterial() const
+  {
+    return material;
+  }
+
   void BindMesh();
 
   void Render(double time) const;
@@ -150,6 +161,8 @@ private:
 
   std::vector<Vertex> vertices;
   std::vector<Triple> faces;
+
+  Material material;
 };
 
 }

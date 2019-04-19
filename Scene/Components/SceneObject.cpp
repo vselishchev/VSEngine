@@ -132,32 +132,32 @@ SceneObject::SceneObject(SceneObject &&obj):
 
 void SceneObject::Scale(const glm::vec3 &scale_)
 {
-  transformation *= glm::scale(glm::mat4(1.0f), scale_);
+  transformation = glm::scale(glm::mat4(1.0f), scale_) * transformation;
 }
 
 void SceneObject::Scale(float scale_)
 {
-  transformation *= glm::scale(glm::mat4(1.0f), glm::vec3(scale_, scale_ ,scale_));
+  transformation = glm::scale(glm::mat4(1.0f), glm::vec3(scale_, scale_, scale_)) * transformation;
 }
 
 void SceneObject::Rotate(const glm::mat4 &rotation_)
 {
-  transformation *= rotation_;
+  transformation = rotation_ * transformation;
 }
 
 void SceneObject::Rotate(const glm::vec3 &axis, float radians)
 {
-  transformation = glm::rotate(transformation, radians, axis);
+  transformation = glm::rotate(glm::mat4(1.0f), radians, axis) * transformation;
 }
 
 void SceneObject::Translate(const glm::vec3 &translation_)
 {
-  transformation *= glm::translate(glm::mat4(1.0f), translation_);
+  transformation = glm::translate(glm::mat4(1.0f), translation_) * transformation;
 }
 
 void SceneObject::Translate(float x, float y, float z)
 {
-  transformation *= glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
+  transformation = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z)) * transformation;
 }
 
 const glm::mat4& SceneObject::GetTransformation() const
@@ -182,6 +182,13 @@ void SceneObject::Render(double time)
   for (auto &mesh : meshes)
   {
     shaderProgram->SetVec3("meshColor", color);
+
+    const Material &meshMaterial = mesh->GetMaterial();
+    shaderProgram->SetVec3("material.ambient", meshMaterial.GetAmbient());
+    shaderProgram->SetVec3("material.diffuse", meshMaterial.GetDiffuse());
+    shaderProgram->SetVec3("material.pecular", meshMaterial.GetSpecular());
+    shaderProgram->SetFloat("material.shininess", meshMaterial.GetShininess());
+
     mesh->Render(time);
   }
 }
@@ -189,6 +196,14 @@ void SceneObject::Render(double time)
 void SceneObject::SetObjectColor(const glm::vec3 &col)
 {
   color = col;
+}
+
+void SceneObject::SetMeshesMaterial(const Material &mat)
+{
+  for (auto &mesh : meshes)
+  {
+    mesh->SetMaterial(mat);
+  }
 }
 
 }

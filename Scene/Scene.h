@@ -37,11 +37,12 @@ private:
   Camera camera = Camera(glm::vec3(0.0f, 1.0f, 0.0f),
                          glm::vec3(0.0f, -1.0f, 0.0f),
                          glm::vec3(0.0f, 1.0f, 0.0f));
-  std::vector<SceneObject*> sceneObjects;
 
   Light light;
-  VSUtils::ShaderProgram *lightShader = nullptr;
 
+  std::vector<SceneObject*> sceneObjects;
+
+  VSUtils::ShaderProgram *lightShader = nullptr;
   VSUtils::ShaderProgram *shaderProgram = nullptr;
 };
 

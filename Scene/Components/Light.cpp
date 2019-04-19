@@ -69,14 +69,44 @@ void Light::RenderRepresentation(double time)
   boxMesh.Render(time);
 }
 
-void Light::SetColor(glm::vec3 col)
+void Light::SetColor(const glm::vec3 &col)
 {
   color = col;
 }
 
-void Light::SetPosition(glm::vec3 pos)
+void Light::SetPosition(const glm::vec3 &pos)
 {
   position = pos;
   positionMat = glm::translate(glm::mat4(1), position);
+}
+
+void Light::SetAmbient(const glm::vec3 &amb)
+{
+  ambient = amb;
+}
+
+const glm::vec3 &Light::GetAmbient() const
+{
+  return ambient;
+}
+
+void Light::SetDiffuse(const glm::vec3 &diff)
+{
+  diffuse = diff;
+}
+
+const glm::vec3 &Light::GetDiffuse() const
+{
+  return diffuse;
+}
+
+void Light::SetSpecular(const glm::vec3 &spec)
+{
+  specular = spec;
+}
+
+const glm::vec3 &Light::GetSpecular() const
+{
+  return specular;
 }
 }

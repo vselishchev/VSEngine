@@ -68,6 +68,9 @@
     <ClCompile Include="..\Utils\Shader.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\ObjectModel\Material.cpp">
+      <Filter>ObjectModel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Utils\Color.h">
@@ -108,6 +111,9 @@
     </ClInclude>
     <ClInclude Include="..\Utils\Shader.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ObjectModel\Material.h">
+      <Filter>ObjectModel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

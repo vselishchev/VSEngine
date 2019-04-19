@@ -40,6 +40,8 @@ private:
   void Update();
 
 private:
+  glm::mat4 viewMatrix = glm::mat4(1.0f);
+
   glm::vec3 position;
   glm::vec3 frontDirection;
   glm::vec3 upDirection;
@@ -47,7 +49,6 @@ private:
   float yaw = -90.0f;
   float pitch = 0.0f;
 
-  glm::mat4 viewMatrix;
   float cameraSpeed = 0.02f;
 };
 

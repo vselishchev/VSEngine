@@ -18,18 +18,32 @@ public:
   void SetShaderProgram(VSUtils::ShaderProgram *shaderProg);
   void RenderRepresentation(double time);
 
-  void SetColor(glm::vec3 col);
-  void SetPosition(glm::vec3 pos);
-
+  void SetColor(const glm::vec3 &col);
   const glm::vec3 &GetColor() const { return color; }
+
+  void SetPosition(const glm::vec3 &pos);
   const glm::vec3 &GetPosition() const { return position; }
 
-private:
-  VSUtils::ShaderProgram *shaderProgram;
+  void SetAmbient(const glm::vec3 &amb);
+  const glm::vec3 &GetAmbient() const;
 
-  glm::vec3 color;
-  glm::vec3 position;
-  glm::mat4 positionMat;
+  void SetDiffuse(const glm::vec3 &diff);
+  const glm::vec3 &GetDiffuse() const;
+
+  void SetSpecular(const glm::vec3 &spec);
+  const glm::vec3 &GetSpecular() const;
+
+private:
+  glm::mat4 positionMat = glm::mat4(1.0f);
+
+  glm::vec3 color = glm::vec3(1.0f);
+  glm::vec3 position = glm::vec3(0.0f);
+
+  glm::vec3 ambient = glm::vec3(1.0f);
+  glm::vec3 diffuse = glm::vec3(1.0f);
+  glm::vec3 specular = glm::vec3(1.0f);
+
+  VSUtils::ShaderProgram *shaderProgram = nullptr;
 };
 }
 

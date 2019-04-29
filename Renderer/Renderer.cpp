@@ -104,11 +104,11 @@ void Renderer::RenderFinish()
 
 void Renderer::Render(double time)
 {
-  static const GLfloat green[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+  static const GLfloat gray[] = { 0.5f, 0.5f, 0.5f, 1.0f };
   static const GLfloat one = 1.0f;
   
   glViewport(0, 0, appInfo.windowWidth, appInfo.windowHeight);
-  glClearBufferfv(GL_COLOR, 0, green);
+  glClearBufferfv(GL_COLOR, 0, gray);
   glClearBufferfv(GL_DEPTH, 0, &one);
 
   scene->RenderScene(time, projectionMatrix);
@@ -131,6 +131,13 @@ void Renderer::ProcessKeyInput()
   else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
   {
     scene->MoveCamera(MoveDirection::Right);
+  }
+  else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+  {
+    scene->MoveCamera(MoveDirection::Up);
+  } else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+  {
+    scene->MoveCamera(MoveDirection::Down);
   }
 }
 

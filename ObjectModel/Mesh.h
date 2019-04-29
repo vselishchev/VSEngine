@@ -79,7 +79,8 @@ public:
       vao(std::exchange(m.vao, 0)),
       vbo(std::exchange(m.vbo, 0)),
       ebo(std::exchange(m.ebo, 0)),
-      texture(std::exchange(m.texture, 0))
+      diffuseTexture(std::exchange(m.diffuseTexture, 0)),
+      specularTexture(std::exchange(m.specularTexture, 0))
   {
   }
 
@@ -95,7 +96,8 @@ public:
     vao = std::exchange(vao, 0);
     vbo = std::exchange(vbo, 0);
     ebo = std::exchange(ebo, 0);
-    texture = std::exchange(m.texture, 0);
+    diffuseTexture = std::exchange(m.diffuseTexture, 0);
+    specularTexture = std::exchange(m.specularTexture, 0);
 
     return *this;
   }
@@ -147,8 +149,7 @@ public:
 public:
   BoundingBox bBox;
   std::string objectName;
-  
-  std::string texturePath;
+
 private:
   bool hasNormals = false;
   bool hasTextureCoordinates = false;
@@ -157,7 +158,8 @@ private:
   unsigned int vbo = 0;
   unsigned int ebo = 0;
 
-  unsigned int texture = 0;
+  unsigned int diffuseTexture = 0;
+  unsigned int specularTexture = 0;
 
   std::vector<Vertex> vertices;
   std::vector<Triple> faces;

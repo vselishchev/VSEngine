@@ -3,6 +3,8 @@
 
 #include <glm/glm.hpp>
 
+#include <string>
+
 namespace VSEngine
 {
 class Material
@@ -11,8 +13,6 @@ public:
   Material() {}
   Material(const Material &mat);
   Material(Material &&mat);
-  Material(const glm::vec3 &amb, const glm::vec3 &diff,
-           const glm::vec3 &spec, float shine);
 
   const Material& operator=(const Material &mat);
   const Material& operator=(Material &&mat);
@@ -28,7 +28,16 @@ public:
 
   void SetShininess(float shine);
   float GetShininess() const;
+
+  void SetDiffuseMapPath(const std::string &diffMap);
+  const std::string& GetDiffuseMapPath() const;
+
+  void SetSpecularMapPath(const std::string &specMap);
+  const std::string& GetSpecularMapPath() const;
 private:
+  std::string diffuseMap;
+  std::string specularMap;
+
   glm::vec3 ambient = glm::vec3(1.0f);
   glm::vec3 diffuse = glm::vec3(1.0f);
   glm::vec3 specular = glm::vec3(1.0f);

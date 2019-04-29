@@ -12,6 +12,20 @@
 
 namespace VSEngine
 {
+
+namespace
+{
+glm::vec3 GetGLMFromAssimp(const aiColor3D &color)
+{
+  return glm::vec3(color.r, color.g, color.b);
+}
+
+glm::vec4 GetGLMFromAssimp(const aiColor4D &color)
+{
+  return glm::vec4(color.r, color.g, color.b, color.a);
+}
+}
+
 SceneObjectsCollection SceneObjectsMap;
 
 SceneObject::SceneObject(const std::string &path):
@@ -37,19 +51,6 @@ SceneObject::SceneObject(const std::string &path):
   for (unsigned int i = 0; i < meshesCount; ++i)
   {
     aiMesh *mesh = scene->mMeshes[i];
-
-    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-
-    unsigned int diffuseTexturesCount =
-        material->GetTextureCount(aiTextureType_DIFFUSE);
-
-    std::string texturePath;
-    aiString texPath;
-    if (diffuseTexturesCount > 0 &&
-        material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
-    {
-      texturePath = texPath.C_Str();
-    }
 
     std::vector<VSEngine::Vertex> vertices;
 
@@ -92,10 +93,59 @@ SceneObject::SceneObject(const std::string &path):
     std::shared_ptr<VSEngine::Mesh> resultingMesh(new VSEngine::Mesh(vertices, indices,
                                                                      true, hasTexture));
 
+    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+
+    unsigned int diffuseTexturesCount =
+        material->GetTextureCount(aiTextureType_DIFFUSE);
+
+    std::string diffuseTexturePath;
+    aiString texPath;
+    if (diffuseTexturesCount > 0 &&
+        material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
+    {
+      diffuseTexturePath = texPath.C_Str();
+    }
+
+    unsigned int specularTexturesCount = 
+        material->GetTextureCount(aiTextureType_SPECULAR);
+
+    std::string specularTexturePath;
+    if (specularTexturesCount > 0 &&
+        material->GetTexture(aiTextureType_SPECULAR, 0, &texPath) == AI_SUCCESS)
+    {
+      specularTexturePath = texPath.C_Str();
+    }
+
     std::size_t found = pathToFile.find_last_of("/\\");
     std::string fileFolder = pathToFile.substr(0, found);
 
-    resultingMesh->texturePath = fileFolder + "/" + texturePath;
+    VSEngine::Material vsMaterial;
+
+    if (!diffuseTexturePath.empty())
+    {
+      vsMaterial.SetDiffuseMapPath(fileFolder + "/" + diffuseTexturePath);
+    }
+
+    if (!specularTexturePath.empty())
+    {
+      vsMaterial.SetSpecularMapPath(fileFolder + "/" + specularTexturePath);
+    }
+
+    aiColor3D colorProperty;
+    material->Get(AI_MATKEY_COLOR_AMBIENT, colorProperty);
+    vsMaterial.SetAmbient(GetGLMFromAssimp(colorProperty));
+
+    material->Get(AI_MATKEY_COLOR_DIFFUSE, colorProperty);
+    vsMaterial.SetDiffuse(GetGLMFromAssimp(colorProperty));
+
+    material->Get(AI_MATKEY_COLOR_SPECULAR, colorProperty);
+    vsMaterial.SetSpecular(GetGLMFromAssimp(colorProperty));
+
+    float shininess;
+    material->Get(AI_MATKEY_SHININESS, shininess);
+    vsMaterial.SetShininess(shininess);
+
+    resultingMesh->SetMaterial(vsMaterial);
 
     meshes.push_back(resultingMesh);
   }
@@ -184,9 +234,12 @@ void SceneObject::Render(double time)
     shaderProgram->SetVec3("meshColor", color);
 
     const Material &meshMaterial = mesh->GetMaterial();
+    shaderProgram->SetInt("material.diffuseMap", 0);
+    shaderProgram->SetInt("material.specularMap", 1);
+
     shaderProgram->SetVec3("material.ambient", meshMaterial.GetAmbient());
     shaderProgram->SetVec3("material.diffuse", meshMaterial.GetDiffuse());
-    shaderProgram->SetVec3("material.pecular", meshMaterial.GetSpecular());
+    shaderProgram->SetVec3("material.specular", meshMaterial.GetSpecular());
     shaderProgram->SetFloat("material.shininess", meshMaterial.GetShininess());
 
     mesh->Render(time);
@@ -196,14 +249,6 @@ void SceneObject::Render(double time)
 void SceneObject::SetObjectColor(const glm::vec3 &col)
 {
   color = col;
-}
-
-void SceneObject::SetMeshesMaterial(const Material &mat)
-{
-  for (auto &mesh : meshes)
-  {
-    mesh->SetMaterial(mat);
-  }
 }
 
 }

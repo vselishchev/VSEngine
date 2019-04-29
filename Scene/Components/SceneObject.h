@@ -44,11 +44,9 @@ public:
   const std::string& GetFilePath() const { return pathToFile; }
 
   void SetObjectColor(const glm::vec3 &col);
-
-  void SetMeshesMaterial(const Material &mat);
 private:
   glm::mat4 transformation = glm::mat4(1.0f);
-  glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+  glm::vec3 color = glm::vec3(0.0f);
 
   VSUtils::ShaderProgram *shaderProgram = nullptr;
   std::string pathToFile;

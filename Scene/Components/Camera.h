@@ -11,7 +11,9 @@ enum class MoveDirection
   Left,
   Right,
   Forward,
-  Back
+  Back,
+  Up,
+  Down
 };
 
 class Camera

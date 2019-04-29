@@ -4,15 +4,9 @@
 
 namespace VSEngine
 {
-Material::Material(const glm::vec3 &amb, const glm::vec3 &diff,
-                   const glm::vec3 &spec, float shine): 
-    ambient(amb),
-    diffuse(diff),
-    specular(spec),
-    shininess(shine)
-{}
-
-Material::Material(const Material& mat): 
+Material::Material(const Material& mat):
+    diffuseMap(mat.diffuseMap),
+    specularMap(mat.specularMap),
     ambient(mat.ambient),
     diffuse(mat.diffuse),
     specular(mat.specular),
@@ -21,6 +15,8 @@ Material::Material(const Material& mat):
 }
 
 Material::Material(Material&& mat) :
+  diffuseMap(std::exchange(mat.diffuseMap, "")),
+  specularMap(std::exchange(mat.specularMap, "")),
   ambient(std::exchange(mat.ambient, glm::vec3(1.0f))),
   diffuse(std::exchange(mat.diffuse, glm::vec3(1.0f))),
   specular(std::exchange(mat.specular, glm::vec3(1.0f))),
@@ -30,6 +26,8 @@ Material::Material(Material&& mat) :
 
 const Material& Material::operator=(const Material &mat)
 {
+  diffuseMap = mat.diffuseMap;
+  specularMap = mat.specularMap;
   ambient = mat.ambient;
   diffuse = mat.diffuse;
   specular = mat.specular;
@@ -40,12 +38,33 @@ const Material& Material::operator=(const Material &mat)
 
 const Material& Material::operator=(Material &&mat)
 {
+  diffuseMap = std::exchange(mat.diffuseMap, "");
+  specularMap = std::exchange(mat.specularMap, "");
   ambient = std::exchange(mat.ambient, glm::vec3(1.0f));
   diffuse = std::exchange(mat.diffuse, glm::vec3(1.0f));
   specular = std::exchange(mat.specular, glm::vec3(1.0f));
   shininess = std::exchange(mat.shininess, 32.0f);
 
   return *this;
+}
+
+void Material::SetDiffuseMapPath(const std::string &diffMap)
+{
+  diffuseMap = diffMap;
+}
+const std::string& Material::GetDiffuseMapPath() const
+{
+  return diffuseMap;
+}
+
+void Material::SetSpecularMapPath(const std::string &specMap)
+{
+  specularMap = specMap;
+}
+
+const std::string& Material::GetSpecularMapPath() const
+{
+  return specularMap;
 }
 
 void Material::SetAmbient(const glm::vec3 &amb)

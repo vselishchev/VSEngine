@@ -13,6 +13,45 @@
 
 namespace VSEngine
 {
+namespace
+{
+GLuint LoadTexture(const std::string &path)
+{
+  int width = 0, height = 0, channelsCount = 0;
+  unsigned char *data =
+    stbi_load(path.c_str(), &width, &height, &channelsCount, 0);
+
+  GLuint texture = 0;
+
+  if (data)
+  {
+    glGenTextures(1, &texture);
+
+    GLenum format = GL_RGB;
+    if (channelsCount == 1)
+    {
+      format = GL_R;
+    } else if (channelsCount == 4)
+    {
+      format = GL_RGBA;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  }
+
+  stbi_image_free(data);
+
+  return texture;
+}
+}
+
 void BoundingBox::AddPoint(const glm::vec3 &point)
 {
   if (point.x < minPoint.x)
@@ -287,34 +326,25 @@ void Mesh::BindMesh()
 
   glBindVertexArray(0);
 
-  // Load texture
-  int width = 0, height = 0, channelsCount = 0;
-  unsigned char *data = 
-    stbi_load(texturePath.c_str(), &width, &height, &channelsCount, 0);
-
-  if (data)
-  {
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
-  }
+  // Load diffuse and specular textures
+  diffuseTexture = LoadTexture(material.GetDiffuseMapPath());
+  specularTexture = LoadTexture(material.GetSpecularMapPath());
 }
 
 void Mesh::Render(double time) const
 {
-  if (texture)
+  if (diffuseTexture)
   {
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, diffuseTexture);
   }
+
+  if (specularTexture)
+  {
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, specularTexture);
+  }
+
   glBindVertexArray(vao);
 
   glDrawElements(GL_TRIANGLES, IndicesCount() * 3, GL_UNSIGNED_SHORT, 0);

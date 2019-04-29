@@ -67,6 +67,14 @@ void Camera::MoveCamera(MoveDirection direction)
     position += frontDirection * cameraSpeed;
     Update();
     break;
+  case MoveDirection::Up:
+    position += upDirection * cameraSpeed;
+    Update();
+    break;
+  case MoveDirection::Down:
+    position -= upDirection * cameraSpeed;
+    Update();
+    break;
   default:
     break;
   }

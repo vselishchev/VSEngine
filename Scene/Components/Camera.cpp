@@ -115,6 +115,11 @@ const glm::vec3& Camera::GetViewPosition() const
   return position;
 }
 
+const glm::vec3& Camera::GetViewDirection() const
+{
+  return frontDirection;
+}
+
 void Camera::Update()
 {
   viewMatrix = glm::lookAt(position, position - frontDirection, upDirection);

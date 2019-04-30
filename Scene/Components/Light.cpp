@@ -80,12 +80,17 @@ void Light::SetPosition(const glm::vec3 &pos)
   positionMat = glm::translate(glm::mat4(1), position);
 }
 
+void Light::SetDirection(const glm::vec3 &dir)
+{
+  direction = dir;
+}
+
 void Light::SetAmbient(const glm::vec3 &amb)
 {
   ambient = amb;
 }
 
-const glm::vec3 &Light::GetAmbient() const
+const glm::vec3& Light::GetAmbient() const
 {
   return ambient;
 }
@@ -95,7 +100,7 @@ void Light::SetDiffuse(const glm::vec3 &diff)
   diffuse = diff;
 }
 
-const glm::vec3 &Light::GetDiffuse() const
+const glm::vec3& Light::GetDiffuse() const
 {
   return diffuse;
 }
@@ -105,8 +110,16 @@ void Light::SetSpecular(const glm::vec3 &spec)
   specular = spec;
 }
 
-const glm::vec3 &Light::GetSpecular() const
+const glm::vec3& Light::GetSpecular() const
 {
   return specular;
 }
+
+void Light::SetAttenuationParamenters(float c, float l, float q)
+{
+  attenuationParameters.constant = c;
+  attenuationParameters.linear = l;
+  attenuationParameters.quadratic = q;
+}
+
 }

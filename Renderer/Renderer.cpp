@@ -104,7 +104,7 @@ void Renderer::RenderFinish()
 
 void Renderer::Render(double time)
 {
-  static const GLfloat gray[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+  static const GLfloat gray[] = { 0.3f, 0.3f, 0.3f, 1.0f };
   static const GLfloat one = 1.0f;
   
   glViewport(0, 0, appInfo.windowWidth, appInfo.windowHeight);

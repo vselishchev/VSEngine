@@ -38,6 +38,7 @@ public:
   const glm::mat4& GetViewMatrix() const;
 
   const glm::vec3& GetViewPosition() const;
+  const glm::vec3& GetViewDirection() const;
 private:
   void Update();
 

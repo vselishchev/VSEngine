@@ -13,6 +13,8 @@ Scene::Scene()
 Scene::~Scene()
 {
   delete lightShader;
+
+  delete[] lights;
 }
 
 void Scene::LoadScene(VSUtils::ShaderProgram *shaderProg)
@@ -32,12 +34,33 @@ void Scene::LoadScene(VSUtils::ShaderProgram *shaderProg)
   lightShader->SetFragmentShader("Light.fs.glsl");
   lightShader->CompileProgram();
 
-  light.SetShaderProgram(lightShader);
-  light.SetPosition(glm::vec3(20.0f, 10.0f, 0.0f));
-  light.SetLightType(LightType::Point);
-  light.SetColor(glm::vec3(1.0f));
-  light.SetAmbient(glm::vec3(0.5f));
-  light.SetDiffuse(glm::vec3(0.5f));
+  // Create Lights
+  lightSourcesCount = 3;
+  lights = new Light[lightSourcesCount];
+
+  lights[0].SetShaderProgram(lightShader);
+  lights[0].SetPosition(glm::vec3(20.0f, 10.0f, 0.0f));
+  lights[0].SetLightType(LightType::Point);
+  lights[0].SetColor(glm::vec3(1.0f));
+  lights[0].SetAmbient(glm::vec3(0.05f));
+  lights[0].SetDiffuse(glm::vec3(0.5f));
+  lights[0].SetSpecular(glm::vec3(1.0f));
+
+  lights[1].SetShaderProgram(lightShader);
+  lights[1].SetPosition(glm::vec3(-20.0f, -10.0f, 0.0f));
+  lights[1].SetLightType(LightType::Point);
+  lights[1].SetColor(glm::vec3(0.0f, 1.0f, 0.0f));
+  lights[1].SetAmbient(glm::vec3(0.05f));
+  lights[1].SetDiffuse(glm::vec3(0.8f));
+  lights[1].SetSpecular(glm::vec3(1.0f));
+
+  lights[2].SetShaderProgram(lightShader);
+  lights[2].SetDirection(glm::vec3(-1.0f, -0.5f, -2.0f));
+  lights[2].SetLightType(LightType::Directional);
+  lights[2].SetColor(glm::vec3(1.0f));
+  lights[2].SetAmbient(glm::vec3(0.05f));
+  lights[2].SetDiffuse(glm::vec3(0.8f));
+  lights[2].SetSpecular(glm::vec3(0.5f));
 }
 
 void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
@@ -46,43 +69,68 @@ void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
   {
     shaderProgram->UseProgram();
 
-    // Set values for light
-    shaderProgram->SetVec3("light.ambient", light.GetColor() * light.GetAmbient());
-    shaderProgram->SetVec3("light.diffuse", light.GetColor() * light.GetDiffuse());
-    shaderProgram->SetVec3("light.specular", light.GetColor() * light.GetSpecular());
-
-    switch (light.GetLightType())
+    size_t pointLightIndex = 0;
+    // Set lights uniforms
+    for (size_t i = 0; i < lightSourcesCount; ++i)
     {
-    case LightType::Directional:
+      const Attenuation &attenuationParams = lights[i].GetAttenuationParamenters();
+
+      switch (lights[i].GetLightType())
       {
-        shaderProgram->SetInt("light.type", 1);
-        shaderProgram->SetVec3("light.direction", camera.GetViewMatrix() * glm::vec4(light.GetDirection(), 0.0f));
-        break;
+        case LightType::Directional:
+        {
+          shaderProgram->SetVec3("directionalLight.direction", 
+              camera.GetViewMatrix() * glm::vec4(lights[i].GetDirection(), 0.0f));
+
+          const glm::vec3 &lightColor = lights[i].GetColor();
+          shaderProgram->SetVec3("directionalLight.ambient", lightColor * lights[i].GetAmbient());
+          shaderProgram->SetVec3("directionalLight.diffuse", lightColor * lights[i].GetDiffuse());
+          shaderProgram->SetVec3("directionalLight.specular", lightColor * lights[i].GetSpecular());
+
+          break;
+        }
+        case LightType::Point:
+        {
+          std::string indexedPointLight = "pointLights[" + std::to_string(pointLightIndex++) + "]";
+
+          shaderProgram->SetVec3(indexedPointLight + ".position", 
+              camera.GetViewMatrix() * glm::vec4(lights[i].GetPosition(), 1.0f));
+
+          const glm::vec3 &lightColor = lights[i].GetColor();
+          shaderProgram->SetVec3(indexedPointLight + ".ambient", lightColor * lights[i].GetAmbient());
+          shaderProgram->SetVec3(indexedPointLight + ".diffuse", lightColor * lights[i].GetDiffuse());
+          shaderProgram->SetVec3(indexedPointLight + ".specular", lightColor * lights[i].GetSpecular());
+
+          shaderProgram->SetFloat(indexedPointLight + ".constant", attenuationParams.constant);
+          shaderProgram->SetFloat(indexedPointLight + ".linear", attenuationParams.linear);
+          shaderProgram->SetFloat(indexedPointLight + ".quadratic", attenuationParams.quadratic);
+          break;
+        }
+        case LightType::Spotlight:
+        {
+          // Set values for light
+          const glm::vec3 &lightColor = lights[i].GetColor();
+          shaderProgram->SetVec3("flashlight.ambient", lightColor * lights[i].GetAmbient());
+          shaderProgram->SetVec3("flashlight.diffuse", lightColor * lights[i].GetDiffuse());
+          shaderProgram->SetVec3("flashlight.specular", lightColor * lights[i].GetSpecular());
+
+          shaderProgram->SetVec3("flashlight.position", 
+              camera.GetViewMatrix() * glm::vec4(camera.GetViewPosition(), 1.0f));
+          shaderProgram->SetVec3("flashlight.direction",
+              camera.GetViewMatrix() * glm::vec4(-camera.GetViewDirection(), 0.0f));
+          shaderProgram->SetFloat("flashlight.cutOff", lights[i].GetCutOffValue());
+          shaderProgram->SetFloat("flashlight.outerCutOff", lights[i].GetOuterCutOffValue());
+
+          shaderProgram->SetFloat("flashlight.constant", attenuationParams.constant);
+          shaderProgram->SetFloat("flashlight.linear", attenuationParams.linear);
+          shaderProgram->SetFloat("flashlight.quadratic", attenuationParams.quadratic);
+
+          break;
+        }
+        default:
+          break;
       }
-    case LightType::Point:
-      {
-        shaderProgram->SetInt("light.type", 2);
-        shaderProgram->SetVec3("light.position", camera.GetViewMatrix() * glm::vec4(light.GetPosition(), 1.0f));
-        break;
-      }
-    case LightType::Spotlight:
-      {
-        shaderProgram->SetVec3("light.position", camera.GetViewMatrix() * glm::vec4(camera.GetViewPosition(), 1.0f));
-        shaderProgram->SetVec3("light.direction", camera.GetViewMatrix() * glm::vec4(-camera.GetViewDirection(), 0.0f));
-        shaderProgram->SetFloat("light.cutOff", light.GetCutOffValue());
-        shaderProgram->SetFloat("light.outerCutOff", light.GetOuterCutOffValue());
-        shaderProgram->SetInt("light.type", 3);
-        break;
-      }
-    default:
-      break;
     }
-
-    const Attenuation &attenuationParams = light.GetAttenuationParamenters();
-
-    shaderProgram->SetFloat("light.constant", attenuationParams.constant);
-    shaderProgram->SetFloat("light.linear", attenuationParams.linear);
-    shaderProgram->SetFloat("light.quadratic", attenuationParams.quadratic);
 
     // Matrices
     static double prevTime = 0;
@@ -100,11 +148,17 @@ void Scene::RenderScene(double time, const glm::mat4 &projMatrix)
   }
 
   // Render light source as box if needed
-  lightShader->UseProgram();
-  lightShader->SetMat4("viewMatrix", camera.GetViewMatrix());
-  lightShader->SetMat4("projMatrix", projMatrix);
+  for (size_t i = 0; i < lightSourcesCount; ++i)
+  {
+    lightShader->UseProgram();
+    lightShader->SetMat4("viewMatrix", camera.GetViewMatrix());
+    lightShader->SetMat4("projMatrix", projMatrix);
 
-  light.RenderRepresentation(time);
+    if (lights[i].GetLightType() == LightType::Point)
+    {
+      lights[i].RenderRepresentation(time);
+    }
+  }
 }
 
 void Scene::AddSceneObject(SceneObject *object)

@@ -38,7 +38,9 @@ private:
                          glm::vec3(0.0f, -1.0f, 0.0f),
                          glm::vec3(0.0f, 1.0f, 0.0f));
 
-  Light light;
+  // Light sources
+  size_t lightSourcesCount = 0;
+  Light *lights;
 
   std::vector<SceneObject*> sceneObjects;
 

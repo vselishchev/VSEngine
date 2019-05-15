@@ -7,25 +7,44 @@
 #include <vector>
 #include <limits>
 
+namespace VSUtils
+{
+class ShaderProgram;
+}
+
 namespace VSEngine
 {
+enum class TextureType: char
+{
+  Diffuse,
+  Specular
+};
+
+struct Texture
+{
+  Texture(unsigned int id_, TextureType t) : id(id_), type(t) {}
+
+  unsigned int id;
+  TextureType type;
+};
+
 struct Triple
 {
   Triple() : x(-1), y(-1), z(-1) {}
 
-  inline int& operator[](int &index)
+  inline short& operator[](short &index)
   {
     return xyz[index];
   }
 
   union
   {
-    int xyz[3];
+    short xyz[3];
     struct
     {
-      int x;
-      int y;
-      int z;
+      short x;
+      short y;
+      short z;
     };
   };
 };
@@ -74,13 +93,12 @@ public:
       objectName(m.objectName),
       hasNormals(std::exchange(m.hasNormals, false)),
       hasTextureCoordinates(std::exchange(m.hasTextureCoordinates, false)),
-      vertices(std::move(m.vertices)),
-      faces(std::move(m.faces)),
       vao(std::exchange(m.vao, 0)),
       vbo(std::exchange(m.vbo, 0)),
       ebo(std::exchange(m.ebo, 0)),
-      diffuseTexture(std::exchange(m.diffuseTexture, 0)),
-      specularTexture(std::exchange(m.specularTexture, 0))
+      textures(std::move(m.textures)),
+      vertices(std::move(m.vertices)),
+      faces(std::move(m.faces))
   {
   }
 
@@ -88,16 +106,15 @@ public:
 
   Mesh& operator=(Mesh &&m)
   {
-    vertices = std::move(m.vertices);
-    faces = std::move(m.faces);
+    objectName = std::exchange(m.objectName, "");
     hasNormals = std::exchange(m.hasNormals, false);
     hasTextureCoordinates = std::exchange(m.hasTextureCoordinates, false);
-    objectName = std::exchange(m.objectName, "");
     vao = std::exchange(vao, 0);
     vbo = std::exchange(vbo, 0);
     ebo = std::exchange(ebo, 0);
-    diffuseTexture = std::exchange(m.diffuseTexture, 0);
-    specularTexture = std::exchange(m.specularTexture, 0);
+    textures = std::move(m.textures);
+    vertices = std::move(m.vertices);
+    faces = std::move(m.faces);
 
     return *this;
   }
@@ -107,11 +124,10 @@ public:
   unsigned short VerticesCount() const { return static_cast<unsigned short>(vertices.size()); }
   unsigned short IndicesCount() const { return static_cast<unsigned short>(faces.size()); }
 
-  unsigned short* GetSingleArrayIndices() const;
-
-  float* GetSingleArrayVertices() const;
-  float* GetSingleArrayVerticesAndNormals() const;
-  float* GetSingleArrayVerticesAndNormalsAndTextures() const;
+  const std::vector<Vertex>& GetVertices() const
+  {
+    return vertices;
+  }
 
   bool HasNormals() const
   {
@@ -135,7 +151,7 @@ public:
 
   void BindMesh();
 
-  void Render(double time) const;
+  void Render(VSUtils::ShaderProgram *shaderProgram) const;
 
 // TODO: Implement own object loader
 /*private:
@@ -158,8 +174,7 @@ private:
   unsigned int vbo = 0;
   unsigned int ebo = 0;
 
-  unsigned int diffuseTexture = 0;
-  unsigned int specularTexture = 0;
+  std::vector<Texture> textures;
 
   std::vector<Vertex> vertices;
   std::vector<Triple> faces;

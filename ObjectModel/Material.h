@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include <string>
+#include <vector>
 
 namespace VSEngine
 {
@@ -17,26 +18,9 @@ public:
   const Material& operator=(const Material &mat);
   const Material& operator=(Material &&mat);
 
-  void SetAmbient(const glm::vec3 &amb);
-  const glm::vec3& GetAmbient() const;
-
-  void SetDiffuse(const glm::vec3 &diff);
-  const glm::vec3& GetDiffuse() const;
-
-  void SetSpecular(const glm::vec3 &spec);
-  const glm::vec3& GetSpecular() const;
-
-  void SetShininess(float shine);
-  float GetShininess() const;
-
-  void SetDiffuseMapPath(const std::string &diffMap);
-  const std::string& GetDiffuseMapPath() const;
-
-  void SetSpecularMapPath(const std::string &specMap);
-  const std::string& GetSpecularMapPath() const;
-private:
-  std::string diffuseMap;
-  std::string specularMap;
+public:
+  std::vector<std::string> diffuseMaps;
+  std::vector<std::string> specularMaps;
 
   glm::vec3 ambient = glm::vec3(1.0f);
   glm::vec3 diffuse = glm::vec3(1.0f);

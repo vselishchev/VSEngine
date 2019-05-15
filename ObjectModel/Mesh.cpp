@@ -1,6 +1,7 @@
 #include "Mesh.h"
 
 #include "Utils/CommonUtils.h"
+#include "Utils/ShaderProgram.h"
 
 #include <fstream>
 #include <stdlib.h>
@@ -181,91 +182,6 @@ Mesh Mesh::Copy() const
   return Mesh(vertices_, faces_);
 }
 
-float* Mesh::GetSingleArrayVertices() const
-{
-  float *result = new float[vertices.size() * 3];
-
-  int i = 0;
-  for (auto &vertex: vertices)
-  {
-    const glm::vec4 &point = vertex.point;
-    result[i * 3] = point[0];
-    result[i * 3 + 1] = point[1];
-    result[i * 3 + 2] = point[2];
-
-    ++i;
-  }
-
-  return result;
-}
-
-unsigned short* Mesh::GetSingleArrayIndices() const
-{
-  unsigned short *result = new unsigned short[faces.size() * 3];
-
-  unsigned int i = 0;
-  for (const Triple &face: faces)
-  {
-    result[i * 3] = static_cast<unsigned short>(face.x);
-    result[i * 3 + 1] = static_cast<unsigned short>(face.y);
-    result[i * 3 + 2] = static_cast<unsigned short>(face.z);
-
-    ++i;
-  }
-
-  return result;
-}
-
-float* Mesh::GetSingleArrayVerticesAndNormals() const
-{
-  float *result = new float[vertices.size() * 6];
-
-  int i = 0;
-  for (auto &vertex : vertices)
-  {
-    const glm::vec4 &point = vertex.point;
-    const glm::vec4 &normal = vertex.normal;
-
-    result[i * 6] = point[0];
-    result[i * 6 + 1] = point[1];
-    result[i * 6 + 2] = point[2];
-    result[i * 6 + 3] = normal[0];
-    result[i * 6 + 4] = normal[1];
-    result[i * 6 + 5] = normal[2];
-
-    ++i;
-  }
-
-  return result;
-}
-
-float* Mesh::GetSingleArrayVerticesAndNormalsAndTextures() const
-{
-  float *result = new float[vertices.size() * 8];
-
-  int i = 0;
-  for (auto &vertex : vertices)
-  {
-    const glm::vec4 &point = vertex.point;
-    result[i * 8] = point.x;
-    result[i * 8 + 1] = point.y;
-    result[i * 8 + 2] = point.z;
-
-    const glm::vec4 &normal = vertex.normal;
-    result[i * 8 + 3] = normal.x;
-    result[i * 8 + 4] = normal.y;
-    result[i * 8 + 5] = normal.z;
-
-    const glm::vec3 &textureCoord = vertex.textureCoord;
-    result[i * 8 + 6] = textureCoord.x;
-    result[i * 8 + 7] = textureCoord.y;
-
-    ++i;
-  }
-
-  return result;
-}
-
 void Mesh::BindMesh()
 {
   glGenVertexArrays(1, &vao);
@@ -274,75 +190,78 @@ void Mesh::BindMesh()
 
   glBindVertexArray(vao);
 
-  float *verticesData = nullptr;
-
-  int perVertexElems = 3;
-
-  if (hasTextureCoordinates)
-  {
-    verticesData = GetSingleArrayVerticesAndNormalsAndTextures();
-    perVertexElems = 8;
-  }
-  else if (hasNormals)
-  {
-    verticesData = GetSingleArrayVerticesAndNormals();
-    perVertexElems = 6;
-  }
-  else
-  {
-    verticesData = GetSingleArrayVertices();
-  }
+  GLsizei sizeofVertex = sizeof(Vertex);
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * VerticesCount() * perVertexElems,
-               verticesData, GL_STATIC_DRAW);
-  delete[] verticesData;
+  glBufferData(GL_ARRAY_BUFFER, sizeofVertex * vertices.size(),
+               vertices.data(), GL_STATIC_DRAW);
 
-  const unsigned short *indices = GetSingleArrayIndices();
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * IndicesCount() * 3,
-               indices, GL_STATIC_DRAW);
-  delete[] indices;
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Triple) * faces.size(),
+               faces.data(), GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
-                        perVertexElems * sizeof(float), nullptr);
   glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
+                        sizeofVertex, nullptr);
 
   if (hasNormals)
   {
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                          perVertexElems * sizeof(float),
-                          (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                          sizeofVertex, (void*)(offsetof(Vertex, normal)));
   }
 
   if (hasTextureCoordinates)
   {
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 
-                          perVertexElems * sizeof(float), 
-                          (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 
+                          sizeofVertex, (void*)(offsetof(Vertex, textureCoord)));
   }
 
   glBindVertexArray(0);
 
   // Load diffuse and specular textures
-  diffuseTexture = LoadTexture(material.GetDiffuseMapPath());
-  specularTexture = LoadTexture(material.GetSpecularMapPath());
-}
-
-void Mesh::Render(double time) const
-{
-  if (diffuseTexture)
+  for (size_t i = 0; i < material.diffuseMaps.size(); ++i)
   {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseTexture);
+    Texture tex(LoadTexture(material.diffuseMaps[i]), TextureType::Diffuse);
+    if (tex.id != 0)
+    {
+      textures.push_back(tex);
+    }
   }
 
-  if (specularTexture)
+  for (size_t i = 0; i < material.specularMaps.size(); ++i)
   {
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, specularTexture);
+    Texture tex(LoadTexture(material.specularMaps[i]), TextureType::Specular);
+    if (tex.id != 0)
+    {
+      textures.push_back(tex);
+    }
+  }
+}
+
+void Mesh::Render(VSUtils::ShaderProgram *shaderProgram) const
+{
+  unsigned int diffuseCounter = 0;
+  unsigned int specularCounter = 0;
+
+  for (size_t i = 0; i < textures.size(); ++i)
+  {
+    glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(i));
+    
+    std::string uniformName;
+    if (textures[i].type == TextureType::Diffuse)
+    {
+      uniformName = "material.diffuseMap" + std::to_string(++diffuseCounter);
+    }
+    else if (textures[i].type == TextureType::Specular)
+    {
+      uniformName = "material.specularMap" + std::to_string(++specularCounter);
+    }
+
+    shaderProgram->SetInt(uniformName, static_cast<int>(i));
+
+    glBindTexture(GL_TEXTURE_2D, textures[i].id);
   }
 
   glBindVertexArray(vao);

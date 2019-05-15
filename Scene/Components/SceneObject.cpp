@@ -1,14 +1,13 @@
 #include "SceneObject.h"
 
 #include <GL/glew.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Utils/ShaderProgram.h"
+
+#include <thread>
 
 namespace VSEngine
 {
@@ -35,122 +34,11 @@ SceneObject::SceneObject(const std::string &path):
   if (object)
   {
     meshes = object->meshes;
-    return;
   }
-
-  // TODO: Replace Assimp with own object loader
-  Assimp::Importer importer;
-
-  const aiScene *scene(importer.ReadFile(path,
-                                         aiProcess_GenNormals |
-                                         aiProcess_JoinIdenticalVertices |
-                                         aiProcess_Triangulate));
-
-  unsigned int meshesCount = scene->mNumMeshes;
-
-  for (unsigned int i = 0; i < meshesCount; ++i)
+  else
   {
-    aiMesh *mesh = scene->mMeshes[i];
-
-    std::vector<VSEngine::Vertex> vertices;
-
-    bool hasTexture = false;
-
-    for (unsigned int j = 0; j < mesh->mNumVertices; ++j)
-    {
-      VSEngine::Vertex vertex;
-      aiVector3D point = mesh->mVertices[j];
-      vertex.point = glm::vec4(point.x, point.y, point.z, 1.0f);
-
-      aiVector3D normal = mesh->mNormals[j];
-      vertex.normal = glm::vec4(normal.x, normal.y, normal.z, 0.0f);
-
-      if (mesh->HasTextureCoords(0))
-      {
-        hasTexture = true;
-        aiVector3D textureCoord = mesh->mTextureCoords[0][j];
-        vertex.textureCoord = glm::vec3(textureCoord.x, 
-                                        textureCoord.y, 
-                                        textureCoord.z);
-      }
-
-      vertices.push_back(std::move(vertex));
-    }
-
-    std::vector<VSEngine::Triple> indices;
-
-    for (unsigned int j = 0; j < mesh->mNumFaces; ++j)
-    {
-      VSEngine::Triple triIndex;
-      aiFace face = mesh->mFaces[j];
-      triIndex.x = face.mIndices[0];
-      triIndex.y = face.mIndices[1];
-      triIndex.z = face.mIndices[2];
-
-      indices.push_back(triIndex);
-    }
-
-    std::shared_ptr<VSEngine::Mesh> resultingMesh(new VSEngine::Mesh(vertices, indices,
-                                                                     true, hasTexture));
-
-    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-
-    unsigned int diffuseTexturesCount =
-        material->GetTextureCount(aiTextureType_DIFFUSE);
-
-    std::string diffuseTexturePath;
-    aiString texPath;
-    if (diffuseTexturesCount > 0 &&
-        material->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == AI_SUCCESS)
-    {
-      diffuseTexturePath = texPath.C_Str();
-    }
-
-    unsigned int specularTexturesCount = 
-        material->GetTextureCount(aiTextureType_SPECULAR);
-
-    std::string specularTexturePath;
-    if (specularTexturesCount > 0 &&
-        material->GetTexture(aiTextureType_SPECULAR, 0, &texPath) == AI_SUCCESS)
-    {
-      specularTexturePath = texPath.C_Str();
-    }
-
-    std::size_t found = pathToFile.find_last_of("/\\");
-    std::string fileFolder = pathToFile.substr(0, found);
-
-    VSEngine::Material vsMaterial;
-
-    if (!diffuseTexturePath.empty())
-    {
-      vsMaterial.SetDiffuseMapPath(fileFolder + "/" + diffuseTexturePath);
-    }
-
-    if (!specularTexturePath.empty())
-    {
-      vsMaterial.SetSpecularMapPath(fileFolder + "/" + specularTexturePath);
-    }
-
-    aiColor3D colorProperty;
-    material->Get(AI_MATKEY_COLOR_AMBIENT, colorProperty);
-    vsMaterial.SetAmbient(GetGLMFromAssimp(colorProperty));
-
-    material->Get(AI_MATKEY_COLOR_DIFFUSE, colorProperty);
-    vsMaterial.SetDiffuse(GetGLMFromAssimp(colorProperty));
-
-    material->Get(AI_MATKEY_COLOR_SPECULAR, colorProperty);
-    vsMaterial.SetSpecular(GetGLMFromAssimp(colorProperty));
-
-    float shininess;
-    material->Get(AI_MATKEY_SHININESS, shininess);
-    vsMaterial.SetShininess(shininess);
-
-    resultingMesh->SetMaterial(vsMaterial);
-
-    meshes.push_back(resultingMesh);
+    ImportModel();
   }
-
-  VSEngine::SceneObjectsMap.AddSceneObject(this);
 }
 
 SceneObject::SceneObject(std::shared_ptr<VSEngine::Mesh> m)
@@ -237,18 +125,168 @@ void SceneObject::Render(double time)
     shaderProgram->SetInt("material.diffuseMap", 0);
     shaderProgram->SetInt("material.specularMap", 1);
 
-    shaderProgram->SetVec3("material.ambient", meshMaterial.GetAmbient());
-    shaderProgram->SetVec3("material.diffuse", meshMaterial.GetDiffuse());
-    shaderProgram->SetVec3("material.specular", meshMaterial.GetSpecular());
-    shaderProgram->SetFloat("material.shininess", meshMaterial.GetShininess());
+    shaderProgram->SetVec3("material.ambient", meshMaterial.ambient);
+    shaderProgram->SetVec3("material.diffuse", meshMaterial.diffuse);
+    shaderProgram->SetVec3("material.specular", meshMaterial.specular);
+    shaderProgram->SetFloat("material.shininess", meshMaterial.shininess);
 
-    mesh->Render(time);
+    mesh->Render(shaderProgram);
   }
 }
 
 void SceneObject::SetObjectColor(const glm::vec3 &col)
 {
   color = col;
+}
+
+void SceneObject::ImportModel()
+{
+  // TODO: Replace Assimp with own object loader
+  Assimp::Importer importer;
+
+  const aiScene *scene(importer.ReadFile(pathToFile,
+                                         aiProcess_GenNormals |
+                                         aiProcess_JoinIdenticalVertices |
+                                         aiProcess_Triangulate |
+                                         aiProcess_FlipUVs));
+
+  if (!scene)
+  {
+    return;
+  }
+
+  ProcessNode(scene->mRootNode, scene);
+
+  VSEngine::SceneObjectsMap.AddSceneObject(this);
+}
+
+void SceneObject::ProcessNode(aiNode *node, const aiScene *scene)
+{
+  unsigned int meshesCount = node->mNumMeshes;
+
+  for (unsigned int i = 0; i < meshesCount; ++i)
+  {
+    ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene);
+  }
+
+  for (unsigned int i = 0; i < node->mNumChildren; ++i)
+  {
+    ProcessNode(node->mChildren[i], scene);
+  }
+}
+
+void SceneObject::ProcessMesh(aiMesh *mesh, const aiScene *scene)
+{
+  std::vector<VSEngine::Vertex> vertices;
+  char hasTexture = false;
+
+  auto verticesParse = [](aiMesh *mesh, 
+                          std::vector<VSEngine::Vertex> *vertices,
+                          char *hasTexture)
+  { 
+    for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
+    {
+      VSEngine::Vertex vertex;
+      aiVector3D point = mesh->mVertices[i];
+      vertex.point = glm::vec3(point.x, point.y, point.z);
+
+      aiVector3D normal = mesh->mNormals[i];
+      vertex.normal = glm::vec3(normal.x, normal.y, normal.z);
+
+      if (mesh->HasTextureCoords(0))
+      {
+        *hasTexture = true;
+        aiVector3D textureCoord = mesh->mTextureCoords[0][i];
+        vertex.textureCoord = glm::vec2(textureCoord.x,
+                                        textureCoord.y);
+      }
+
+      vertices->push_back(std::move(vertex));
+    }
+  };
+
+  std::thread verticesThread(verticesParse, mesh, &vertices, &hasTexture);
+
+  std::vector<VSEngine::Triple> indices;
+
+  auto indicesParse = [](aiMesh *mesh, std::vector<VSEngine::Triple> *indices)
+  {
+    for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
+    {
+      VSEngine::Triple triIndex;
+      aiFace face = mesh->mFaces[i];
+      triIndex.x = face.mIndices[0];
+      triIndex.y = face.mIndices[1];
+      triIndex.z = face.mIndices[2];
+
+      indices->push_back(triIndex);
+    }
+  };
+  
+  std::thread indicesThread(indicesParse, mesh, &indices);
+
+  verticesThread.join();
+  indicesThread.join();
+
+  std::shared_ptr<VSEngine::Mesh> resultingMesh(new VSEngine::Mesh(vertices, indices,
+                                                                   true, hasTexture));
+
+  aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+
+  resultingMesh->SetMaterial(ProcessMaterial(material));
+
+  meshes.push_back(resultingMesh);
+}
+
+Material SceneObject::ProcessMaterial(aiMaterial *mat)
+{
+
+  std::size_t found = pathToFile.find_last_of("/\\");
+  std::string fileFolder = pathToFile.substr(0, found);
+
+  VSEngine::Material vsMaterial;
+
+  unsigned int diffuseTexturesCount =
+    mat->GetTextureCount(aiTextureType_DIFFUSE);
+
+  aiString texPath;
+  for (unsigned int j = 0; j < diffuseTexturesCount; ++j)
+  {
+    if (mat->GetTexture(aiTextureType_DIFFUSE, j, &texPath) == AI_SUCCESS)
+    {
+      std::string diffuseTexturePath = texPath.C_Str();
+      vsMaterial.diffuseMaps.push_back(fileFolder + "/" + diffuseTexturePath);
+    }
+  }
+
+  unsigned int specularTexturesCount =
+    mat->GetTextureCount(aiTextureType_SPECULAR);
+
+  for (unsigned int j = 0; j < specularTexturesCount; ++j)
+  {
+    if (mat->GetTexture(aiTextureType_SPECULAR, j, &texPath) == AI_SUCCESS)
+    {
+      std::string specularTexturePath = texPath.C_Str();
+
+      vsMaterial.specularMaps.push_back(fileFolder + "/" + specularTexturePath);
+    }
+  }
+
+  aiColor3D colorProperty;
+  mat->Get(AI_MATKEY_COLOR_AMBIENT, colorProperty);
+  vsMaterial.ambient = GetGLMFromAssimp(colorProperty);
+
+  mat->Get(AI_MATKEY_COLOR_DIFFUSE, colorProperty);
+  vsMaterial.diffuse = GetGLMFromAssimp(colorProperty);
+
+  mat->Get(AI_MATKEY_COLOR_SPECULAR, colorProperty);
+  vsMaterial.specular = GetGLMFromAssimp(colorProperty);
+
+  float shininess;
+  mat->Get(AI_MATKEY_SHININESS, shininess);
+  vsMaterial.shininess = shininess;
+
+  return std::move(vsMaterial);
 }
 
 }

@@ -10,9 +10,9 @@ class Vertex
 public:
   Vertex() = default;
 
-  Vertex(const glm::vec4 &point_,
-         const glm::vec4 &normal_,
-         const glm::vec3 &textureCoord_);
+  Vertex(const glm::vec3 &point_,
+         const glm::vec3 &normal_,
+         const glm::vec2 &textureCoord_);
 
   inline Vertex(const Vertex &vertex) :
     point(vertex.point),
@@ -30,11 +30,12 @@ public:
   bool operator==(const Vertex &rhs) const;
 
   const Vertex& operator=(const Vertex &rhs);
+  const Vertex& operator=(Vertex &&rhs);
 
 public:
-  glm::vec4 point;
-  glm::vec4 normal;
-  glm::vec3 textureCoord;
+  glm::vec3 point;
+  glm::vec3 normal;
+  glm::vec2 textureCoord;
 };
 
 }

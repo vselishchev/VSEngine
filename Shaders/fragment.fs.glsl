@@ -53,8 +53,12 @@ struct Spotlight
 
 struct Material
 {
-	sampler2D diffuseMap;
-	sampler2D specularMap;
+	sampler2D diffuseMap1;
+	sampler2D diffuseMap2;
+	sampler2D diffuseMap3;
+	sampler2D specularMap1;
+	sampler2D specularMap2;
+	sampler2D specularMap3;
 
 	vec3 ambient;
 	vec3 diffuse;
@@ -80,8 +84,8 @@ void main()
 {
 	vec3 viewDir = -normalize(fsIn.fragmentPosition);
 	vec3 normal = normalize(fsIn.normal);
-	vec3 diffuseTex = texture(material.diffuseMap, fsIn.textureCoord).rgb;
-	vec3 specularTex = texture(material.specularMap, fsIn.textureCoord).rgb;
+	vec3 diffuseTex = texture(material.diffuseMap1, fsIn.textureCoord).rgb;
+	vec3 specularTex = texture(material.specularMap1, fsIn.textureCoord).rgb;
 
 	vec3 outputColor = CalculateDirectionalLight(directionalLight, normal, viewDir, 
 											 	 diffuseTex, specularTex);

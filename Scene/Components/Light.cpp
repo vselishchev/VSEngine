@@ -66,7 +66,7 @@ void Light::RenderRepresentation(double time)
   shaderProgram->SetMat4("modelMatrix", positionMat);
   shaderProgram->SetVec3("lightColor", color);
 
-  boxMesh.Render(time);
+  boxMesh.Render(shaderProgram);
 }
 
 void Light::SetColor(const glm::vec3 &col)

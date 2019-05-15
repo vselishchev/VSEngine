@@ -3,8 +3,11 @@
 
 #include "ObjectModel/Mesh.h"
 
-#include <memory>
 #include "SceneObjectCollection.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace VSUtils
 {
@@ -44,6 +47,13 @@ public:
   const std::string& GetFilePath() const { return pathToFile; }
 
   void SetObjectColor(const glm::vec3 &col);
+
+private:
+  void ImportModel();
+  void ProcessNode(aiNode *node, const aiScene *scene);
+  void ProcessMesh(aiMesh *mesh, const aiScene *scene);
+  Material ProcessMaterial(aiMaterial *mat);
+
 private:
   glm::mat4 transformation = glm::mat4(1.0f);
   glm::vec3 color = glm::vec3(0.0f);
@@ -51,6 +61,7 @@ private:
   VSUtils::ShaderProgram *shaderProgram = nullptr;
   std::string pathToFile;
 
+  std::vector<Texture> textures;
   std::vector<std::shared_ptr<VSEngine::Mesh>> meshes;
 };
 

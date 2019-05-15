@@ -12,10 +12,10 @@ VSEngine::Renderer renderer(600, 800, "VS Engine");
 
 int main()
 {
-  std::string filePath1 = "D:/Work/Models/teapot/teapot.obj";
+  std::string filePath1 = "D:/Work/Models/nanosuit/nanosuit.obj";
 
   VSEngine::SceneObject *obj = new VSEngine::SceneObject(filePath1);
-  obj->Scale(0.5f);
+  obj->Scale(2.0f);
   obj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
   obj->Translate(60.0f, 0.0f, 30.0f);
 

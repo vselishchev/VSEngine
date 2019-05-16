@@ -35,7 +35,7 @@ void Scene::LoadScene(VSUtils::ShaderProgram *shaderProg)
   lightShader->CompileProgram();
 
   // Create Lights
-  lightSourcesCount = 3;
+  lightSourcesCount = 2;
   lights = new Light[lightSourcesCount];
 
   lights[0].SetShaderProgram(lightShader);
@@ -46,21 +46,21 @@ void Scene::LoadScene(VSUtils::ShaderProgram *shaderProg)
   lights[0].SetDiffuse(glm::vec3(0.5f));
   lights[0].SetSpecular(glm::vec3(1.0f));
 
-  lights[1].SetShaderProgram(lightShader);
+  /*lights[1].SetShaderProgram(lightShader);
   lights[1].SetPosition(glm::vec3(-20.0f, -10.0f, 0.0f));
   lights[1].SetLightType(LightType::Point);
   lights[1].SetColor(glm::vec3(0.0f, 1.0f, 0.0f));
   lights[1].SetAmbient(glm::vec3(0.05f));
   lights[1].SetDiffuse(glm::vec3(0.8f));
-  lights[1].SetSpecular(glm::vec3(1.0f));
+  lights[1].SetSpecular(glm::vec3(1.0f));*/
 
-  lights[2].SetShaderProgram(lightShader);
-  lights[2].SetDirection(glm::vec3(-1.0f, -0.5f, -2.0f));
-  lights[2].SetLightType(LightType::Directional);
-  lights[2].SetColor(glm::vec3(1.0f));
-  lights[2].SetAmbient(glm::vec3(0.05f));
-  lights[2].SetDiffuse(glm::vec3(0.8f));
-  lights[2].SetSpecular(glm::vec3(0.5f));
+  lights[1].SetShaderProgram(lightShader);
+  lights[1].SetDirection(glm::vec3(-1.0f, -0.5f, -2.0f));
+  lights[1].SetLightType(LightType::Directional);
+  lights[1].SetColor(glm::vec3(1.0f));
+  lights[1].SetAmbient(glm::vec3(0.05f));
+  lights[1].SetDiffuse(glm::vec3(0.8f));
+  lights[1].SetSpecular(glm::vec3(0.5f));
 }
 
 void Scene::RenderScene(double time, const glm::mat4 &projMatrix)

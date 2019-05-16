@@ -22,10 +22,13 @@ enum class TextureType: char
 
 struct Texture
 {
-  Texture(unsigned int id_, TextureType t) : id(id_), type(t) {}
+  Texture(unsigned int id_, TextureType t, const std::string &pathToTexture) : 
+      id(id_), type(t), path(pathToTexture) {}
 
-  unsigned int id;
+  unsigned int id = 0;
   TextureType type;
+
+  std::string path;
 };
 
 struct Triple
@@ -166,6 +169,8 @@ public:
   BoundingBox bBox;
   std::string objectName;
 
+  std::vector<Texture> textures;
+
 private:
   bool hasNormals = false;
   bool hasTextureCoordinates = false;
@@ -173,8 +178,6 @@ private:
   unsigned int vao = 0;
   unsigned int vbo = 0;
   unsigned int ebo = 0;
-
-  std::vector<Texture> textures;
 
   std::vector<Vertex> vertices;
   std::vector<Triple> faces;

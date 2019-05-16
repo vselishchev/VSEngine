@@ -9,6 +9,9 @@
 
 #include <thread>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "Utils/stb_image.h"
+
 namespace VSEngine
 {
 
@@ -23,6 +26,44 @@ glm::vec4 GetGLMFromAssimp(const aiColor4D &color)
 {
   return glm::vec4(color.r, color.g, color.b, color.a);
 }
+
+GLuint LoadTexture(const std::string &path)
+{
+  int width = 0, height = 0, channelsCount = 0;
+  unsigned char *data =
+      stbi_load(path.c_str(), &width, &height, &channelsCount, 0);
+
+  GLuint texture = 0;
+
+  if (data)
+  {
+    glGenTextures(1, &texture);
+
+    GLenum format = GL_RGB;
+    if (channelsCount == 1)
+    {
+      format = GL_R;
+    }
+    else if (channelsCount == 4)
+    {
+      format = GL_RGBA;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  }
+
+  stbi_image_free(data);
+
+  return texture;
+}
+
 }
 
 SceneObjectsCollection SceneObjectsMap;
@@ -233,12 +274,12 @@ void SceneObject::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 
   aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-  resultingMesh->SetMaterial(ProcessMaterial(material));
+  resultingMesh->SetMaterial(ProcessMaterial(material, resultingMesh.get()));
 
   meshes.push_back(resultingMesh);
 }
 
-Material SceneObject::ProcessMaterial(aiMaterial *mat)
+Material SceneObject::ProcessMaterial(aiMaterial *mat, VSEngine::Mesh *mesh)
 {
 
   std::size_t found = pathToFile.find_last_of("/\\");
@@ -255,7 +296,8 @@ Material SceneObject::ProcessMaterial(aiMaterial *mat)
     if (mat->GetTexture(aiTextureType_DIFFUSE, j, &texPath) == AI_SUCCESS)
     {
       std::string diffuseTexturePath = texPath.C_Str();
-      vsMaterial.diffuseMaps.push_back(fileFolder + "/" + diffuseTexturePath);
+      mesh->textures.push_back(GetTexture(fileFolder + "/" + diffuseTexturePath,
+                                          TextureType::Diffuse));
     }
   }
 
@@ -267,8 +309,8 @@ Material SceneObject::ProcessMaterial(aiMaterial *mat)
     if (mat->GetTexture(aiTextureType_SPECULAR, j, &texPath) == AI_SUCCESS)
     {
       std::string specularTexturePath = texPath.C_Str();
-
-      vsMaterial.specularMaps.push_back(fileFolder + "/" + specularTexturePath);
+      mesh->textures.push_back(GetTexture(fileFolder + "/" + specularTexturePath,
+                                          TextureType::Specular));
     }
   }
 
@@ -287,6 +329,22 @@ Material SceneObject::ProcessMaterial(aiMaterial *mat)
   vsMaterial.shininess = shininess;
 
   return std::move(vsMaterial);
+}
+
+Texture SceneObject::GetTexture(const std::string &path, TextureType type)
+{
+  auto texture = texturesMap.find(path);
+
+  if (texture != texturesMap.end())
+  {
+    return texture->second;
+  }
+
+  Texture newTexture(LoadTexture(path), type, path);
+
+  texturesMap.try_emplace(path, newTexture);
+
+  return newTexture;
 }
 
 }

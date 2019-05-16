@@ -7,52 +7,10 @@
 #include <stdlib.h>
 #include <algorithm>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "Utils/stb_image.h"
-
 #include <GL/glew.h>
 
 namespace VSEngine
 {
-namespace
-{
-GLuint LoadTexture(const std::string &path)
-{
-  int width = 0, height = 0, channelsCount = 0;
-  unsigned char *data =
-    stbi_load(path.c_str(), &width, &height, &channelsCount, 0);
-
-  GLuint texture = 0;
-
-  if (data)
-  {
-    glGenTextures(1, &texture);
-
-    GLenum format = GL_RGB;
-    if (channelsCount == 1)
-    {
-      format = GL_R;
-    } else if (channelsCount == 4)
-    {
-      format = GL_RGBA;
-    }
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  }
-
-  stbi_image_free(data);
-
-  return texture;
-}
-}
-
 void BoundingBox::AddPoint(const glm::vec3 &point)
 {
   if (point.x < minPoint.x)
@@ -219,25 +177,6 @@ void Mesh::BindMesh()
   }
 
   glBindVertexArray(0);
-
-  // Load diffuse and specular textures
-  for (size_t i = 0; i < material.diffuseMaps.size(); ++i)
-  {
-    Texture tex(LoadTexture(material.diffuseMaps[i]), TextureType::Diffuse);
-    if (tex.id != 0)
-    {
-      textures.push_back(tex);
-    }
-  }
-
-  for (size_t i = 0; i < material.specularMaps.size(); ++i)
-  {
-    Texture tex(LoadTexture(material.specularMaps[i]), TextureType::Specular);
-    if (tex.id != 0)
-    {
-      textures.push_back(tex);
-    }
-  }
 }
 
 void Mesh::Render(VSUtils::ShaderProgram *shaderProgram) const

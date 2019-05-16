@@ -9,6 +9,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <unordered_map>
+
 namespace VSUtils
 {
 class ShaderProgram;
@@ -52,8 +54,11 @@ private:
   void ImportModel();
   void ProcessNode(aiNode *node, const aiScene *scene);
   void ProcessMesh(aiMesh *mesh, const aiScene *scene);
-  Material ProcessMaterial(aiMaterial *mat);
+  Material ProcessMaterial(aiMaterial *mat, VSEngine::Mesh *mesh);
 
+  // Retrieve the texture from textures map 
+  // or create new if not exist and add to textures
+  Texture GetTexture(const std::string &path, TextureType type);
 private:
   glm::mat4 transformation = glm::mat4(1.0f);
   glm::vec3 color = glm::vec3(0.0f);
@@ -61,7 +66,7 @@ private:
   VSUtils::ShaderProgram *shaderProgram = nullptr;
   std::string pathToFile;
 
-  std::vector<Texture> textures;
+  std::unordered_map<std::string, Texture> texturesMap; // maps paths to textures 
   std::vector<std::shared_ptr<VSEngine::Mesh>> meshes;
 };
 

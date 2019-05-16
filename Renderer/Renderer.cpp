@@ -25,6 +25,26 @@ Renderer::Renderer(int height, int width,
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_SAMPLES, 0);
+
+  window = glfwCreateWindow(appInfo.windowWidth, appInfo.windowHeight,
+                            appInfo.title.c_str(), nullptr,
+                            nullptr);
+  
+  if (!window)
+  {
+    fprintf(stderr, "Window opening failure\n");
+    return;
+  }
+
+  glfwMakeContextCurrent(window);
+
+  glewInit();
+  glDebugMessageCallback((GLDEBUGPROC)DebugCallback, this);
+  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+  glfwSetCursorPosCallback(window, MouseCallbacks);
+  glfwSetScrollCallback(window, ScrollCallback);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 Renderer::~Renderer()
@@ -39,31 +59,11 @@ Renderer::~Renderer()
 
 void Renderer::Start()
 {
-  window = glfwCreateWindow(appInfo.windowWidth, appInfo.windowHeight,
-                            appInfo.title.c_str(), nullptr,
-                            nullptr);
-  if (!window)
-  {
-    fprintf(stderr, "Window opening failure\n");
-    return;
-  }
-
-  glfwMakeContextCurrent(window);
-
-  glewInit();
-
-  glDebugMessageCallback((GLDEBUGPROC)DebugCallback, this);
-  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
-  glfwSetCursorPosCallback(window, MouseCallbacks);
-  glfwSetScrollCallback(window, ScrollCallback);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
   RenderStart();
 
   projectionMatrix =
       glm::perspective(fov, static_cast<float>(appInfo.windowWidth) /
-                       static_cast<float>(appInfo.windowHeight), 0.1f, 1000.0f);
+                       static_cast<float>(appInfo.windowHeight), 0.1f, 10000.0f);
 
   bool running{true};
   do

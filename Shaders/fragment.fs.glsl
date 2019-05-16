@@ -31,7 +31,7 @@ struct PointLight
 	float linear;
 	float quadratic;	
 };
-#define POINT_LIGHTS_COUNT 2
+#define POINT_LIGHTS_COUNT 1
 
 struct Spotlight
 {

@@ -74,18 +74,23 @@ uniform PointLight pointLights[POINT_LIGHTS_COUNT];
 //uniform Spotlight flashlight;
 
 vec3 CalculateDirectionalLight(DirectionalLight dirLight, vec3 normal, vec3 viewDir, 
-							   vec3 diffuseTex, vec3 specularTex);
+							   vec4 diffuseTex, vec4 specularTex);
 vec3 CalculatePointLight(PointLight pointLight, vec3 normal, vec3 fragmentPosition, 
-						 vec3 viewDir, vec3 diffuseTex, vec3 specularTex);
+						 vec3 viewDir, vec4 diffuseTex, vec4 specularTex);
 vec3 CalculateSpotLight(Spotlight spotlight, vec3 normal, vec3 fragmentPosition, 
-						vec3 viewDir, vec3 diffuseTex, vec3 specularTex);
+						vec3 viewDir, vec4 diffuseTex, vec4 specularTex);
 
 void main()
 {
 	vec3 viewDir = -normalize(fsIn.fragmentPosition);
 	vec3 normal = normalize(fsIn.normal);
-	vec3 diffuseTex = texture(material.diffuseMap1, fsIn.textureCoord).rgb;
-	vec3 specularTex = texture(material.specularMap1, fsIn.textureCoord).rgb;
+	vec4 diffuseTex = texture(material.diffuseMap1, fsIn.textureCoord);
+	if (diffuseTex.a < 0.01)
+	{
+		discard;
+	}
+
+	vec4 specularTex = texture(material.specularMap1, fsIn.textureCoord);
 
 	vec3 outputColor = CalculateDirectionalLight(directionalLight, normal, viewDir, 
 											 	 diffuseTex, specularTex);
@@ -106,7 +111,7 @@ void main()
 }
 
 vec3 CalculateDirectionalLight(DirectionalLight dirLight, vec3 normal, vec3 viewDir, 
-							   vec3 diffuseTex, vec3 specularTex)
+							   vec4 diffuseTex, vec4 specularTex)
 {
 	vec3 lightDir = normalize(-dirLight.direction);
 
@@ -118,15 +123,15 @@ vec3 CalculateDirectionalLight(DirectionalLight dirLight, vec3 normal, vec3 view
 	float spec = pow(max(dot(reflectDir, viewDir), 0.0), material.shininess);
 
 	// Total
-	vec3 ambient = dirLight.ambient * diffuseTex;
-	vec3 diffuse = dirLight.diffuse * diff * diffuseTex;
-	vec3 specular = dirLight.specular * spec * specularTex;
+	vec3 ambient = dirLight.ambient * diffuseTex.rgb;
+	vec3 diffuse = dirLight.diffuse * diff * diffuseTex.rgb;
+	vec3 specular = dirLight.specular * spec * specularTex.rgb;
 
 	return (ambient + diffuse + specular);
 }
 
 vec3 CalculatePointLight(PointLight pointLight, vec3 normal, vec3 fragmentPosition, 
-						 vec3 viewDir, vec3 diffuseTex, vec3 specularTex)
+						 vec3 viewDir, vec4 diffuseTex, vec4 specularTex)
 {
 	float distance = length(pointLight.position - fragmentPosition);
 	float attenuation = 1.0 / (pointLight.constant + 
@@ -143,15 +148,15 @@ vec3 CalculatePointLight(PointLight pointLight, vec3 normal, vec3 fragmentPositi
 	float spec = pow(max(dot(reflectDir, viewDir), 0.0), material.shininess);
 
 	// Total
-	vec3 ambient = pointLight.ambient * diffuseTex;
-	vec3 diffuse = pointLight.diffuse * diff * diffuseTex;
-	vec3 specular = pointLight.specular * spec * specularTex;
+	vec3 ambient = pointLight.ambient * diffuseTex.rgb;
+	vec3 diffuse = pointLight.diffuse * diff * diffuseTex.rgb;
+	vec3 specular = pointLight.specular * spec * specularTex.rgb;
 
 	return (ambient + diffuse + specular) * attenuation;
 }
 
 vec3 CalculateSpotLight(Spotlight spotlight, vec3 normal, vec3 fragmentPosition, 
-						vec3 viewDir, vec3 diffuseTex, vec3 specularTex)
+						vec3 viewDir, vec4 diffuseTex, vec4 specularTex)
 {
 	float distance = length(spotlight.position - fragmentPosition);
 	float attenuation = 1.0 / (spotlight.constant + 
@@ -173,9 +178,9 @@ vec3 CalculateSpotLight(Spotlight spotlight, vec3 normal, vec3 fragmentPosition,
 	float intensity = clamp((theta - spotlight.outerCutOff) / epsilon, 0.0, 1.0);
 
 	// Total
-	vec3 ambient = spotlight.ambient * diffuseTex;
-	vec3 diffuse = spotlight.diffuse * diff * diffuseTex * intensity;
-	vec3 specular = spotlight.specular * spec * specularTex * intensity;
+	vec3 ambient = spotlight.ambient * diffuseTex.rgb;
+	vec3 diffuse = spotlight.diffuse * diff * diffuseTex.rgb * intensity;
+	vec3 specular = spotlight.specular * spec * specularTex.rgb * intensity;
 
 	return (ambient + diffuse + specular) * attenuation;
 }

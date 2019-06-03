@@ -27,6 +27,9 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{af0f908d-bd88-425b-ac4a-20276b44865a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{a92558fc-23f9-42ca-b75c-7207a7654fdc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Utils\Color.cpp">
@@ -71,6 +74,12 @@
     <ClCompile Include="..\ObjectModel\Material.cpp">
       <Filter>ObjectModel</Filter>
     </ClCompile>
+    <ClCompile Include="..\Core\Engine.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Renderer\RenderData.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Utils\Color.h">
@@ -114,6 +123,12 @@
     </ClInclude>
     <ClInclude Include="..\ObjectModel\Material.h">
       <Filter>ObjectModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Core\Engine.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Renderer\RenderData.h">
+      <Filter>Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

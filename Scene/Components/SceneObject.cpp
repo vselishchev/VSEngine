@@ -5,16 +5,16 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Core/Engine.h"
+#include "Renderer/Renderer.h"
 #include "Utils/ShaderProgram.h"
 
 #include <thread>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "Utils/stb_image.h"
+extern VSEngine::Engine g_Eng;
 
 namespace VSEngine
 {
-
 namespace
 {
 glm::vec3 GetGLMFromAssimp(const aiColor3D &color)
@@ -25,43 +25,6 @@ glm::vec3 GetGLMFromAssimp(const aiColor3D &color)
 glm::vec4 GetGLMFromAssimp(const aiColor4D &color)
 {
   return glm::vec4(color.r, color.g, color.b, color.a);
-}
-
-GLuint LoadTexture(const std::string &path)
-{
-  int width = 0, height = 0, channelsCount = 0;
-  unsigned char *data =
-      stbi_load(path.c_str(), &width, &height, &channelsCount, 0);
-
-  GLuint texture = 0;
-
-  if (data)
-  {
-    glGenTextures(1, &texture);
-
-    GLenum format = GL_RGB;
-    if (channelsCount == 1)
-    {
-      format = GL_R;
-    }
-    else if (channelsCount == 4)
-    {
-      format = GL_RGBA;
-    }
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  }
-
-  stbi_image_free(data);
-
-  return texture;
 }
 
 }
@@ -144,34 +107,11 @@ const glm::mat4& SceneObject::GetTransformation() const
   return transformation;
 }
 
-void SceneObject::BindObject(VSUtils::ShaderProgram *shaderProg)
+void SceneObject::BindObject()
 {
   for (auto &mesh : meshes)
   {
     mesh->BindMesh();
-  }
-
-  shaderProgram = shaderProg;
-}
-
-void SceneObject::Render(double time)
-{
-  shaderProgram->SetMat4("modelMatrix", transformation);
-
-  for (auto &mesh : meshes)
-  {
-    shaderProgram->SetVec3("meshColor", color);
-
-    const Material &meshMaterial = mesh->GetMaterial();
-    shaderProgram->SetInt("material.diffuseMap", 0);
-    shaderProgram->SetInt("material.specularMap", 1);
-
-    shaderProgram->SetVec3("material.ambient", meshMaterial.ambient);
-    shaderProgram->SetVec3("material.diffuse", meshMaterial.diffuse);
-    shaderProgram->SetVec3("material.specular", meshMaterial.specular);
-    shaderProgram->SetFloat("material.shininess", meshMaterial.shininess);
-
-    mesh->Render(shaderProgram);
   }
 }
 
@@ -281,7 +221,6 @@ void SceneObject::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 
 Material SceneObject::ProcessMaterial(aiMaterial *mat, VSEngine::Mesh *mesh)
 {
-
   std::size_t found = pathToFile.find_last_of("/\\");
   std::string fileFolder = pathToFile.substr(0, found);
 
@@ -296,8 +235,8 @@ Material SceneObject::ProcessMaterial(aiMaterial *mat, VSEngine::Mesh *mesh)
     if (mat->GetTexture(aiTextureType_DIFFUSE, j, &texPath) == AI_SUCCESS)
     {
       std::string diffuseTexturePath = texPath.C_Str();
-      mesh->textures.push_back(GetTexture(fileFolder + "/" + diffuseTexturePath,
-                                          TextureType::Diffuse));
+      mesh->textures.push_back(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + diffuseTexturePath,
+                                                                   TextureType::Diffuse));
     }
   }
 
@@ -309,8 +248,8 @@ Material SceneObject::ProcessMaterial(aiMaterial *mat, VSEngine::Mesh *mesh)
     if (mat->GetTexture(aiTextureType_SPECULAR, j, &texPath) == AI_SUCCESS)
     {
       std::string specularTexturePath = texPath.C_Str();
-      mesh->textures.push_back(GetTexture(fileFolder + "/" + specularTexturePath,
-                                          TextureType::Specular));
+      mesh->textures.push_back(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + specularTexturePath,
+                                                                   TextureType::Specular));
     }
   }
 
@@ -329,22 +268,6 @@ Material SceneObject::ProcessMaterial(aiMaterial *mat, VSEngine::Mesh *mesh)
   vsMaterial.shininess = shininess;
 
   return std::move(vsMaterial);
-}
-
-Texture SceneObject::GetTexture(const std::string &path, TextureType type)
-{
-  auto texture = texturesMap.find(path);
-
-  if (texture != texturesMap.end())
-  {
-    return texture->second;
-  }
-
-  Texture newTexture(LoadTexture(path), type, path);
-
-  texturesMap.try_emplace(path, newTexture);
-
-  return newTexture;
 }
 
 }

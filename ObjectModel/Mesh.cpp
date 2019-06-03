@@ -1,5 +1,7 @@
 #include "Mesh.h"
 
+#include "Core/Engine.h"
+#include "Renderer/Renderer.h"
 #include "Utils/CommonUtils.h"
 #include "Utils/ShaderProgram.h"
 
@@ -8,6 +10,8 @@
 #include <algorithm>
 
 #include <GL/glew.h>
+
+extern VSEngine::Engine g_Eng;
 
 namespace VSEngine
 {
@@ -42,9 +46,6 @@ void BoundingBox::AddPoint(const glm::vec3 &point)
 
 Mesh::~Mesh()
 {
-  glDeleteVertexArrays(1, &vao);
-  glDeleteBuffers(1, &vbo);
-  glDeleteBuffers(1, &ebo);
 }
 
 // TODO: Implement own object loader
@@ -142,70 +143,9 @@ Mesh Mesh::Copy() const
 
 void Mesh::BindMesh()
 {
-  glGenVertexArrays(1, &vao);
-  glGenBuffers(1, &vbo);
-  glGenBuffers(1, &ebo);
+  VSEngine::Renderer *renderer = g_Eng.GetRenderer();
 
-  glBindVertexArray(vao);
-
-  GLsizei sizeofVertex = sizeof(Vertex);
-
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeofVertex * vertices.size(),
-               vertices.data(), GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Triple) * faces.size(),
-               faces.data(), GL_STATIC_DRAW);
-
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 
-                        sizeofVertex, nullptr);
-
-  if (hasNormals)
-  {
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                          sizeofVertex, (void*)(offsetof(Vertex, normal)));
-  }
-
-  if (hasTextureCoordinates)
-  {
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 
-                          sizeofVertex, (void*)(offsetof(Vertex, textureCoord)));
-  }
-
-  glBindVertexArray(0);
-}
-
-void Mesh::Render(VSUtils::ShaderProgram *shaderProgram) const
-{
-  unsigned int diffuseCounter = 0;
-  unsigned int specularCounter = 0;
-
-  for (size_t i = 0; i < textures.size(); ++i)
-  {
-    glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(i));
-    
-    std::string uniformName;
-    if (textures[i].type == TextureType::Diffuse)
-    {
-      uniformName = "material.diffuseMap" + std::to_string(++diffuseCounter);
-    }
-    else if (textures[i].type == TextureType::Specular)
-    {
-      uniformName = "material.specularMap" + std::to_string(++specularCounter);
-    }
-
-    shaderProgram->SetInt(uniformName, static_cast<int>(i));
-
-    glBindTexture(GL_TEXTURE_2D, textures[i].id);
-  }
-
-  glBindVertexArray(vao);
-
-  glDrawElements(GL_TRIANGLES, IndicesCount() * 3, GL_UNSIGNED_SHORT, 0);
+  renderDataID = renderer->GenerateMeshRenderData(this);
 }
 
 }

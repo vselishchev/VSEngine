@@ -2,8 +2,8 @@
 #define _VSENGINE_SCENE_SCENECOMPONENTS_LIGHT_H_
 
 #include <glm/glm.hpp>
-#include "ObjectModel/Mesh.h"
 
+#include "ObjectModel/Mesh.h"
 namespace VSUtils
 {
 class ShaderProgram;
@@ -31,9 +31,8 @@ struct Attenuation
 class Light
 {
 public:
-  Light() {}
-  void SetShaderProgram(VSUtils::ShaderProgram *shaderProg);
-  void RenderRepresentation(double time);
+  Light();
+  void Render();
 
   void SetColor(const glm::vec3 &col);
   const glm::vec3& GetColor() const { return color; }
@@ -72,7 +71,10 @@ public:
   float GetOuterCutOffValue() const { return outerCutOff; }
 
   void SetLightType(LightType t) { type = t; }
-  LightType GetLightType() { return type; }
+  LightType GetLightType() const { return type; }
+
+  const Mesh* GetMesh() { return mesh; }
+
 private:
   glm::mat4 positionMat = glm::mat4(1.0f);
 
@@ -90,12 +92,12 @@ private:
   // Attenuation parameters (values are specified for distance == 3200 by Ogre3D)
   Attenuation attenuationParameters;
 
-  VSUtils::ShaderProgram *shaderProgram = nullptr;
-
   float cutOff = 0.97437006f; // cos(13 degrees)
   float outerCutOff = 0.95630475f; // cos(17 degrees)
 
   LightType type = LightType::None;
+
+  Mesh *mesh = nullptr;
 };
 }
 

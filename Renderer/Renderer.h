@@ -4,14 +4,20 @@
 #include <GL/glew.h>
 #include <glfw3.h>
 
-#include <list>
 #include <string>
+#include <unordered_map>
 
-#include "Scene/Scene.h"
 #include "Utils/ShaderProgram.h"
 
 namespace VSEngine
 {
+class Scene;
+class Mesh;
+struct Texture;
+struct RenderData;
+
+enum class TextureType: char;
+
 class Renderer final
 {
 private:
@@ -22,40 +28,6 @@ private:
                                      GLsizei length,
                                      const GLchar* message,
                                      GLvoid* userParam);
-public:
-  Renderer() = delete;
-  Renderer(int height, int width,
-           const std::string &title = "");
-  ~Renderer();
-
-  void Start();
-
-  void SetScene(Scene *scene_)
-  {
-    scene = scene_;
-  }
-
-  Scene* GetScene() const
-  {
-    return scene;
-  }
-
-  int GetViewportHeight() const
-  {
-    return appInfo.windowHeight;
-  }
-
-  int GetViewportWidth() const
-  {
-    return appInfo.windowWidth;
-  }
-
-  void UpdateFoV(float deltaFoV);
-
-private:
-  void RenderStart();
-  void RenderFinish();
-  void Render(double time);
 
   virtual void OnDebugMessage(GLenum source,
                               GLenum type,
@@ -63,31 +35,55 @@ private:
                               GLenum severity,
                               GLsizei length,
                               const GLchar* message)
-  {
-  }
-
-  void ProcessKeyInput();
+  {}
 public:
-  struct ApplicationInfo
-  {
-    std::string title;
-    int windowHeight;
-    int windowWidth;
-    int majorVersion;
-    int minorVersion;
-  };
+  Renderer();
+  Renderer(unsigned short viewportWidth, unsigned short viewportHeight);
+  ~Renderer();
+
+  void ChangeViewportSize(unsigned short width, unsigned short height);
+
+  void Render(double time, const Scene *scene, const glm::mat4 &projMatrix);
+  void RenderStart();
+  void RenderFinish();
+
+  unsigned long GenerateMeshRenderData(const Mesh * mesh);
+
+  void SetShaderUniform(const std::string &name, bool value) const;
+  void SetShaderUniform(const std::string &name, int value) const;
+  void SetShaderUniform(const std::string &name, float value) const;
+  void SetShaderUniform(const std::string &name, const glm::vec2 &value) const;
+  void SetShaderUniform(const std::string &name, float x, float y) const;
+  void SetShaderUniform(const std::string &name, const glm::vec3 &value) const;
+  void SetShaderUniform(const std::string &name, float x, float y, float z) const;
+  void SetShaderUniform(const std::string &name, const glm::vec4 &value) const;
+  void SetShaderUniform(const std::string &name, float x, float y, float z, float w) const;
+  void SetShaderUniform(const std::string &name, const glm::mat2 &mat) const;
+  void SetShaderUniform(const std::string &name, const glm::mat3 &mat) const;
+  void SetShaderUniform(const std::string &name, const glm::mat4 &mat) const;
+
+  void Reset();
+
+  void ClearStoredObjects();
+
+  // Retrieve the texture from textures map 
+  // or create new if not exist and add to textures
+  const Texture* GetTextureInfo(const std::string &texturePath, TextureType type);
 
 private:
-  ApplicationInfo appInfo;
-  GLFWwindow *window;
+  void Initialize();
 
-  glm::mat4 projectionMatrix;
+  void SetLightningUniforms(const Scene *scene);
 
-  VSUtils::ShaderProgram program;
+public:
+  VSUtils::ShaderProgram programShader;
+  VSUtils::ShaderProgram lightShader;
 
-  Scene *scene = nullptr;
+private:
+  unsigned long renderDataIDCounter = 0;
+  std::unordered_map<unsigned long, RenderData*> renderObjectsMap;
 
-  float fov = 45.0f;
+  std::unordered_map<std::string, Texture*> texturesMap; // maps paths to textures 
 };
 }
 

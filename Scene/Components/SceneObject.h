@@ -29,9 +29,7 @@ public:
   SceneObject(SceneObject &&obj);
   ~SceneObject();
 
-  void BindObject(VSUtils::ShaderProgram *shaderProg);
-
-  void Render(double time);
+  void BindObject();
 
   void Scale(const glm::vec3 &scale_);
   void Scale(float scale_);
@@ -49,6 +47,9 @@ public:
   const std::string& GetFilePath() const { return pathToFile; }
 
   void SetObjectColor(const glm::vec3 &col);
+  const glm::vec3& GetObjectColor() const { return color; }
+
+  const std::vector<std::shared_ptr<VSEngine::Mesh>>& GetMeshes() const { return meshes; }
 
 private:
   void ImportModel();
@@ -56,17 +57,12 @@ private:
   void ProcessMesh(aiMesh *mesh, const aiScene *scene);
   Material ProcessMaterial(aiMaterial *mat, VSEngine::Mesh *mesh);
 
-  // Retrieve the texture from textures map 
-  // or create new if not exist and add to textures
-  Texture GetTexture(const std::string &path, TextureType type);
 private:
   glm::mat4 transformation = glm::mat4(1.0f);
   glm::vec3 color = glm::vec3(0.0f);
 
-  VSUtils::ShaderProgram *shaderProgram = nullptr;
   std::string pathToFile;
 
-  std::unordered_map<std::string, Texture> texturesMap; // maps paths to textures 
   std::vector<std::shared_ptr<VSEngine::Mesh>> meshes;
 };
 

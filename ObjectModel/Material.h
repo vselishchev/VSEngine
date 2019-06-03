@@ -4,7 +4,8 @@
 #include <glm/glm.hpp>
 
 #include <string>
-#include <vector>
+
+#include <unordered_set>
 
 namespace VSEngine
 {
@@ -19,8 +20,8 @@ public:
   const Material& operator=(Material &&mat);
 
 public:
-  std::vector<std::string> diffuseMaps;
-  std::vector<std::string> specularMaps;
+  std::unordered_set<std::string> diffuseMaps;
+  std::unordered_set<std::string> specularMaps;
 
   glm::vec3 ambient = glm::vec3(1.0f);
   glm::vec3 diffuse = glm::vec3(1.0f);

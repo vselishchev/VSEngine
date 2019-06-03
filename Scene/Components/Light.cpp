@@ -7,7 +7,7 @@ namespace VSEngine
 {
 namespace
 {
-Mesh &GetBoxMesh()
+Mesh* GetBoxMesh()
 {
   static bool needCalculate = true;
 
@@ -43,30 +43,22 @@ Mesh &GetBoxMesh()
 
   static Mesh mesh(vertices, triples, false, false);
 
-  return mesh;
+  return &mesh;
 }
 }
 
-void Light::SetShaderProgram(VSUtils::ShaderProgram *shaderProg)
+Light::Light()
 {
-  shaderProgram = shaderProg;
+  mesh = GetBoxMesh();
 }
 
-void Light::RenderRepresentation(double time)
+void Light::Render()
 {
-  Mesh &boxMesh = GetBoxMesh();
-
-  static bool isInitialized = false;
-  if (!isInitialized)
-  {
-    boxMesh.BindMesh();
-    isInitialized = true;
-  }
-
-  shaderProgram->SetMat4("modelMatrix", positionMat);
+  // TODO : render light source
+  /*shaderProgram->SetMat4("modelMatrix", positionMat);
   shaderProgram->SetVec3("lightColor", color);
 
-  boxMesh.Render(shaderProgram);
+  boxMesh.Render(*shaderProgram);*/
 }
 
 void Light::SetColor(const glm::vec3 &col)

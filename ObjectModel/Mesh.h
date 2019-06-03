@@ -7,6 +7,8 @@
 #include <vector>
 #include <limits>
 
+#include "Renderer/RenderData.h"
+
 namespace VSUtils
 {
 class ShaderProgram;
@@ -14,7 +16,7 @@ class ShaderProgram;
 
 namespace VSEngine
 {
-enum class TextureType: char
+enum class TextureType : char
 {
   Diffuse,
   Specular
@@ -22,12 +24,11 @@ enum class TextureType: char
 
 struct Texture
 {
-  Texture(unsigned int id_, TextureType t, const std::string &pathToTexture) : 
+  Texture(unsigned int id_, TextureType t, const std::string &pathToTexture) :
       id(id_), type(t), path(pathToTexture) {}
-
+  
+  TextureType type = TextureType::Diffuse;
   unsigned int id = 0;
-  TextureType type;
-
   std::string path;
 };
 
@@ -96,10 +97,7 @@ public:
       objectName(m.objectName),
       hasNormals(std::exchange(m.hasNormals, false)),
       hasTextureCoordinates(std::exchange(m.hasTextureCoordinates, false)),
-      vao(std::exchange(m.vao, 0)),
-      vbo(std::exchange(m.vbo, 0)),
-      ebo(std::exchange(m.ebo, 0)),
-      textures(std::move(m.textures)),
+      renderDataID(std::exchange(m.renderDataID, 0)),
       vertices(std::move(m.vertices)),
       faces(std::move(m.faces))
   {
@@ -112,10 +110,7 @@ public:
     objectName = std::exchange(m.objectName, "");
     hasNormals = std::exchange(m.hasNormals, false);
     hasTextureCoordinates = std::exchange(m.hasTextureCoordinates, false);
-    vao = std::exchange(vao, 0);
-    vbo = std::exchange(vbo, 0);
-    ebo = std::exchange(ebo, 0);
-    textures = std::move(m.textures);
+    renderDataID = std::exchange(m.renderDataID, 0);
     vertices = std::move(m.vertices);
     faces = std::move(m.faces);
 
@@ -124,12 +119,17 @@ public:
 
   Mesh Copy() const;
 
-  unsigned short VerticesCount() const { return static_cast<unsigned short>(vertices.size()); }
-  unsigned short IndicesCount() const { return static_cast<unsigned short>(faces.size()); }
+  unsigned long VerticesCount() const { return static_cast<unsigned long>(vertices.size()); }
+  unsigned long IndicesCount() const { return static_cast<unsigned long>(faces.size()); }
 
   const std::vector<Vertex>& GetVertices() const
   {
     return vertices;
+  }
+
+  const std::vector<Triple>& GetFaces() const
+  {
+    return faces;
   }
 
   bool HasNormals() const
@@ -152,10 +152,13 @@ public:
     return material;
   }
 
+  const BoundingBox& GetBoundingBox() const
+  {
+    return bBox;
+  }
+
   void BindMesh();
-
-  void Render(VSUtils::ShaderProgram *shaderProgram) const;
-
+  
 // TODO: Implement own object loader
 /*private:
   void MakeUnique(const std::vector<Point3df> &points,
@@ -166,23 +169,20 @@ public:
   int GetVertexID(const Vertex &vert) const;*/
 
 public:
+  unsigned long renderDataID;
+
   BoundingBox bBox;
   std::string objectName;
 
-  std::vector<Texture> textures;
+  std::vector<const Texture*> textures;
+  Material material;
 
 private:
   bool hasNormals = false;
   bool hasTextureCoordinates = false;
 
-  unsigned int vao = 0;
-  unsigned int vbo = 0;
-  unsigned int ebo = 0;
-
   std::vector<Vertex> vertices;
   std::vector<Triple> faces;
-
-  Material material;
 };
 
 }

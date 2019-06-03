@@ -3,7 +3,8 @@
 
 #include <GL/glew.h>
 #include <glfw3.h>
-#include <vector>
+
+#include <list>
 
 #include "Scene/Components/Camera.h"
 #include "Scene/Components/Light.h"
@@ -25,27 +26,34 @@ public:
   explicit Scene();
   virtual ~Scene();
 
-  void LoadScene(VSUtils::ShaderProgram *shaderProg);
-  void RenderScene(double time, const glm::mat4 &projMatrix);
+  void LoadScene();
+  void RenderScene(double time, const glm::mat4 &projMatrix, 
+                   const VSUtils::ShaderProgram &shaderProgram);
 
   void AddSceneObject(SceneObject *object);
 
   void SetCamera(const Camera &camera);
+  const Camera& GetCamera() const { return camera; }
+  Camera& GetCamera() { return camera; }
+
   void MoveCamera(MoveDirection direction);
   void RotateCamera(float deltaYaw, float deltaPitch);
+
+  unsigned short GetLightsCount() const { return lightSourcesCount; }
+  const Light* GetLights() const { return lights; }
+
+  const std::list<SceneObject*> GetSceneObjects() const { return sceneObjects; }
+
 private:
   Camera camera = Camera(glm::vec3(0.0f, 1.0f, 0.0f),
                          glm::vec3(0.0f, -1.0f, 0.0f),
                          glm::vec3(0.0f, 1.0f, 0.0f));
 
   // Light sources
-  size_t lightSourcesCount = 0;
+  unsigned short lightSourcesCount = 0;
   Light *lights;
 
-  std::vector<SceneObject*> sceneObjects;
-
-  VSUtils::ShaderProgram *lightShader = nullptr;
-  VSUtils::ShaderProgram *shaderProgram = nullptr;
+  std::list<SceneObject*> sceneObjects;
 };
 
 }

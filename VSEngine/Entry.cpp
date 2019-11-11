@@ -8,7 +8,7 @@
 
 #include <memory>
 
-VSEngine::Engine g_Eng("VS Engine", 800, 600);
+VSEngine::Engine g_Eng("VS Engine", 1200, 800);
 
 int main()
 {

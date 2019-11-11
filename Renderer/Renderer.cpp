@@ -55,13 +55,14 @@ GLuint LoadTexture(const std::string &path)
 
 }
 
-void APIENTRY Renderer::DebugCallback(GLenum source,
-                                      GLenum type,
-                                      GLuint id,
-                                      GLenum severity,
-                                      GLsizei length,
-                                      const GLchar* message,
-                                      GLvoid* userParam)
+void APIENTRY Renderer::DebugCallback(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    GLvoid* userParam)
 {
   reinterpret_cast<Renderer*>(userParam)->OnDebugMessage(source, type, id, severity, length, message);
 }
@@ -146,9 +147,6 @@ void Renderer::Render(double time, const Scene *scene, const glm::mat4 &projMatr
       programShader.SetVec3("material.specular", meshMaterial.specular);
       programShader.SetFloat("material.shininess", meshMaterial.shininess);
 
-      //mesh->Render(programShader);
-
-      // TODO: Make global texture container and get them from it
       unsigned int diffuseCounter = 0;
       unsigned int specularCounter = 0;
 
@@ -178,8 +176,6 @@ void Renderer::Render(double time, const Scene *scene, const glm::mat4 &projMatr
       glDrawElements(GL_TRIANGLES, mesh->IndicesCount() * 3, GL_UNSIGNED_SHORT, 0);
     }
   }
-
-  //scene->RenderScene(time, projMatrix, programShader);
 }
 
 unsigned long Renderer::GenerateMeshRenderData(const Mesh *mesh)

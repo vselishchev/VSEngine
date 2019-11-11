@@ -36,6 +36,7 @@ private:
                               GLsizei length,
                               const GLchar* message)
   {}
+
 public:
   Renderer();
   Renderer(unsigned short viewportWidth, unsigned short viewportHeight);
@@ -80,10 +81,10 @@ public:
   VSUtils::ShaderProgram lightShader;
 
 private:
-  unsigned long renderDataIDCounter = 0;
   std::unordered_map<unsigned long, RenderData*> renderObjectsMap;
-
   std::unordered_map<std::string, Texture*> texturesMap; // maps paths to textures 
+
+  unsigned long renderDataIDCounter = 0;
 };
 }
 

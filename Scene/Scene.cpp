@@ -58,16 +58,16 @@ void Scene::RenderScene(double time, const glm::mat4 &projMatrix,
                         const VSUtils::ShaderProgram &shaderProgram)
 {
   // Render light source as box, if needed
-  /*for (size_t i = 0; i < lightSourcesCount; ++i)
+  for (size_t i = 0; i < lightSourcesCount; ++i)
   {
-    lightShader->SetMat4("viewMatrix", camera.GetViewMatrix());
-    lightShader->SetMat4("projMatrix", projMatrix);
+    shaderProgram.SetMat4("viewMatrix", camera.GetViewMatrix());
+    shaderProgram.SetMat4("projMatrix", projMatrix);
 
     if (lights[i].GetLightType() == LightType::Point)
     {
       lights[i].Render();
     }
-  }*/
+  }
 }
 
 void Scene::AddSceneObject(SceneObject *object)

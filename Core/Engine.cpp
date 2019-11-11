@@ -37,23 +37,23 @@ void Engine::ProcessKeyInput()
   {
     scene->MoveCamera(MoveDirection::Forward);
   }
-  else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
   {
     scene->MoveCamera(MoveDirection::Back);
   }
-  else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
   {
     scene->MoveCamera(MoveDirection::Left);
   }
-  else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
   {
     scene->MoveCamera(MoveDirection::Right);
   }
-  else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
   {
     scene->MoveCamera(MoveDirection::Up);
   }
-  else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
   {
     scene->MoveCamera(MoveDirection::Down);
   }
@@ -72,10 +72,10 @@ void Engine::Start()
 
   do
   {
-    double time = glfwGetTime();
+    const double time = glfwGetTime();
 
     static double prevTime = 0;
-    float delta = static_cast<float>(time - prevTime);
+    const float delta = static_cast<float>(time - prevTime);
     scene->GetCamera().SetSpeed(delta * 20.0f);
     prevTime = time;
 

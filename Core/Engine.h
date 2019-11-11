@@ -59,22 +59,18 @@ public:
   struct ApplicationInfo
   {
     std::string title = "Window";
-    unsigned short windowWidth = 800;
-    unsigned short windowHeight = 600;
+    unsigned short windowWidth = 1200;
+    unsigned short windowHeight = 800;
     unsigned short majorVersion = 4;
     unsigned short minorVersion = 3;
   };
 
 private:
   glm::mat4 projectionMatrix = glm::mat4(1.0f);
-
   ApplicationInfo appInfo;
   GLFWwindow *window = nullptr;
-
   Scene *scene = nullptr;
-
   Renderer *renderer = nullptr;
-
   float fov = 45.0f;
 };
 

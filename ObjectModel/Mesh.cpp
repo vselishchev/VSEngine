@@ -135,8 +135,8 @@ int Mesh::GetVertexID(const Vertex &vert) const
 
 Mesh Mesh::Copy() const
 {
-  std::vector<Vertex> vertices_(vertices);
-  std::vector<Triple> faces_(faces);
+  std::vector<Vertex> vertices_(m_vertices);
+  std::vector<Triple> faces_(m_faces);
 
   return Mesh(vertices_, faces_);
 }
@@ -145,7 +145,7 @@ void Mesh::BindMesh()
 {
   VSEngine::Renderer *renderer = g_Eng.GetRenderer();
 
-  renderDataID = renderer->GenerateMeshRenderData(this);
+  m_renderDataID = renderer->GenerateMeshRenderData(this);
 }
 
 }

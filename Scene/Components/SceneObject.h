@@ -3,11 +3,7 @@
 
 #include "ObjectModel/Mesh.h"
 
-#include "SceneObjectCollection.h"
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include "ObjectModel/MeshCollection.h"
 
 #include <unordered_map>
 
@@ -22,11 +18,9 @@ class SceneObject
 {
 public:
   SceneObject() = delete;
-  explicit SceneObject(const std::string &path);
-  explicit SceneObject(std::shared_ptr<VSEngine::Mesh> m);
-  explicit SceneObject(const std::vector<std::shared_ptr<VSEngine::Mesh>> &m);
+  explicit SceneObject(VSEngine::Mesh* m);
   SceneObject(const SceneObject &obj);
-  SceneObject(SceneObject &&obj);
+  SceneObject(SceneObject &&obj) noexcept;
   ~SceneObject();
 
   void BindObject();
@@ -42,14 +36,12 @@ public:
 
   const glm::mat4& GetTransformation() const;
 
-  void ResetTransform() { transformation = glm::mat4(1.0f); }
+  void ResetTransform() { m_transformation = glm::mat4(1.0f); }
 
-  const std::string& GetFilePath() const { return pathToFile; }
+  const std::string& GetFilePath() const { return m_mesh->GetFilePath(); }
 
   void SetObjectColor(const glm::vec3 &col);
-  const glm::vec3& GetObjectColor() const { return color; }
-
-  const std::vector<std::shared_ptr<VSEngine::Mesh>>& GetMeshes() const { return meshes; }
+  const glm::vec3& GetObjectColor() const { return m_color; }
 
 private:
   void ImportModel();
@@ -58,15 +50,11 @@ private:
   Material ProcessMaterial(aiMaterial *mat, VSEngine::Mesh *mesh);
 
 private:
-  glm::mat4 transformation = glm::mat4(1.0f);
-  glm::vec3 color = glm::vec3(0.0f);
+  glm::mat4 m_transformation = glm::mat4(1.0f);
+  glm::vec3 m_color = glm::vec3(0.0f);
 
-  std::string pathToFile;
-
-  std::vector<std::shared_ptr<VSEngine::Mesh>> meshes;
+  Mesh* m_mesh;
 };
-
-extern SceneObjectsCollection SceneObjectsMap;
 
 }
 

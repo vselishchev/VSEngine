@@ -217,7 +217,7 @@ unsigned long Renderer::GenerateMeshRenderData(const Mesh *mesh)
                           sizeofVertex, (void*)(normalOffset));
   }
 
-  if (mesh->HasTextureCoordinated())
+  if (mesh->HasTextureCoordinates())
   {
     constexpr static size_t textureOffset = offsetof(Vertex, textureCoord);
     glEnableVertexAttribArray(2);

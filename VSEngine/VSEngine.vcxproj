@@ -14,19 +14,19 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D96FC594-9FF2-479C-97B3-7F5A6560C73F}</ProjectGuid>
     <RootNamespace>VSEngine</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -80,14 +80,15 @@
     <ClCompile Include="..\Core\Engine.cpp" />
     <ClCompile Include="..\ObjectModel\Material.cpp" />
     <ClCompile Include="..\ObjectModel\Mesh.cpp" />
+    <ClCompile Include="..\ObjectModel\MeshCollection.cpp" />
     <ClCompile Include="..\ObjectModel\Vertex.cpp" />
     <ClCompile Include="..\Renderer\RenderData.cpp" />
     <ClCompile Include="..\Renderer\Renderer.cpp" />
     <ClCompile Include="..\Scene\Components\Camera.cpp" />
     <ClCompile Include="..\Scene\Components\Light.cpp" />
     <ClCompile Include="..\Scene\Components\SceneObject.cpp" />
-    <ClCompile Include="..\Scene\Components\SceneObjectCollection.cpp" />
     <ClCompile Include="..\Scene\Scene.cpp" />
+    <ClCompile Include="..\Scene\Utils.cpp" />
     <ClCompile Include="..\Utils\Color.cpp" />
     <ClCompile Include="..\Utils\CommonUtils.cpp" />
     <ClCompile Include="..\Utils\Shader.cpp" />
@@ -98,14 +99,15 @@
     <ClInclude Include="..\Core\Engine.h" />
     <ClInclude Include="..\ObjectModel\Material.h" />
     <ClInclude Include="..\ObjectModel\Mesh.h" />
+    <ClInclude Include="..\ObjectModel\MeshCollection.h" />
     <ClInclude Include="..\ObjectModel\Vertex.h" />
     <ClInclude Include="..\Renderer\RenderData.h" />
     <ClInclude Include="..\Renderer\Renderer.h" />
     <ClInclude Include="..\Scene\Components\Camera.h" />
     <ClInclude Include="..\Scene\Components\Light.h" />
     <ClInclude Include="..\Scene\Components\SceneObject.h" />
-    <ClInclude Include="..\Scene\Components\SceneObjectCollection.h" />
     <ClInclude Include="..\Scene\Scene.h" />
+    <ClInclude Include="..\Scene\Utils.h" />
     <ClInclude Include="..\Utils\Color.h" />
     <ClInclude Include="..\Utils\CommonUtils.h" />
     <ClInclude Include="..\Utils\Shader.h" />

@@ -56,9 +56,6 @@
     <ClCompile Include="..\ObjectModel\Vertex.cpp">
       <Filter>ObjectModel</Filter>
     </ClCompile>
-    <ClCompile Include="..\Scene\Components\SceneObjectCollection.cpp">
-      <Filter>Scene\Components</Filter>
-    </ClCompile>
     <ClCompile Include="..\Scene\Components\Camera.cpp">
       <Filter>Scene\Components</Filter>
     </ClCompile>
@@ -79,6 +76,12 @@
     </ClCompile>
     <ClCompile Include="..\Renderer\RenderData.cpp">
       <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ObjectModel\MeshCollection.cpp">
+      <Filter>ObjectModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Scene\Utils.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -106,9 +109,6 @@
     <ClInclude Include="..\Utils\stb_image.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\Scene\Components\SceneObjectCollection.h">
-      <Filter>Scene\Components</Filter>
-    </ClInclude>
     <ClInclude Include="..\Scene\Components\Camera.h">
       <Filter>Scene\Components</Filter>
     </ClInclude>
@@ -129,6 +129,12 @@
     </ClInclude>
     <ClInclude Include="..\Renderer\RenderData.h">
       <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ObjectModel\MeshCollection.h">
+      <Filter>ObjectModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Scene\Utils.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

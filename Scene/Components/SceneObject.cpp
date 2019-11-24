@@ -9,21 +9,18 @@
 #include "Renderer/Renderer.h"
 #include "Utils/ShaderProgram.h"
 
-#include <thread>
-
 extern VSEngine::Engine g_Eng;
 
 namespace VSEngine
 {
 
-SceneObject::SceneObject(VSEngine::Mesh* mesh)
+SceneObject::SceneObject(VSEngine::Mesh& mesh)
     : m_mesh(mesh)
 {
 }
 
 SceneObject::~SceneObject()
 {
-
 }
 
 SceneObject::SceneObject(const SceneObject &obj)
@@ -36,7 +33,6 @@ SceneObject::SceneObject(SceneObject &&obj) noexcept
     : m_mesh(obj.m_mesh)
     , m_transformation(std::exchange(obj.m_transformation, glm::mat4(1.0f)))
 {
-  obj.m_mesh = nullptr;
 }
 
 void SceneObject::Scale(const glm::vec3 &scale_)
@@ -76,8 +72,7 @@ const glm::mat4& SceneObject::GetTransformation() const
 
 void SceneObject::BindObject()
 {
-  if (m_mesh)
-    m_mesh->BindMesh();
+  m_mesh.BindMesh();
 }
 
 void SceneObject::SetObjectColor(const glm::vec3 &col)

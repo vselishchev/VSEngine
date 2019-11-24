@@ -9,13 +9,14 @@
 
 #include "Renderer/RenderData.h"
 
-namespace VSUtils
-{
+namespace VSUtils {
+
 class ShaderProgram;
+
 }
 
-namespace VSEngine
-{
+namespace VSEngine {
+
 enum class TextureType : char
 {
   Diffuse,
@@ -84,39 +85,12 @@ public:
   Mesh() = delete;
 
   // Moves vectors
-  Mesh(std::vector<Vertex> &vertices_, std::vector<Triple> &faces_,
-       bool normals = false, bool textures = false) :
-    m_hasNormals(normals),
-    m_hasTextureCoordinates(textures),
-    m_vertices(std::move(vertices_)),
-    m_faces(std::move(faces_))
-  {}
-
-  Mesh(Mesh &&m) noexcept :
-    m_objectName(m.m_objectName),
-    m_hasNormals(std::exchange(m.m_hasNormals, false)),
-    m_hasTextureCoordinates(std::exchange(m.m_hasTextureCoordinates, false)),
-    m_renderDataID(std::exchange(m.m_renderDataID, 0)),
-    m_vertices(std::move(m.m_vertices)),
-    m_faces(std::move(m.m_faces))
-  {}
-
+  Mesh(std::vector<Vertex>& vertices_, std::vector<Triple>& faces_,
+       bool normals = false, bool textures = false);
+  Mesh(Mesh&& m) noexcept;
   ~Mesh();
 
-  Mesh& operator=(Mesh &&m) noexcept
-  {
-    if (this != &m)
-    {
-      m_objectName = std::exchange(m.m_objectName, "");
-      m_hasNormals = std::exchange(m.m_hasNormals, false);
-      m_hasTextureCoordinates = std::exchange(m.m_hasTextureCoordinates, false);
-      m_renderDataID = std::exchange(m.m_renderDataID, 0);
-      m_vertices = std::move(m.m_vertices);
-      m_faces = std::move(m.m_faces);
-    }
-
-    return *this;
-  }
+  Mesh& operator=(Mesh&& m) noexcept;
 
   Mesh Copy() const;
 
@@ -152,6 +126,9 @@ public:
   {
     return m_material;
   }
+
+  void AddTexture(const Texture* pTexture);
+  const std::vector<const Texture*>& GetTextures() const { return m_textures; }
 
   const BoundingBox& GetBoundingBox() const
   {

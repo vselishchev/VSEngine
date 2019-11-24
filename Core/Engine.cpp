@@ -15,15 +15,15 @@ void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 Engine::Engine()
 {
   Initialize();
-  renderer = new Renderer();
+  m_pRenderer = new Renderer();
 }
 
-Engine::Engine(std::string title, unsigned short width, unsigned short height,
-               unsigned short majorVersion, unsigned short minorVersion) :
-  appInfo{title, width, height, majorVersion, minorVersion}
+Engine::Engine(const std::string& title, unsigned short width, unsigned short height,
+               unsigned short majorVersion, unsigned short minorVersion)
+  : m_appInfo{title, width, height, majorVersion, minorVersion}
 {
   Initialize();
-  renderer = new Renderer();
+  m_pRenderer = new Renderer();
 }
 
 Engine::~Engine()
@@ -33,40 +33,40 @@ Engine::~Engine()
 
 void Engine::ProcessKeyInput()
 {
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+  if (glfwGetKey(m_pWindow, GLFW_KEY_W) == GLFW_PRESS)
   {
-    scene->MoveCamera(MoveDirection::Forward);
+    m_pScene->MoveCamera(MoveDirection::Forward);
   }
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+  if (glfwGetKey(m_pWindow, GLFW_KEY_S) == GLFW_PRESS)
   {
-    scene->MoveCamera(MoveDirection::Back);
+    m_pScene->MoveCamera(MoveDirection::Back);
   }
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+  if (glfwGetKey(m_pWindow, GLFW_KEY_A) == GLFW_PRESS)
   {
-    scene->MoveCamera(MoveDirection::Left);
+    m_pScene->MoveCamera(MoveDirection::Left);
   }
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+  if (glfwGetKey(m_pWindow, GLFW_KEY_D) == GLFW_PRESS)
   {
-    scene->MoveCamera(MoveDirection::Right);
+    m_pScene->MoveCamera(MoveDirection::Right);
   }
-  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+  if (glfwGetKey(m_pWindow, GLFW_KEY_Q) == GLFW_PRESS)
   {
-    scene->MoveCamera(MoveDirection::Up);
+    m_pScene->MoveCamera(MoveDirection::Up);
   }
-  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+  if (glfwGetKey(m_pWindow, GLFW_KEY_E) == GLFW_PRESS)
   {
-    scene->MoveCamera(MoveDirection::Down);
+    m_pScene->MoveCamera(MoveDirection::Down);
   }
 }
 
 void Engine::Start()
 {
-  projectionMatrix =
-    glm::perspective(fov, static_cast<float>(appInfo.windowWidth) /
-                     static_cast<float>(appInfo.windowHeight), 0.1f, 10000.0f);
+  m_projectionMatrix =
+    glm::perspective(m_fov, static_cast<float>(m_appInfo.windowWidth) /
+                     static_cast<float>(m_appInfo.windowHeight), 0.1f, 10000.0f);
 
-  renderer->RenderStart();
-  scene->LoadScene();
+  m_pRenderer->RenderStart();
+  m_pScene->LoadScene();
 
   bool running = true;
 
@@ -76,62 +76,61 @@ void Engine::Start()
 
     static double prevTime = 0;
     const float delta = static_cast<float>(time - prevTime);
-    scene->GetCamera().SetSpeed(delta * 20.0f);
+    m_pScene->GetCamera().SetSpeed(delta * 20.0f);
     prevTime = time;
 
     ProcessKeyInput();
 
-    renderer->Render(time, scene, projectionMatrix);
+    m_pRenderer->Render(time, m_pScene, m_projectionMatrix);
 
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(m_pWindow);
     glfwPollEvents();
 
-    running &= (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE);
-    running &= (glfwWindowShouldClose(window) != GL_TRUE);
+    running &= (glfwGetKey(m_pWindow, GLFW_KEY_ESCAPE) == GLFW_RELEASE);
+    running &= (glfwWindowShouldClose(m_pWindow) != GL_TRUE);
   } while (running);
 }
 
 void Engine::Finish()
 {
-  renderer->RenderFinish();
+  m_pRenderer->RenderFinish();
 }
 
 void Engine::Initialize()
 {
   glfwInit();
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, appInfo.majorVersion);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, appInfo.minorVersion);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, m_appInfo.majorVersion);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, m_appInfo.minorVersion);
 
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_SAMPLES, 0);
 
-  window = glfwCreateWindow(appInfo.windowWidth, appInfo.windowHeight,
-                            appInfo.title.c_str(), nullptr,
-                            nullptr);
+  m_pWindow = glfwCreateWindow(m_appInfo.windowWidth, m_appInfo.windowHeight,
+                               m_appInfo.title.c_str(), nullptr, nullptr);
 
-  if (!window)
+  if (!m_pWindow)
   {
     fprintf(stderr, "Window opening failure\n");
     return;
   }
 
-  glfwMakeContextCurrent(window);
+  glfwMakeContextCurrent(m_pWindow);
 
-  glfwSetCursorPosCallback(window, MouseCallbacks);
-  glfwSetScrollCallback(window, ScrollCallback);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(m_pWindow, MouseCallbacks);
+  glfwSetScrollCallback(m_pWindow, ScrollCallback);
+  glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void Engine::Release()
 {
-  delete renderer;
+  delete m_pRenderer;
 
-  if (window)
+  if (m_pWindow)
   {
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(m_pWindow);
   }
 
   glfwTerminate();
@@ -139,22 +138,22 @@ void Engine::Release()
 
 void Engine::UpdateFoV(float deltaFoV)
 {
-  if (fov > 1.0f && fov < 50.0f)
+  if (m_fov > 1.0f && m_fov < 50.0f)
   {
-    fov -= deltaFoV;
+    m_fov -= deltaFoV;
   }
-  else if (fov <= 1.0f)
+  else if (m_fov <= 1.0f)
   {
-    fov = 1.0f;
+    m_fov = 1.0f;
   }
-  else if (fov >= 50.0f)
+  else if (m_fov >= 50.0f)
   {
-    fov = 50.0f;
+    m_fov = 50.0f;
   }
 
-  projectionMatrix =
-    glm::perspective(fov, static_cast<float>(appInfo.windowWidth) /
-                     static_cast<float>(appInfo.windowHeight), 0.1f, 1000.0f);
+  m_projectionMatrix =
+    glm::perspective(m_fov, static_cast<float>(m_appInfo.windowWidth) /
+                     static_cast<float>(m_appInfo.windowHeight), 0.1f, 1000.0f);
 }
 
 void MouseCallbacks(GLFWwindow *window, double xPos, double yPos)

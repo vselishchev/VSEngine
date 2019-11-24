@@ -44,8 +44,40 @@ void BoundingBox::AddPoint(const glm::vec3 &point)
   }
 }
 
+Mesh::Mesh(std::vector<Vertex>& vertices_, std::vector<Triple>& faces_,
+     bool normals, bool textures)
+  : m_hasNormals(normals)
+  , m_hasTextureCoordinates(textures)
+  , m_vertices(std::move(vertices_))
+  , m_faces(std::move(faces_))
+{}
+
+Mesh::Mesh(Mesh&& m) noexcept
+  : m_objectName(m.m_objectName)
+  , m_hasNormals(std::exchange(m.m_hasNormals, false))
+  , m_hasTextureCoordinates(std::exchange(m.m_hasTextureCoordinates, false))
+  , m_renderDataID(std::exchange(m.m_renderDataID, 0))
+  , m_vertices(std::move(m.m_vertices))
+  , m_faces(std::move(m.m_faces))
+{}
+
 Mesh::~Mesh()
 {
+}
+
+Mesh& Mesh::operator=(Mesh&& m) noexcept
+{
+  if (this != &m)
+  {
+    m_objectName = std::exchange(m.m_objectName, "");
+    m_hasNormals = std::exchange(m.m_hasNormals, false);
+    m_hasTextureCoordinates = std::exchange(m.m_hasTextureCoordinates, false);
+    m_renderDataID = std::exchange(m.m_renderDataID, 0);
+    m_vertices = std::move(m.m_vertices);
+    m_faces = std::move(m.m_faces);
+  }
+
+  return *this;
 }
 
 // TODO: Implement own object loader
@@ -139,6 +171,11 @@ Mesh Mesh::Copy() const
   std::vector<Triple> faces_(m_faces);
 
   return Mesh(vertices_, faces_);
+}
+
+void Mesh::AddTexture(const Texture* pTexture)
+{
+  m_textures.push_back(pTexture);
 }
 
 void Mesh::BindMesh()

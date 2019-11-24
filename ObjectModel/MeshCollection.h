@@ -19,7 +19,8 @@ public:
   
   size_t                    GetMeshesCount() const { return m_meshesMap.size(); }
   // Single .obj file can contain multiple meshes.
-  const std::vector<Mesh*>& GetMeshes(const std::string& pathToObject) const;
+  bool                      HasMeshByPath(const std::string& pathToMesh) const;
+  const std::vector<Mesh*>& GetMeshes(const std::string& pathToMesh) const;
 
 private:
   std::unordered_map<size_t, std::vector<Mesh*>> m_meshesMap;

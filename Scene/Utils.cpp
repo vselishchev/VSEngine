@@ -6,11 +6,16 @@
 
 #include "Components/SceneObject.h"
 
-namespace VSEngine
-{
+#include "Core/Engine.h"
+#include "Renderer/Renderer.h"
 
-namespace
-{
+#include <thread>
+
+extern VSEngine::Engine g_Eng;
+
+namespace VSEngine {
+namespace {
+
 glm::vec3 GetGLMFromAssimp(const aiColor3D& color)
 {
   return glm::vec3(color.r, color.g, color.b);
@@ -23,8 +28,26 @@ glm::vec4 GetGLMFromAssimp(const aiColor4D& color)
 
 }
 
+// TODO: Find better place for MeshCollection.
+static MeshCollection meshCollection;
+// ~TODO
+
+void ProcessNode(aiNode* node, const aiScene* scene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile);
+Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& pathToFile);
+Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh, const std::string& pathToFile);
+
 std::vector<SceneObject*> LoadFile(const std::string& pathToFile)
 {
+  if (meshCollection.HasMeshByPath(pathToFile))
+  {
+    const std::vector<Mesh*>& meshes = meshCollection.GetMeshes(pathToFile);
+    std::vector<SceneObject*> sceneObjects(meshes.size());
+    for (Mesh* pMesh : meshes)
+    {
+      sceneObjects.push_back(new SceneObject(*pMesh));
+    }
+    return std::move(sceneObjects);
+  }
   // TODO: Replace Assimp with own object loader
   Assimp::Importer importer;
 
@@ -34,39 +57,42 @@ std::vector<SceneObject*> LoadFile(const std::string& pathToFile)
                                          aiProcess_Triangulate |
                                          aiProcess_FlipUVs));
 
+  std::vector<SceneObject*> sceneObjects;
+
   if (!scene)
-  {
-    return;
-  }
+    return sceneObjects;
 
-  ProcessNode(scene->mRootNode, scene);
+  ProcessNode(scene->mRootNode, scene, sceneObjects, pathToFile);
 
-  VSEngine::SceneObjectsMap.AddSceneObject(this);
+  return std::move(sceneObjects);
 }
 
-void ProcessNode(aiNode* node, const aiScene* scene)
+void ProcessNode(aiNode* node, const aiScene* scene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile)
 {
-  unsigned int meshesCount = node->mNumMeshes;
-
-  for (unsigned int i = 0; i < meshesCount; ++i)
+  const size_t meshesCount = node->mNumMeshes;
+  for (size_t i = 0; i < meshesCount; ++i)
   {
-    ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene);
+    Mesh* pMesh = ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene, pathToFile);
+    // TODO: Add SceneObject.
+    meshCollection.AddMesh(pMesh);
+    sceneObjects.push_back(new SceneObject(*pMesh));
   }
 
-  for (unsigned int i = 0; i < node->mNumChildren; ++i)
+  const size_t childrenCount = node->mNumChildren;
+  for (size_t i = 0; i < childrenCount; ++i)
   {
-    ProcessNode(node->mChildren[i], scene);
+    ProcessNode(node->mChildren[i], scene, sceneObjects, pathToFile);
   }
 }
 
-void ProcessMesh(aiMesh* mesh, const aiScene* scene)
+Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& pathToFile)
 {
   std::vector<VSEngine::Vertex> vertices;
-  char hasTexture = false;
+  bool hasTexture = false;
 
   auto verticesParse = [](aiMesh* mesh,
                           std::vector<VSEngine::Vertex>* vertices,
-                          char* hasTexture) {
+                          bool* hasTexture) {
     for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
     {
       VSEngine::Vertex vertex;
@@ -110,17 +136,16 @@ void ProcessMesh(aiMesh* mesh, const aiScene* scene)
   verticesThread.join();
   indicesThread.join();
 
-  std::shared_ptr<VSEngine::Mesh> resultingMesh(new VSEngine::Mesh(vertices, indices,
-                                                                   true, hasTexture));
+  Mesh* resultingMesh = new VSEngine::Mesh(vertices, indices, true, hasTexture);
 
   aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-  resultingMesh->SetMaterial(ProcessMaterial(material, resultingMesh.get()));
+  resultingMesh->SetMaterial(ProcessMaterial(material, resultingMesh, pathToFile));
 
-  meshes.push_back(resultingMesh);
+  return resultingMesh;
 }
 
-Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh)
+Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh, const std::string& pathToFile)
 {
   std::size_t found = pathToFile.find_last_of("/\\");
   std::string fileFolder = pathToFile.substr(0, found);
@@ -136,8 +161,8 @@ Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh)
     if (mat->GetTexture(aiTextureType_DIFFUSE, j, &texPath) == AI_SUCCESS)
     {
       std::string diffuseTexturePath = texPath.C_Str();
-      mesh->textures.push_back(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + diffuseTexturePath,
-                                                                   TextureType::Diffuse));
+      mesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + diffuseTexturePath,
+                                                           TextureType::Diffuse));
     }
   }
 
@@ -149,8 +174,8 @@ Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh)
     if (mat->GetTexture(aiTextureType_SPECULAR, j, &texPath) == AI_SUCCESS)
     {
       std::string specularTexturePath = texPath.C_Str();
-      mesh->textures.push_back(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + specularTexturePath,
-                                                                   TextureType::Specular));
+      mesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + specularTexturePath,
+                                                           TextureType::Specular));
     }
   }
 

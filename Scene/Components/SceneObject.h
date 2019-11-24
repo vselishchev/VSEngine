@@ -18,7 +18,7 @@ class SceneObject
 {
 public:
   SceneObject() = delete;
-  explicit SceneObject(VSEngine::Mesh* m);
+  explicit SceneObject(VSEngine::Mesh& m);
   SceneObject(const SceneObject &obj);
   SceneObject(SceneObject &&obj) noexcept;
   ~SceneObject();
@@ -38,22 +38,18 @@ public:
 
   void ResetTransform() { m_transformation = glm::mat4(1.0f); }
 
-  const std::string& GetFilePath() const { return m_mesh->GetFilePath(); }
+  const std::string& GetFilePath() const { return m_mesh.GetFilePath(); }
 
   void SetObjectColor(const glm::vec3 &col);
   const glm::vec3& GetObjectColor() const { return m_color; }
 
-private:
-  void ImportModel();
-  void ProcessNode(aiNode *node, const aiScene *scene);
-  void ProcessMesh(aiMesh *mesh, const aiScene *scene);
-  Material ProcessMaterial(aiMaterial *mat, VSEngine::Mesh *mesh);
+  Mesh& GetMesh() const { return m_mesh; }
 
 private:
   glm::mat4 m_transformation = glm::mat4(1.0f);
   glm::vec3 m_color = glm::vec3(0.0f);
 
-  Mesh* m_mesh;
+  Mesh& m_mesh;
 };
 
 }

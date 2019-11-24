@@ -6,6 +6,8 @@
 
 #include <glm/ext/matrix_transform.hpp>
 
+#include "Scene/Utils.h"
+
 #include <memory>
 
 VSEngine::Engine g_Eng("VS Engine", 1200, 800);
@@ -14,40 +16,52 @@ int main()
 {
   std::string filePath1 = "D:/Work/Models/nanosuit/nanosuit.obj";
 
-  VSEngine::SceneObject *obj = new VSEngine::SceneObject(filePath1);
-  obj->Scale(2.0f);
-  obj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
-  obj->Translate(60.0f, 0.0f, 30.0f);
+  VSEngine::Scene* pScene = new VSEngine::Scene();
+  g_Eng.SetScene(pScene);
+
+  std::vector<VSEngine::SceneObject*> objects = VSEngine::LoadFile(filePath1);
+  for (VSEngine::SceneObject* pObj : objects)
+  {
+    pScene->AddSceneObject(pObj);
+    pObj->Scale(2.0f);
+    pObj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
+    pObj->Translate(60.0f, 0.0f, 30.0f);
+  }
 
   std::string filePath2 = "D:/Work/Models/cube/cube.obj";//"D:/Work/Models/sponza/sponza.obj";
-  VSEngine::SceneObject *obj2 = new VSEngine::SceneObject(filePath2);
-  obj2->Scale(20.0f);
-  obj2->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
-  obj2->Translate(-20.0f, 0.0f, -20.0f);
+  std::vector<VSEngine::SceneObject*> objects2 = VSEngine::LoadFile(filePath2);
+  for (VSEngine::SceneObject* pObj : objects2)
+  {
+    pScene->AddSceneObject(pObj);
+    pObj->Scale(20.0f);
+    pObj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
+    pObj->Translate(-20.0f, 0.0f, -20.0f);
+  }
 
-  VSEngine::SceneObject *obj3 = new VSEngine::SceneObject(filePath2);
-  obj3->Scale(10.0f);
-  obj3->Rotate(glm::vec3(1.0f, 1.0f, 0.0f), 45.0f);
-  obj3->Translate(-80.0f, 20.0f, -20.0f);
+  std::vector<VSEngine::SceneObject*> objects3 = VSEngine::LoadFile(filePath2);
+  for (VSEngine::SceneObject* pObj : objects3)
+  {
+    pScene->AddSceneObject(pObj);
+    pObj->Scale(10.0f);
+    pObj->Rotate(glm::vec3(1.0f, 1.0f, 0.0f), 45.0f);
+    pObj->Translate(-80.0f, 20.0f, -20.0f);
+  }
 
-  VSEngine::SceneObject *obj4 = new VSEngine::SceneObject(filePath2);
-  obj4->Scale(20.0f);
-  obj4->Rotate(glm::vec3(-1.0f, 1.0f, 0.0f), 60.0f);
-  obj4->Translate(40.0f, 20.0f, -20.0f);
+  std::vector<VSEngine::SceneObject*> objects4 = VSEngine::LoadFile(filePath2);
+  for (VSEngine::SceneObject* pObj : objects4)
+  {
+    pScene->AddSceneObject(pObj);
+    pObj->Scale(20.0f);
+    pObj->Rotate(glm::vec3(-1.0f, 1.0f, 0.0f), 60.0f);
+    pObj->Translate(40.0f, 20.0f, -20.0f);
+  }
   
-  std::shared_ptr<VSEngine::Scene> scene(new VSEngine::Scene());
-  scene->AddSceneObject(obj);
-  scene->AddSceneObject(obj2);
-  scene->AddSceneObject(obj3);
-  scene->AddSceneObject(obj4);
-
   VSEngine::Camera cam(glm::vec3(0.0f, 0.0f, -50.0f),
                        glm::vec3(0.0f, 0.0f, -1.0f),
                        glm::vec3(0.0f, 1.0f, 0.0f));
  
-  scene->SetCamera(cam);
+  pScene->SetCamera(cam);
 
-  g_Eng.SetScene(scene.get());
   g_Eng.Start();
 
   return 0;

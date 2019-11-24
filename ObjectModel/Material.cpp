@@ -14,7 +14,7 @@ Material::Material(const Material& mat):
 {
 }
 
-Material::Material(Material&& mat) :
+Material::Material(Material&& mat) noexcept :
   diffuseMaps(std::move(mat.diffuseMaps)),
   specularMaps(std::move(mat.specularMaps)),
   ambient(std::exchange(mat.ambient, glm::vec3(1.0f))),
@@ -36,14 +36,17 @@ const Material& Material::operator=(const Material &mat)
   return *this;
 }
 
-const Material& Material::operator=(Material &&mat)
+const Material& Material::operator=(Material &&mat) noexcept
 {
-  diffuseMaps = std::move(mat.diffuseMaps);
-  specularMaps = std::move(mat.specularMaps);
-  ambient = std::exchange(mat.ambient, glm::vec3(1.0f));
-  diffuse = std::exchange(mat.diffuse, glm::vec3(1.0f));
-  specular = std::exchange(mat.specular, glm::vec3(1.0f));
-  shininess = std::exchange(mat.shininess, 32.0f);
+  if (this != &mat)
+  {
+    diffuseMaps = std::move(mat.diffuseMaps);
+    specularMaps = std::move(mat.specularMaps);
+    ambient = std::exchange(mat.ambient, glm::vec3(1.0f));
+    diffuse = std::exchange(mat.diffuse, glm::vec3(1.0f));
+    specular = std::exchange(mat.specular, glm::vec3(1.0f));
+    shininess = std::exchange(mat.shininess, 32.0f);
+  }
 
   return *this;
 }

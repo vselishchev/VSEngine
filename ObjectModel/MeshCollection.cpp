@@ -3,8 +3,14 @@
 
 #include <functional>
 
-namespace VSEngine
-{
+namespace VSEngine {
+namespace {
+
+constexpr std::hash<std::string> hasher;
+
+}
+
+
 MeshCollection::~MeshCollection()
 {
   for (auto& stringMeshesPair : m_meshesMap)
@@ -24,25 +30,37 @@ void MeshCollection::AddMesh(Mesh *mesh)
     return;
   }
 
-  constexpr std::hash<std::string> hasher;
-
   const size_t meshHash = hasher(mesh->GetFilePath());
   auto meshIt = m_meshesMap.find(meshHash);
   if (meshIt == m_meshesMap.end())
   {
     std::vector<Mesh*> newVect;
     newVect.push_back(mesh);
-    m_meshesMap.try_emplace(meshHash, newVect);
+    m_meshesMap.emplace(meshHash, newVect);
     return;
   }
 
   meshIt->second.push_back(mesh);
 }
 
+bool MeshCollection::HasMeshByPath(const std::string& pathToMesh) const
+{
+  const size_t meshHash = hasher(pathToMesh);
+  if (m_meshesMap.find(meshHash) == m_meshesMap.end())
+  {
+    return false;
+  }
+
+  return true;
+}
+
 const std::vector<Mesh*>& MeshCollection::GetMeshes(const std::string &pathToObject) const
 {
-  constexpr std::hash<std::string> hasher;
+  if (HasMeshByPath(pathToObject) == false)
+  {
+    return std::vector<Mesh*>();
+  }
 
-  return m_meshesMap[hasher(pathToObject)];
+  return m_meshesMap.at(hasher(pathToObject));
 }
 }

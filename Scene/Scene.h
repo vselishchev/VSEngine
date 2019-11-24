@@ -42,7 +42,7 @@ public:
   unsigned short GetLightsCount() const { return lightSourcesCount; }
   const Light* GetLights() const { return lights; }
 
-  const std::list<SceneObject*> GetSceneObjects() const { return sceneObjects; }
+  const std::list<SceneObject*>& GetSceneObjects() const { return sceneObjects; }
 
 private:
   Camera camera = Camera(glm::vec3(0.0f, 1.0f, 0.0f),

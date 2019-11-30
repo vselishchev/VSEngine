@@ -136,53 +136,52 @@ void Renderer::Render(double time, const Scene *scene, const glm::mat4 &projMatr
 
     programShader.SetVec3("meshColor", object->GetObjectColor());
 
-    for (auto &mesh : object->GetMeshes())
+    Mesh& mesh = object->GetMesh();
+    const Material &meshMaterial = mesh.GetMaterial();
+    programShader.SetInt("material.diffuseMap", 0);
+    programShader.SetInt("material.specularMap", 1);
+
+    programShader.SetVec3("material.ambient", meshMaterial.ambient);
+    programShader.SetVec3("material.diffuse", meshMaterial.diffuse);
+    programShader.SetVec3("material.specular", meshMaterial.specular);
+    programShader.SetFloat("material.shininess", meshMaterial.shininess);
+
+    unsigned int diffuseCounter = 0;
+    unsigned int specularCounter = 0;
+
+    const std::vector<const Texture*>& textures = mesh.GetTextures();
+    for (size_t i = 0; i < textures.size(); ++i)
     {
-      const Material &meshMaterial = mesh->GetMaterial();
-      programShader.SetInt("material.diffuseMap", 0);
-      programShader.SetInt("material.specularMap", 1);
+      glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(i));
 
-      programShader.SetVec3("material.ambient", meshMaterial.ambient);
-      programShader.SetVec3("material.diffuse", meshMaterial.diffuse);
-      programShader.SetVec3("material.specular", meshMaterial.specular);
-      programShader.SetFloat("material.shininess", meshMaterial.shininess);
-
-      unsigned int diffuseCounter = 0;
-      unsigned int specularCounter = 0;
-
-      for (size_t i = 0; i < mesh->textures.size(); ++i)
+      std::string uniformName;
+      if (textures[i]->type == TextureType::Diffuse)
       {
-        glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(i));
-
-        std::string uniformName;
-        if (mesh->textures[i]->type == TextureType::Diffuse)
-        {
-          uniformName = "material.diffuseMap" + std::to_string(++diffuseCounter);
-        }
-        else if (mesh->textures[i]->type == TextureType::Specular)
-        {
-          uniformName = "material.specularMap" + std::to_string(++specularCounter);
-        }
-
-        programShader.SetInt(uniformName, static_cast<int>(i));
-
-        glBindTexture(GL_TEXTURE_2D, mesh->textures[i]->id);
+        uniformName = "material.diffuseMap" + std::to_string(++diffuseCounter);
+      }
+      else if (textures[i]->type == TextureType::Specular)
+      {
+        uniformName = "material.specularMap" + std::to_string(++specularCounter);
       }
 
-      const RenderData *renderData = renderObjectsMap[mesh->renderDataID];
+      programShader.SetInt(uniformName, static_cast<int>(i));
 
-      glBindVertexArray(renderData->vao);
-
-      glDrawElements(GL_TRIANGLES, mesh->IndicesCount() * 3, GL_UNSIGNED_SHORT, 0);
+      glBindTexture(GL_TEXTURE_2D, textures[i]->id);
     }
+
+    const RenderData *renderData = renderObjectsMap[mesh.GetMeshRenderDataId()];
+
+    glBindVertexArray(renderData->vao);
+
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.IndicesCount() * 3), GL_UNSIGNED_SHORT, 0);
   }
 }
 
-unsigned long Renderer::GenerateMeshRenderData(const Mesh *mesh)
+size_t Renderer::GenerateMeshRenderData(const Mesh *mesh)
 {
-  if (mesh->renderDataID)
+  if (mesh->GetMeshRenderDataId())
   {
-    return mesh->renderDataID;
+    return mesh->GetMeshRenderDataId();
   }
 
   renderObjectsMap.try_emplace(++renderDataIDCounter, new RenderData());
@@ -217,7 +216,7 @@ unsigned long Renderer::GenerateMeshRenderData(const Mesh *mesh)
                           sizeofVertex, (void*)(normalOffset));
   }
 
-  if (mesh->HasTextureCoordinated())
+  if (mesh->HasTextureCoordinates())
   {
     constexpr static size_t textureOffset = offsetof(Vertex, textureCoord);
     glEnableVertexAttribArray(2);

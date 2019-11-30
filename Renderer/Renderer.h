@@ -48,7 +48,7 @@ public:
   void RenderStart();
   void RenderFinish();
 
-  unsigned long GenerateMeshRenderData(const Mesh * mesh);
+  size_t GenerateMeshRenderData(const Mesh * mesh);
 
   void SetShaderUniform(const std::string &name, bool value) const;
   void SetShaderUniform(const std::string &name, int value) const;
@@ -81,7 +81,7 @@ public:
   VSUtils::ShaderProgram lightShader;
 
 private:
-  std::unordered_map<unsigned long, RenderData*> renderObjectsMap;
+  std::unordered_map<size_t, RenderData*> renderObjectsMap;
   std::unordered_map<std::string, Texture*> texturesMap; // maps paths to textures 
 
   unsigned long renderDataIDCounter = 0;

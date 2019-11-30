@@ -14,10 +14,10 @@ class Material
 public: 
   Material() {}
   Material(const Material &mat);
-  Material(Material &&mat);
+  Material(Material &&mat) noexcept;
 
   const Material& operator=(const Material &mat);
-  const Material& operator=(Material &&mat);
+  const Material& operator=(Material &&mat) noexcept;
 
 public:
   std::unordered_set<std::string> diffuseMaps;

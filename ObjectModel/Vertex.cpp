@@ -26,7 +26,7 @@ const Vertex& Vertex::operator=(const Vertex &rhs)
 
   return *this;
 }
-const Vertex& Vertex::operator=(Vertex &&rhs)
+const Vertex& Vertex::operator=(Vertex &&rhs) noexcept
 {
   point = std::move(rhs.point);
   normal = std::move(rhs.normal);

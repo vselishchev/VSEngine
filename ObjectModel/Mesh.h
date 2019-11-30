@@ -9,13 +9,14 @@
 
 #include "Renderer/RenderData.h"
 
-namespace VSUtils
-{
+namespace VSUtils {
+
 class ShaderProgram;
+
 }
 
-namespace VSEngine
-{
+namespace VSEngine {
+
 enum class TextureType : char
 {
   Diffuse,
@@ -84,78 +85,59 @@ public:
   Mesh() = delete;
 
   // Moves vectors
-  Mesh(std::vector<Vertex> &vertices_, std::vector<Triple> &faces_, 
-       bool normals = false, bool textures = false):
-      hasNormals(normals),
-      hasTextureCoordinates(textures),
-      vertices(std::move(vertices_)),
-      faces(std::move(faces_))
-  {
-  }
-
-  Mesh(Mesh &&m) :
-      objectName(m.objectName),
-      hasNormals(std::exchange(m.hasNormals, false)),
-      hasTextureCoordinates(std::exchange(m.hasTextureCoordinates, false)),
-      renderDataID(std::exchange(m.renderDataID, 0)),
-      vertices(std::move(m.vertices)),
-      faces(std::move(m.faces))
-  {
-  }
-
+  Mesh(std::vector<Vertex>& vertices_, std::vector<Triple>& faces_,
+       bool normals = false, bool textures = false);
+  Mesh(Mesh&& m) noexcept;
   ~Mesh();
 
-  Mesh& operator=(Mesh &&m)
-  {
-    objectName = std::exchange(m.objectName, "");
-    hasNormals = std::exchange(m.hasNormals, false);
-    hasTextureCoordinates = std::exchange(m.hasTextureCoordinates, false);
-    renderDataID = std::exchange(m.renderDataID, 0);
-    vertices = std::move(m.vertices);
-    faces = std::move(m.faces);
-
-    return *this;
-  }
+  Mesh& operator=(Mesh&& m) noexcept;
 
   Mesh Copy() const;
 
-  unsigned long VerticesCount() const { return static_cast<unsigned long>(vertices.size()); }
-  unsigned long IndicesCount() const { return static_cast<unsigned long>(faces.size()); }
+  size_t VerticesCount() const { return m_vertices.size(); }
+  size_t IndicesCount() const { return m_faces.size(); }
 
   const std::vector<Vertex>& GetVertices() const
   {
-    return vertices;
+    return m_vertices;
   }
 
   const std::vector<Triple>& GetFaces() const
   {
-    return faces;
+    return m_faces;
   }
 
   bool HasNormals() const
   {
-    return hasNormals;
+    return m_hasNormals;
   }
 
-  bool HasTextureCoordinated() const
+  bool HasTextureCoordinates() const
   {
-    return hasTextureCoordinates;
+    return m_hasTextureCoordinates;
   }
 
   void SetMaterial(const Material &mat)
   {
-    material = mat;
+    m_material = mat;
   }
 
   const Material& GetMaterial() const
   {
-    return material;
+    return m_material;
   }
+
+  void AddTexture(const Texture* pTexture);
+  const std::vector<const Texture*>& GetTextures() const { return m_textures; }
 
   const BoundingBox& GetBoundingBox() const
   {
-    return bBox;
+    return m_bBox;
   }
+
+  size_t GetMeshRenderDataId() const { return m_renderDataID; }
+
+  const std::string& GetFilePath() const { return m_objectName; }
 
   void BindMesh();
   
@@ -168,21 +150,20 @@ public:
 
   int GetVertexID(const Vertex &vert) const;*/
 
-public:
-  unsigned long renderDataID;
+private:  
+  BoundingBox m_bBox;
+  std::string m_objectName;
 
-  BoundingBox bBox;
-  std::string objectName;
+  std::vector<const Texture*> m_textures;
+  Material m_material;
 
-  std::vector<const Texture*> textures;
-  Material material;
+  bool m_hasNormals = false;
+  bool m_hasTextureCoordinates = false;
 
-private:
-  bool hasNormals = false;
-  bool hasTextureCoordinates = false;
+  size_t m_renderDataID = 0;
 
-  std::vector<Vertex> vertices;
-  std::vector<Triple> faces;
+  std::vector<Vertex> m_vertices;
+  std::vector<Triple> m_faces;
 };
 
 }

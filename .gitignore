@@ -9,9 +9,7 @@
 *.pch
 
 # Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+*.so*.dylib
 
 # Fortran module files
 *.mod
@@ -30,7 +28,3 @@
 *.ipch
 *.opendb
 *.bak
-
-*/x64/*
-*/Debug/*
-*/Release/*

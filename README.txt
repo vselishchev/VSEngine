@@ -1,1 +1,0 @@
-Place Assimp *.dll and glew32.dll near *.exe.

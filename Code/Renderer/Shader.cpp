@@ -21,7 +21,10 @@ GLuint LoadShader(const std::string &name, GLenum type)
     return 0;
   }
 
-  std::string path = exePath + "/../../Shaders/" + name;
+  // TODO: Remove hard-coded path
+  std::string path = std::string(ROOT_PATH) + "/Code/Shaders/" + name;
+  // ~TODO
+
   std::replace(path.begin(), path.end(), '\\', '/');
 
   std::ifstream file(path.c_str());

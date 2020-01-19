@@ -82,4 +82,5 @@ add_executable(${PROJECT_NAME}
 	"Entry.cpp"
 	"${SRC}")
 
+add_compile_definitions(ROOT_PATH="${ROOT_DIR}")
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")

@@ -4,56 +4,65 @@
 #include <GL/glew.h>
 #include <glfw3.h>
 
-#include <list>
+#include <vector>
 
 #include "Scene/Components/Camera.h"
 #include "Scene/Components/Light.h"
+#include "SpatialSystem/Octree.h"
 
 #include "glm/glm.hpp"
 
-namespace VSUtils
-{
+namespace VSUtils {
 class ShaderProgram;
 }
 
-namespace VSEngine
-{
+namespace VSEngine {
 class SceneObject;
 
 class Scene
 {
 public:
-  explicit Scene();
+  Scene();
+  Scene(const Scene& other) = delete;
+  Scene(Scene&& other) = delete;
   virtual ~Scene();
 
-  void LoadScene();
-  void RenderScene(double time, const glm::mat4 &projMatrix, 
-                   const VSUtils::ShaderProgram &shaderProgram);
+  Scene& operator=(const Scene& other) = delete;
+  Scene& operator=(Scene&& other) = delete;
 
-  void AddSceneObject(SceneObject *object);
+  void                             LoadScene();
+  void                             RenderScene(double time, const glm::mat4 &projMatrix, 
+                                               const VSUtils::ShaderProgram &shaderProgram);
 
-  void SetCamera(const Camera &camera);
-  const Camera& GetCamera() const { return camera; }
-  Camera& GetCamera() { return camera; }
+  void                             AddSceneObject(SceneObject *object);
 
-  void MoveCamera(MoveDirection direction);
-  void RotateCamera(float deltaYaw, float deltaPitch);
+  void                             SetCamera(const Camera &camera);
+  const Camera&                    GetCamera() const { return m_camera; }
+  Camera&                          GetCamera() { return m_camera; }
 
-  unsigned short GetLightsCount() const { return lightSourcesCount; }
-  const Light* GetLights() const { return lights; }
+  void                             MoveCamera(MoveDirection direction);
+  void                             RotateCamera(float deltaYaw, float deltaPitch);
 
-  const std::list<SceneObject*>& GetSceneObjects() const { return sceneObjects; }
+  unsigned short                   GetLightsCount() const { return m_lights.size(); }
+  const std::vector<Light>&        GetLights() const { return m_lights; }
+
+  const std::vector<SceneObject*>& GetSceneObjects() const { return m_sortedSceneObjects; }
+
+  void                             UpdateScene();
 
 private:
-  Camera camera = Camera(glm::vec3(0.0f, 1.0f, 0.0f),
-                         glm::vec3(0.0f, -1.0f, 0.0f),
-                         glm::vec3(0.0f, 1.0f, 0.0f));
+  Camera                    m_camera = Camera(glm::vec3(0.0f, 1.0f, 0.0f),
+                                            glm::vec3(0.0f, -1.0f, 0.0f),
+                                            glm::vec3(0.0f, 1.0f, 0.0f));
+
+  std::vector<SceneObject*> m_sortedSceneObjects;
+
+  SpatialSystem::Octree     m_octree;
 
   // Light sources
-  unsigned short lightSourcesCount = 0;
-  Light *lights;
+  std::vector<Light>        m_lights;
 
-  std::list<SceneObject*> sceneObjects;
+  bool                      m_needSceneUpdate = false;
 };
 
 }

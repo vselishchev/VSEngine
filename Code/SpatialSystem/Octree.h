@@ -1,47 +1,52 @@
 #ifndef _SPATIALSYSTEM_OCTREE_H
 #define _SPATIALSYSTEM_OCTREE_H
 
-#include <list>
+#include <vector>
 #include <array>
 
-namespace VSEngine {
-namespace SpatialSystem {
+#include "Scene/Components/SceneObject.h"
+
+namespace VSEngine
+{
+namespace SpatialSystem
+{
 
 static constexpr short octCount = 8;
+static constexpr float minSize = 1.0f;
 
 class Node
 {
 public:
   Node() = delete;
-  Node(const std::list<const TreeUtils::Object3D*> &objects,
-       const TreeUtils::BoundingBox &region) :
-      m_pendingObjects(objects),
-      m_region(region)
+  Node(std::vector<VSEngine::SceneObject*>&& objects,
+       const VSUtils::BoundingBox& region)
+    : m_pendingObjects(std::move(objects))
+    , m_region(region)
+    , m_children{}
   {
   }
 
-  Node(const TreeUtils::BoundingBox &region) :
-      m_region(region)
+  Node(const VSUtils::BoundingBox& region)
+    : m_region(region)
+    , m_children{}
   {
   }
 
   void UpdateTree();
 
   // Get all the objects which containing in or intersecting with frustum
-  std::list<const TreeUtils::Object3D*> GetInFrustum(const TreeUtils::Frustum &frustum) const;
+  [[nodiscard]] std::vector<VSEngine::SceneObject*> GetInFrustum(const VSUtils::Frustum& frustum) const;
   // Get all the object from current node and subnodes;
-  std::list<const TreeUtils::Object3D*> GetSubtreeObjects() const;
+  [[nodiscard]] std::vector<VSEngine::SceneObject*> GetSubtreeObjects() const;
 
 public:
-  std::list<const TreeUtils::Object3D*> m_objects;
-  std::list<const TreeUtils::Object3D*> m_pendingObjects;
+  std::vector<VSEngine::SceneObject*> m_objects;
+  std::vector<VSEngine::SceneObject*> m_pendingObjects;
 
-  TreeUtils::BoundingBox m_region = TreeUtils::BoundingBox();
+  VSUtils::BoundingBox m_region;
 
-  std::array<Node*, 8> m_childs;
-  Node *m_parent = nullptr;
-
-  static const short m_minSize = 1;
+  std::array<Node*, 8> m_children;
+  Node* m_parent = nullptr;
 
   char m_activeNodes = 0;
   bool m_hasChildren = false;
@@ -50,17 +55,25 @@ public:
 class Octree
 {
 public:
-  Octree(const TreeUtils::BoundingBox &boundingBox);
+  Octree() = delete;
+  Octree(const VSUtils::BoundingBox& boundingBox);
+  Octree(const Octree& other) = delete;
+  Octree(Octree&& other) = delete;
+  ~Octree();
 
-  void AddObject(const TreeUtils::Object3D *object);
+  Octree& operator=(const Octree& other) = delete;
+  Octree& operator=(Octree&& other) = delete;
+
+  void AddObject(VSEngine::SceneObject* pObject);
 
   void UpdateTree();
 
   // Get all the objects which containing in or intersecting with frustum
-  std::list<const TreeUtils::Object3D*> GetObjectsInside(const TreeUtils::Frustum &frustum);
+  [[nodiscard]] std::vector<VSEngine::SceneObject*> GetObjectsInside(const VSUtils::Frustum& frustum) const;
+  [[nodiscard]] std::vector<VSEngine::SceneObject*> GetAllObjects() const;
 
 private:
-  Node *m_root = nullptr;
+  Node* m_root = nullptr;
 
   bool m_treeReady = false;
   bool m_treeBuilt = false;

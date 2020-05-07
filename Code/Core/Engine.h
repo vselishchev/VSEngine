@@ -13,6 +13,8 @@ namespace VSEngine {
 
 class Renderer;
 
+static MeshCollection meshCollection;
+
 class Engine final
 {
 public:

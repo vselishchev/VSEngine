@@ -2,7 +2,7 @@
 #define _VSENGINE_SCENE_SCENECOMPONENTS_CAMERA_H_
 
 #include <glm/glm.hpp>
-#include "Utils/CommonUtils.h"
+#include "Utils/GeometryUtils.h"
 
 namespace VSEngine
 {
@@ -24,8 +24,9 @@ public:
          const glm::vec3 &front,
          const glm::vec3 &up);
   Camera(const Camera &cam);
+  Camera(Camera&& other) noexcept;
 
-  void operator=(const Camera &cam);
+  Camera& operator=(const Camera &cam);
 
   void Set(const glm::vec3 &pos,
            const glm::vec3 &front,
@@ -39,20 +40,24 @@ public:
 
   const glm::vec3& GetViewPosition() const;
   const glm::vec3& GetViewDirection() const;
-private:
-  void Update();
 
 private:
-  glm::mat4 viewMatrix = glm::mat4(1.0f);
+  void RecalculateViewMatrix();
 
-  glm::vec3 position;
-  glm::vec3 frontDirection;
-  glm::vec3 upDirection;
+private:
+  VSUtils::Frustum m_frustum;
 
-  float yaw = -90.0f;
-  float pitch = 0.0f;
+  glm::mat4        m_viewMatrix = glm::mat4(1.0f);
+  glm::mat4        m_projectionMatrix = glm::mat4(1.0f);
 
-  float cameraSpeed = 0.02f;
+  glm::vec3        m_position;
+  glm::vec3        m_frontDirection;
+  glm::vec3        m_upDirection;
+
+  float            m_yaw = -90.0f;
+  float            m_pitch = 0.0f;
+
+  float            m_cameraSpeed = 0.02f;
 };
 
 }

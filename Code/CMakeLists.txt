@@ -49,16 +49,16 @@ set(SRC_SHADERS
 	"Shaders/Light.vs.glsl")
 
 set(SRC_SPATIAL_SYSTEM
-	"Shaders/fragment.fs.glsl"
-	"Shaders/vertex.vs.glsl"
-	"Shaders/Light.fs.glsl"
-	"Shaders/Light.vs.glsl")
+	"SpatialSystem/Octree.h"
+	"SpatialSystem/Octree.cpp")
 
 set(SRC_UTILS
 	"Utils/Color.h"
 	"Utils/Color.cpp"
 	"Utils/CommonUtils.h"
-	"Utils/CommonUtils.cpp")
+	"Utils/CommonUtils.cpp"
+	"Utils/GeometryUtils.cpp"
+	"Utils/GeometryUtils.h")
 
 source_group("Core"              REGULAR_EXPRESSION "Core/.*")
 source_group("ObjectModel"       REGULAR_EXPRESSION "ObjectModel/.*")

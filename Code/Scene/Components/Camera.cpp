@@ -6,45 +6,50 @@ namespace VSEngine
 {
 Camera::Camera(const glm::vec3 &pos,
                const glm::vec3 &front,
-               const glm::vec3 &up) :
-    position(pos),
-    frontDirection(front),
-    upDirection(up)
+               const glm::vec3 &up)
+    : m_position(pos)
+    , m_frontDirection(front)
+    , m_upDirection(up)
 {
-  Update();
+  RecalculateViewMatrix();
 }
 
 Camera::Camera(const Camera &cam) : 
-    position(cam.position),
-    frontDirection(cam.frontDirection),
-    upDirection(cam.upDirection)
+    m_position(cam.m_position),
+    m_frontDirection(cam.m_frontDirection),
+    m_upDirection(cam.m_upDirection)
 {
-  Update();
+  RecalculateViewMatrix();
 }
 
-void Camera::operator=(const Camera &cam)
+Camera& Camera::operator=(const Camera& cam)
 {
-  position = cam.position;
-  frontDirection = cam.frontDirection;
-  upDirection = cam.upDirection;
+  if (this != &cam)
+  {
+    m_position = cam.m_position;
+    m_frontDirection = cam.m_frontDirection;
+    m_upDirection = cam.m_upDirection;
 
-  Update();
+    RecalculateViewMatrix();
+  }
+
+  return *this;
 }
 
 void Camera::Set(const glm::vec3 &pos,
                  const glm::vec3 &front,
                  const glm::vec3 &up)
 {
-  position = pos;
-  frontDirection = front;
-  upDirection = up;
+  m_position = pos;
+  m_frontDirection = front;
+  m_upDirection = up;
 
-  Update();
+  RecalculateViewMatrix();
 }
 
 void Camera::SetSpeed(float speed)
 {
-  cameraSpeed = speed;
+  m_cameraSpeed = speed;
 }
 
 void Camera::MoveCamera(MoveDirection direction)
@@ -52,28 +57,28 @@ void Camera::MoveCamera(MoveDirection direction)
   switch (direction)
   {
   case MoveDirection::Left:
-    position += glm::normalize(glm::cross(frontDirection, upDirection)) * cameraSpeed;
-    Update();
+    m_position += glm::normalize(glm::cross(m_frontDirection, m_upDirection)) * m_cameraSpeed;
+    RecalculateViewMatrix();
     break;
   case MoveDirection::Right:
-    position -= glm::normalize(glm::cross(frontDirection, upDirection)) * cameraSpeed;
-    Update();
+    m_position -= glm::normalize(glm::cross(m_frontDirection, m_upDirection)) * m_cameraSpeed;
+    RecalculateViewMatrix();
     break;
   case MoveDirection::Forward:
-    position -= frontDirection * cameraSpeed;
-    Update();
+    m_position -= m_frontDirection * m_cameraSpeed;
+    RecalculateViewMatrix();
     break;
   case MoveDirection::Back:
-    position += frontDirection * cameraSpeed;
-    Update();
+    m_position += m_frontDirection * m_cameraSpeed;
+    RecalculateViewMatrix();
     break;
   case MoveDirection::Up:
-    position += upDirection * cameraSpeed;
-    Update();
+    m_position += m_upDirection * m_cameraSpeed;
+    RecalculateViewMatrix();
     break;
   case MoveDirection::Down:
-    position -= upDirection * cameraSpeed;
-    Update();
+    m_position -= m_upDirection * m_cameraSpeed;
+    RecalculateViewMatrix();
     break;
   default:
     break;
@@ -84,44 +89,44 @@ void Camera::RotateCamera(float deltaYaw, float deltaPitch)
 {
   static const float sensitivity = 0.03f;
   
-  yaw += deltaYaw * sensitivity;
-  pitch += deltaPitch * sensitivity;
+  m_yaw += deltaYaw * sensitivity;
+  m_pitch += deltaPitch * sensitivity;
 
-  if (pitch > 89.0f)
+  if (m_pitch > 89.0f)
   {
-    pitch = 89.0f;
+    m_pitch = 89.0f;
   }
-  else if (pitch < -89.0f)
+  else if (m_pitch < -89.0f)
   {
-    pitch = -89.0f;
+    m_pitch = -89.0f;
   }
 
-  frontDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-  frontDirection.y = sin(glm::radians(pitch));
-  frontDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+  m_frontDirection.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+  m_frontDirection.y = sin(glm::radians(m_pitch));
+  m_frontDirection.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
 
-  frontDirection = glm::normalize(frontDirection);
+  m_frontDirection = glm::normalize(m_frontDirection);
 
-  Update();
+  RecalculateViewMatrix();
 }
 
 const glm::mat4& Camera::GetViewMatrix() const
 {
-  return viewMatrix;
+  return m_viewMatrix;
 }
 
 const glm::vec3& Camera::GetViewPosition() const
 {
-  return position;
+  return m_position;
 }
 
 const glm::vec3& Camera::GetViewDirection() const
 {
-  return frontDirection;
+  return m_frontDirection;
 }
 
-void Camera::Update()
+void Camera::RecalculateViewMatrix()
 {
-  viewMatrix = glm::lookAt(position, position - frontDirection, upDirection);
+  m_viewMatrix = glm::lookAt(m_position, m_position - m_frontDirection, m_upDirection);
 }
 }

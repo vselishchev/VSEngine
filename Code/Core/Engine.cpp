@@ -69,9 +69,9 @@ void Engine::Start()
   m_pScene->LoadScene();
 
   bool running = true;
-
   do
   {
+    m_pScene->UpdateScene();
     const double time = glfwGetTime();
 
     static double prevTime = 0;

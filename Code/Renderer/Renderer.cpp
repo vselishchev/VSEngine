@@ -128,7 +128,7 @@ void Renderer::Render(double time, const Scene *scene, const glm::mat4 &projMatr
   programShader.SetMat4("viewMatrix", scene->GetCamera().GetViewMatrix());
   programShader.SetMat4("projMatrix", projMatrix);
 
-  const std::list<SceneObject*> sceneObjects = scene->GetSceneObjects();
+  const std::vector<SceneObject*> sceneObjects = scene->GetSceneObjects();
 
   for (const SceneObject *object : sceneObjects)
   {
@@ -173,15 +173,15 @@ void Renderer::Render(double time, const Scene *scene, const glm::mat4 &projMatr
 
     glBindVertexArray(renderData->vao);
 
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.IndicesCount() * 3), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.FacesCount() * 3), GL_UNSIGNED_SHORT, 0);
   }
 }
 
-size_t Renderer::GenerateMeshRenderData(const Mesh *mesh)
+size_t Renderer::GenerateMeshRenderData(const Mesh& mesh)
 {
-  if (mesh->GetMeshRenderDataId())
+  if (mesh.GetMeshRenderDataId())
   {
-    return mesh->GetMeshRenderDataId();
+    return mesh.GetMeshRenderDataId();
   }
 
   renderObjectsMap.try_emplace(++renderDataIDCounter, new RenderData());
@@ -196,27 +196,28 @@ size_t Renderer::GenerateMeshRenderData(const Mesh *mesh)
 
   constexpr static GLsizei sizeofVertex = sizeof(Vertex);
 
+  const std::vector<Vertex>& vertices = mesh.GetVertices();
   glBindBuffer(GL_ARRAY_BUFFER, meshRenderData->vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeofVertex * mesh->GetVertices().size(),
-               mesh->GetVertices().data(), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeofVertex * vertices.size(),
+               vertices.data(), GL_STATIC_DRAW);
 
+  constexpr static GLsizei sizeofTriple = sizeof(VSUtils::Triple);
+
+  const std::vector<VSUtils::Triple>& faces = mesh.GetFaces();
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshRenderData->ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Triple) * mesh->GetFaces().size(),
-               mesh->GetFaces().data(), GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeofTriple * faces.size(),
+               faces.data(), GL_STATIC_DRAW);
 
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
                         sizeofVertex, nullptr);
 
-  if (mesh->HasNormals())
-  {
-    constexpr static size_t normalOffset = offsetof(Vertex, normal);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                          sizeofVertex, (void*)(normalOffset));
-  }
+  constexpr static size_t normalOffset = offsetof(Vertex, normal);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                        sizeofVertex, (void*)(normalOffset));
 
-  if (mesh->HasTextureCoordinates())
+  if (mesh.HasTextureCoordinates())
   {
     constexpr static size_t textureOffset = offsetof(Vertex, textureCoord);
     glEnableVertexAttribArray(2);
@@ -334,9 +335,9 @@ void Renderer::Initialize()
 void Renderer::SetLightningUniforms(const Scene *scene)
 {
   size_t pointLightIndex = 0;
-  const Light* lights = scene->GetLights();
+  const std::vector<Light> lights = scene->GetLights();
 
-  // Set lights uniforms
+  // Set m_lights uniforms
   for (size_t i = 0; i < scene->GetLightsCount(); ++i)
   {
     const Attenuation &attenuationParams = lights[i].GetAttenuationParamenters();

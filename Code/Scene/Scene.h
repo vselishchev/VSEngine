@@ -30,25 +30,25 @@ public:
   Scene& operator=(const Scene& other) = delete;
   Scene& operator=(Scene&& other) = delete;
 
-  void                             LoadScene();
-  void                             RenderScene(double time, const glm::mat4 &projMatrix, 
-                                               const VSUtils::ShaderProgram &shaderProgram);
+  void                                           LoadScene();
+  void                                           RenderScene(double time, const glm::mat4 &projMatrix, 
+                                                             const VSUtils::ShaderProgram &shaderProgram);
 
-  void                             AddSceneObject(SceneObject *object);
+  void                                           AddSceneObject(SceneObject *object);
 
-  void                             SetCamera(const Camera &camera);
-  const Camera&                    GetCamera() const { return m_camera; }
-  Camera&                          GetCamera() { return m_camera; }
+  void                                           SetCamera(const Camera &camera);
+  [[nodiscard]] const Camera&                    GetCamera() const { return m_camera; }
+  Camera&                                        GetCamera() { return m_camera; }
 
-  void                             MoveCamera(MoveDirection direction);
-  void                             RotateCamera(float deltaYaw, float deltaPitch);
+  void                                           MoveCamera(MoveDirection direction);
+  void                                           RotateCamera(float deltaYaw, float deltaPitch);
 
-  unsigned short                   GetLightsCount() const { return m_lights.size(); }
-  const std::vector<Light>&        GetLights() const { return m_lights; }
+  [[nodiscard]] unsigned short                   GetLightsCount() const { return m_lights.size(); }
+  [[nodiscard]] const std::vector<Light>&        GetLights() const { return m_lights; }
 
-  const std::vector<SceneObject*>& GetSceneObjects() const { return m_sortedSceneObjects; }
+  [[nodiscard]] const std::vector<SceneObject*>& GetSceneObjects() const { return m_sortedSceneObjects; }
 
-  void                             UpdateScene();
+  void                                           UpdateScene();
 
 private:
   Camera                    m_camera = Camera(glm::vec3(0.0f, 1.0f, 0.0f),

@@ -24,7 +24,7 @@ void Scene::LoadScene()
 {
   m_octree.UpdateTree();
 
-  std::vector<VSEngine::SceneObject*> objects = m_octree.GetAllObjects();
+  std::vector<SceneObject*> objects = m_octree.GetAllObjects();
   for (SceneObject *object : objects)
   {
     object->BindObject();
@@ -104,17 +104,19 @@ void Scene::UpdateScene()
 
   m_sortedSceneObjects.clear();
 
-  std::vector<SceneObject*> objects = m_octree.GetAllObjects();
-  for (SceneObject* pObject : objects)
-  {
-    //const VSUtils::IntersectionResult result = frustum.TestAABB(pObject->GetBoundingBox());
-    //if (result != VSUtils::IntersectionResult::Outside)
-    {
-      m_sortedSceneObjects.push_back(pObject);
-    }
-  }
+  const VSUtils::Frustum& frustum = m_camera.GetFrustum();
 
-  //m_sortedSceneObjects = m_octree.GetObjectsInside(frustum); // m_octree.GetAllObjects();
+  //std::vector<SceneObject*> objects = m_octree.GetAllObjects();
+  //for (SceneObject* pObject : objects)
+  //{
+  //  const VSUtils::IntersectionResult result = frustum.TestAABB(pObject->GetBoundingBox());
+  //  if (result != VSUtils::IntersectionResult::Outside)
+  //  {
+  //    m_sortedSceneObjects.push_back(pObject);
+  //  }
+  //}
+
+  m_sortedSceneObjects = m_octree.GetObjectsInside(frustum); // m_octree.GetAllObjects();
   std::sort(m_sortedSceneObjects.begin(), m_sortedSceneObjects.end(), [&](const SceneObject* lhs, const SceneObject* rhs) {
     if (lhs == nullptr || rhs == nullptr)
       return false;

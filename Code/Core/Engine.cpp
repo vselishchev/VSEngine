@@ -1,8 +1,5 @@
 #include "Engine.h"
 
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/ext/matrix_transform.hpp>
-
 #include "Renderer/Renderer.h"
 
 extern VSEngine::Engine g_Eng;
@@ -61,9 +58,8 @@ void Engine::ProcessKeyInput()
 
 void Engine::Start()
 {
-  m_projectionMatrix =
-    glm::perspective(m_fov, static_cast<float>(m_appInfo.windowWidth) /
-                     static_cast<float>(m_appInfo.windowHeight), 0.1f, 10000.0f);
+  Camera& camera = m_pScene->GetCamera();
+  camera.RecalculateProjectionMatrix();
 
   m_pRenderer->RenderStart();
   m_pScene->LoadScene();
@@ -81,7 +77,7 @@ void Engine::Start()
 
     ProcessKeyInput();
 
-    m_pRenderer->Render(time, m_pScene, m_projectionMatrix);
+    m_pRenderer->Render(time, m_pScene, camera.GetProjectionMatrix());
 
     glfwSwapBuffers(m_pWindow);
     glfwPollEvents();
@@ -136,26 +132,6 @@ void Engine::Release()
   glfwTerminate();
 }
 
-void Engine::UpdateFoV(float deltaFoV)
-{
-  if (m_fov > 1.0f && m_fov < 50.0f)
-  {
-    m_fov -= deltaFoV;
-  }
-  else if (m_fov <= 1.0f)
-  {
-    m_fov = 1.0f;
-  }
-  else if (m_fov >= 50.0f)
-  {
-    m_fov = 50.0f;
-  }
-
-  m_projectionMatrix =
-    glm::perspective(m_fov, static_cast<float>(m_appInfo.windowWidth) /
-                     static_cast<float>(m_appInfo.windowHeight), 0.1f, 1000.0f);
-}
-
 void MouseCallbacks(GLFWwindow *window, double xPos, double yPos)
 {
   static bool firstRun = true;
@@ -165,8 +141,8 @@ void MouseCallbacks(GLFWwindow *window, double xPos, double yPos)
 
   if (!firstRun)
   {
-    float deltaYaw = static_cast<float>(xPos) - lastX;
-    float deltaPitch = static_cast<float>(yPos) - lastY;
+    const float deltaYaw = static_cast<float>(xPos) - lastX;
+    const float deltaPitch = static_cast<float>(yPos) - lastY;
 
     g_Eng.GetScene()->RotateCamera(deltaYaw, deltaPitch);
   }
@@ -182,7 +158,10 @@ void MouseCallbacks(GLFWwindow *window, double xPos, double yPos)
 void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 {
   static float sensitivity = 0.05f;
-  g_Eng.UpdateFoV(static_cast<float>(yOffset) * sensitivity);
+
+  Camera& camera = g_Eng.GetScene()->GetCamera();
+  const float newFoV = camera.GetFoV() - static_cast<float>(yOffset) * sensitivity;
+  camera.SetFoV(newFoV);
 }
 
 }

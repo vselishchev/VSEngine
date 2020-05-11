@@ -110,24 +110,24 @@ void Node::UpdateTree()
   }
 }
 
-std::vector<VSEngine::SceneObject*> Node::GetInFrustum(const VSUtils::Frustum& frustum) const
+std::vector<SceneObject*> Node::GetInFrustum(const VSUtils::Frustum& frustum) const
 {
-  std::vector<VSEngine::SceneObject*> objects;
+  std::vector<SceneObject*> objects;
 
   VSUtils::IntersectionResult res =
     frustum.TestAABB(m_region);
 
   if (res == VSUtils::IntersectionResult::Inside)
   {
-    objects.insert(objects.end(), m_objects.begin(), m_objects.begin());
+    objects.insert(objects.end(), m_objects.begin(), m_objects.end());
 
-    std::vector<VSEngine::SceneObject*> subObjects =
-      GetSubtreeObjects();
-    objects.insert(objects.end(), subObjects.begin(), subObjects.begin());
+    std::vector<SceneObject*> subObjects =
+        GetSubtreeObjects();
+    objects.insert(objects.end(), subObjects.begin(), subObjects.end());
   }
   else if (res == VSUtils::IntersectionResult::Intersect)
   {
-    for (VSEngine::SceneObject* pObject : m_objects)
+    for (SceneObject* pObject : m_objects)
     {
       if (pObject == nullptr)
         continue;
@@ -143,7 +143,7 @@ std::vector<VSEngine::SceneObject*> Node::GetInFrustum(const VSUtils::Frustum& f
     {
       if (m_children[i])
       {
-        std::vector<VSEngine::SceneObject*> subObjects =
+        std::vector<SceneObject*> subObjects =
           m_children[i]->GetInFrustum(frustum);
         if (!subObjects.empty())
         {

@@ -152,13 +152,14 @@ Frustum::Frustum(float fovRadians, float aspectRatio, float zNear, float zFar, c
 
 void Frustum::GenerateFrustum(float fovRadians, float aspectRatio, float zNear, float zFar, const glm::vec3& position, const glm::vec3& frontDirection, const glm::vec3& upDirection)
 {
-  const float halfHorizontalFoV = fovRadians * 0.5f;
-  const float tgHorizontalHalfFoV =  sin(halfHorizontalFoV) / cos(halfHorizontalFoV);
+  // Add some extra angle.
+  const float halfVerticalFoV = fovRadians * 0.65f;
+  const float tgVerticalHalfFoV =  sin(halfVerticalFoV) / cos(halfVerticalFoV);
 
-  const float nearHalfWidth = zNear * tgHorizontalHalfFoV;
-  const float nearHalfHeight = nearHalfWidth / aspectRatio;
+  const float nearHalfHeight = zNear * tgVerticalHalfFoV;
+  const float nearHalfWidth = nearHalfHeight * aspectRatio;
 
-  const glm::vec3 frontDir = -frontDirection;
+  const glm::vec3 frontDir = frontDirection;
 
   const glm::vec3 nearCenter = frontDir * zNear + position;
   // Near plane.
@@ -292,15 +293,40 @@ void Frustum::GenerateFrustum(const glm::mat4& viewProj)
 
 IntersectionResult Frustum::TestAABB(const BoundingBox& aabb) const
 {
-  IntersectionResult result = IntersectionResult::Inside;
-  const glm::vec3 center = aabb.GetCenter();
+  const glm::vec3& lowerLeft = aabb.m_lowerLeft;
+  const glm::vec3& upperRight = aabb.m_upperRight;
+
+  const std::array<glm::vec3, 8> bboxPoints
+  {
+    glm::vec3(lowerLeft),
+    glm::vec3(upperRight),
+    glm::vec3(lowerLeft.x, upperRight.y, upperRight.z),
+    glm::vec3(lowerLeft.x, upperRight.y, lowerLeft.z),
+    glm::vec3(upperRight.x, upperRight.y, lowerLeft.z),
+    glm::vec3(upperRight.x, lowerLeft.y, lowerLeft.z),
+    glm::vec3(upperRight.x, lowerLeft.y, upperRight.z),
+    glm::vec3(lowerLeft.x, lowerLeft.y, upperRight.z),
+  };
+
+  unsigned char outsideFlag = 0;
   for (auto& plane : planes)
   {
+    outsideFlag = 0;
     const glm::vec3 normal(plane.a, plane.b, plane.c);
-    const float dist = dot(center, normal) + plane.d;
+    for (size_t index = 0; index < 8; ++index)
+    {
+      const float dist = dot(bboxPoints[index], normal) + plane.d;
+      if (dist < 0.0f)
+      {
+        outsideFlag |= 1 << index;
+      }
+    }
+    const unsigned short flagAsInt = static_cast<unsigned short>(outsideFlag);
+    if (flagAsInt == 255)
+      return IntersectionResult::Outside;
 
-    if (dist < 0.0f)
-      result = IntersectionResult::Outside;
+    if (flagAsInt != 0)
+      return IntersectionResult::Intersect;
   }
 
   return IntersectionResult::Inside;

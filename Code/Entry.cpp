@@ -26,9 +26,9 @@ int main()
     pObj->Translate(12.0f, 0.0f, 6.0f);
   }
 
-  //const std::string filePath2 = "D:/Work/Models/sponza/sponza.obj";
-  //std::vector<VSEngine::SceneObject*> objects2 = VSEngine::LoadFile(filePath2);
-  //for (VSEngine::SceneObject* pObj : objects2)
+  //const std::string filePath3 = "D:/Work/Models/sponza/sponza.obj";
+  //std::vector<VSEngine::SceneObject*> objects5 = VSEngine::LoadFile(filePath3);
+  //for (VSEngine::SceneObject* pObj : objects5)
   //{
   //  pScene->AddSceneObject(pObj);
   //  pObj->Scale(0.1f);
@@ -42,7 +42,7 @@ int main()
   {
     pScene->AddSceneObject(pObj);
     pObj->Scale(2.0f);
-    pObj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
+    //pObj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
     pObj->Translate(-4.0f, 0.0f, -4.0f);
   }
 
@@ -51,7 +51,7 @@ int main()
   {
     pScene->AddSceneObject(pObj);
     pObj->Scale(2.0f);
-    pObj->Rotate(glm::vec3(1.0f, 1.0f, 0.0f), 45.0f);
+    //pObj->Rotate(glm::vec3(1.0f, 1.0f, 0.0f), 45.0f);
     pObj->Translate(-16.0f, 4.0f, -4.0f);
   }
 
@@ -60,11 +60,11 @@ int main()
   {
     pScene->AddSceneObject(pObj);
     pObj->Scale(4.0f);
-    pObj->Rotate(glm::vec3(-1.0f, 1.0f, 0.0f), 60.0f);
+    //pObj->Rotate(glm::vec3(-1.0f, 1.0f, 0.0f), 60.0f);
     pObj->Translate(8.0f, 4.0f, -4.0f);
   }
   
-  VSEngine::Camera cam(glm::vec3(0.0f, 0.0f, -10.0f),
+  VSEngine::Camera cam(glm::vec3(0.0f, 0.0f, 10.0f),
                        glm::vec3(0.0f, 0.0f, -1.0f),
                        glm::vec3(0.0f, 1.0f, 0.0f));
  

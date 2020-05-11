@@ -106,25 +106,21 @@ void Scene::UpdateScene()
 
   const VSUtils::Frustum& frustum = m_camera.GetFrustum();
 
-  //std::vector<SceneObject*> objects = m_octree.GetAllObjects();
-  //for (SceneObject* pObject : objects)
-  //{
-  //  const VSUtils::IntersectionResult result = frustum.TestAABB(pObject->GetBoundingBox());
-  //  if (result != VSUtils::IntersectionResult::Outside)
-  //  {
-  //    m_sortedSceneObjects.push_back(pObject);
-  //  }
-  //}
+  constexpr auto SqDistance = [](const glm::vec3& lhs, const glm::vec3& rhs) -> float
+  {
+    const glm::vec3& diff = rhs - lhs;
+    return dot(diff, diff);
+  };
 
-  m_sortedSceneObjects = m_octree.GetObjectsInside(frustum); // m_octree.GetAllObjects();
+  m_sortedSceneObjects = m_octree.GetObjectsInside(frustum);
   std::sort(m_sortedSceneObjects.begin(), m_sortedSceneObjects.end(), [&](const SceneObject* lhs, const SceneObject* rhs) {
     if (lhs == nullptr || rhs == nullptr)
       return false;
 
     const glm::vec3& cameraPos = m_camera.GetViewPosition();
 
-    const float distToCameraLeft = distance(lhs->GetBoundingBox().GetCenter(), cameraPos);
-    const float distToCameraRight = distance(rhs->GetBoundingBox().GetCenter(), cameraPos);
+    const float distToCameraLeft = SqDistance(lhs->GetBoundingBox().GetCenter(), cameraPos);
+    const float distToCameraRight = SqDistance(rhs->GetBoundingBox().GetCenter(), cameraPos);
 
     return distToCameraLeft < distToCameraRight;
   });

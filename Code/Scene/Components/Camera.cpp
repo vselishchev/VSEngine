@@ -122,16 +122,16 @@ void Camera::MoveCamera(MoveDirection direction)
   switch (direction)
   {
   case MoveDirection::Left:
-    m_position += glm::normalize(glm::cross(m_frontDirection, m_upDirection)) * m_cameraSpeed;
-    break;
-  case MoveDirection::Right:
     m_position -= glm::normalize(glm::cross(m_frontDirection, m_upDirection)) * m_cameraSpeed;
     break;
+  case MoveDirection::Right:
+    m_position += glm::normalize(glm::cross(m_frontDirection, m_upDirection)) * m_cameraSpeed;
+    break;
   case MoveDirection::Forward:
-    m_position -= m_frontDirection * m_cameraSpeed;
+    m_position += m_frontDirection * m_cameraSpeed;
     break;
   case MoveDirection::Back:
-    m_position += m_frontDirection * m_cameraSpeed;
+    m_position -= m_frontDirection * m_cameraSpeed;
     break;
   case MoveDirection::Up:
     m_position += m_upDirection * m_cameraSpeed;
@@ -151,7 +151,7 @@ void Camera::RotateCamera(float deltaYaw, float deltaPitch)
   static const float sensitivity = 0.03f;
   
   m_yaw += deltaYaw * sensitivity;
-  m_pitch += deltaPitch * sensitivity;
+  m_pitch -= deltaPitch * sensitivity;
 
   if (m_pitch > 89.0f)
   {
@@ -247,7 +247,7 @@ void Camera::RecalculateViewMatrix()
   const glm::vec3 rightDir = glm::normalize(glm::cross(m_frontDirection, m_worldUpDirection));
   m_upDirection = glm::normalize(glm::cross(rightDir, m_frontDirection));
 
-  m_viewMatrix = glm::lookAt(m_position, m_position - m_frontDirection, m_upDirection);
+  m_viewMatrix = glm::lookAt(m_position, m_position + m_frontDirection, m_upDirection);
   RecalculateFrustum();
 }
 
@@ -267,8 +267,10 @@ const VSUtils::Frustum& Camera::GetFrustum() const
 
 void Camera::RecalculateFrustum()
 {
+  // TODO: Investigate why doesn't work in screen space.
   //const glm::mat4 viewProjMatrix = m_projectionMatrix * m_viewMatrix;
   //m_frustum.GenerateFrustum(viewProjMatrix);
+  // ~ TODO
   m_frustum.GenerateFrustum(VSUtils::DegreeToRadian(m_fov), m_aspectRatio, m_zNear, m_zFar, m_position, m_frontDirection, m_upDirection);
 }
 

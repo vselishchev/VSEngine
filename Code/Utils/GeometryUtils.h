@@ -98,9 +98,9 @@ struct Plane
 
 enum class IntersectionResult : char
 {
-  Inside,
-  Outside,
-  Intersect
+  Inside = 1,
+  Outside = 2,
+  Intersect = 4
 };
 
 class Frustum

@@ -65,12 +65,12 @@ void Engine::Start()
   m_pScene->LoadScene();
 
   bool running = true;
+  double prevTime = 0;
   do
   {
     m_pScene->UpdateScene();
     const double time = glfwGetTime();
 
-    static double prevTime = 0;
     const float delta = static_cast<float>(time - prevTime);
     m_pScene->GetCamera().SetSpeed(delta * 20.0f);
     prevTime = time;

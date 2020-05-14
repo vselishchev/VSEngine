@@ -30,9 +30,9 @@ glm::vec4 GetGLMFromAssimp(const aiColor4D& color)
 
 }
 
-void ProcessNode(aiNode* node, const aiScene* scene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile);
-Mesh* ProcessMesh(aiMesh* pAiMesh, const aiScene* scene, const std::string& pathToFile);
-Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh, const std::string& pathToFile);
+void ProcessNode(aiNode* pAiNode, const aiScene* pAiScene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile);
+Mesh* ProcessMesh(aiMesh* pAiMesh, const aiScene* pAiScene, const std::string& pathToFile);
+Material ProcessMaterial(aiMaterial* pAiMat, Mesh* pMesh, const std::string& pathToFile);
 
 std::vector<SceneObject*> LoadFile(const std::string& pathToFile)
 {
@@ -68,24 +68,24 @@ std::vector<SceneObject*> LoadFile(const std::string& pathToFile)
   return sceneObjects;
 }
 
-void ProcessNode(aiNode* node, const aiScene* scene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile)
+void ProcessNode(aiNode* pAiNode, const aiScene* pAiScene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile)
 {
-  const size_t meshesCount = node->mNumMeshes;
+  const size_t meshesCount = pAiNode->mNumMeshes;
   for (size_t i = 0; i < meshesCount; ++i)
   {
-    Mesh* pMesh = ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene, pathToFile);
+    Mesh* pMesh = ProcessMesh(pAiScene->mMeshes[pAiNode->mMeshes[i]], pAiScene, pathToFile);
     meshCollection.AddMesh(pMesh);
     sceneObjects.push_back(new SceneObject(*pMesh));
   }
 
-  const size_t childrenCount = node->mNumChildren;
+  const size_t childrenCount = pAiNode->mNumChildren;
   for (size_t i = 0; i < childrenCount; ++i)
   {
-    ProcessNode(node->mChildren[i], scene, sceneObjects, pathToFile);
+    ProcessNode(pAiNode->mChildren[i], pAiScene, sceneObjects, pathToFile);
   }
 }
 
-Mesh* ProcessMesh(aiMesh* pAiMesh, const aiScene* scene, const std::string& pathToFile)
+Mesh* ProcessMesh(aiMesh* pAiMesh, const aiScene* pAiScene, const std::string& pathToFile)
 {
   Mesh* pMesh = new Mesh(pathToFile.c_str());
 
@@ -132,14 +132,14 @@ Mesh* ProcessMesh(aiMesh* pAiMesh, const aiScene* scene, const std::string& path
   verticesThread.join();
   indicesThread.join();
 
-  aiMaterial* material = scene->mMaterials[pAiMesh->mMaterialIndex];
+  aiMaterial* material = pAiScene->mMaterials[pAiMesh->mMaterialIndex];
 
   pMesh->SetMaterial(ProcessMaterial(material, pMesh, pathToFile));
 
   return pMesh;
 }
 
-Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh, const std::string& pathToFile)
+Material ProcessMaterial(aiMaterial* pAiMat, Mesh* pMesh, const std::string& pathToFile)
 {
   const std::size_t found = pathToFile.find_last_of("/\\");
   const std::string fileFolder = pathToFile.substr(0, found);
@@ -147,44 +147,44 @@ Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh, const std::strin
   VSEngine::Material vsMaterial;
 
   const unsigned int diffuseTexturesCount =
-    mat->GetTextureCount(aiTextureType_DIFFUSE);
+    pAiMat->GetTextureCount(aiTextureType_DIFFUSE);
 
   aiString texPath;
   for (unsigned int j = 0; j < diffuseTexturesCount; ++j)
   {
-    if (mat->GetTexture(aiTextureType_DIFFUSE, j, &texPath) == AI_SUCCESS)
+    if (pAiMat->GetTexture(aiTextureType_DIFFUSE, j, &texPath) == AI_SUCCESS)
     {
       const std::string diffuseTexturePath = texPath.C_Str();
-      mesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + diffuseTexturePath,
+      pMesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + diffuseTexturePath,
                                                            TextureType::Diffuse));
     }
   }
 
   const unsigned int specularTexturesCount =
-    mat->GetTextureCount(aiTextureType_SPECULAR);
+    pAiMat->GetTextureCount(aiTextureType_SPECULAR);
 
   for (unsigned int j = 0; j < specularTexturesCount; ++j)
   {
-    if (mat->GetTexture(aiTextureType_SPECULAR, j, &texPath) == AI_SUCCESS)
+    if (pAiMat->GetTexture(aiTextureType_SPECULAR, j, &texPath) == AI_SUCCESS)
     {
       const std::string specularTexturePath = texPath.C_Str();
-      mesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + specularTexturePath,
+      pMesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + specularTexturePath,
                                                            TextureType::Specular));
     }
   }
 
   aiColor3D colorProperty;
-  mat->Get(AI_MATKEY_COLOR_AMBIENT, colorProperty);
+  pAiMat->Get(AI_MATKEY_COLOR_AMBIENT, colorProperty);
   vsMaterial.ambient = GetGLMFromAssimp(colorProperty);
 
-  mat->Get(AI_MATKEY_COLOR_DIFFUSE, colorProperty);
+  pAiMat->Get(AI_MATKEY_COLOR_DIFFUSE, colorProperty);
   vsMaterial.diffuse = GetGLMFromAssimp(colorProperty);
 
-  mat->Get(AI_MATKEY_COLOR_SPECULAR, colorProperty);
+  pAiMat->Get(AI_MATKEY_COLOR_SPECULAR, colorProperty);
   vsMaterial.specular = GetGLMFromAssimp(colorProperty);
 
   float shininess;
-  mat->Get(AI_MATKEY_SHININESS, shininess);
+  pAiMat->Get(AI_MATKEY_SHININESS, shininess);
   vsMaterial.shininess = shininess;
 
   return vsMaterial;

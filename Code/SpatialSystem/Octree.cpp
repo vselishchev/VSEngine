@@ -156,15 +156,15 @@ std::vector<SceneObject*> Node::GetInFrustum(const VSUtils::Frustum& frustum) co
   return objects;
 }
 
-std::vector<VSEngine::SceneObject*> Node::GetSubtreeObjects() const
+std::vector<SceneObject*> Node::GetSubtreeObjects() const
 {
-  std::vector<VSEngine::SceneObject*> objects(m_objects);
+  std::vector<SceneObject*> objects(m_objects);
 
   for (size_t i = 0; i < octCount; ++i)
   {
     if (m_children[i])
     {
-      std::vector<VSEngine::SceneObject*> subObjects =
+      std::vector<SceneObject*> subObjects =
         m_children[i]->GetSubtreeObjects();
       if (!subObjects.empty())
       {
@@ -186,9 +186,9 @@ Octree::~Octree()
   delete m_root;
 }
 
-void Octree::AddObject(VSEngine::SceneObject* object)
+void Octree::AddObject(SceneObject* pObject)
 {
-  m_root->m_pendingObjects.push_back(object);
+  m_root->m_pendingObjects.push_back(pObject);
 }
 
 void Octree::UpdateTree()
@@ -199,12 +199,12 @@ void Octree::UpdateTree()
   m_treeReady = true;
 }
 
-std::vector<VSEngine::SceneObject*> Octree::GetObjectsInside(const VSUtils::Frustum& frustum) const
+std::vector<SceneObject*> Octree::GetObjectsInside(const VSUtils::Frustum& frustum) const
 {
   return m_root->GetInFrustum(frustum);
 }
 
-std::vector<VSEngine::SceneObject*> Octree::GetAllObjects() const
+std::vector<SceneObject*> Octree::GetAllObjects() const
 {
   return m_root->GetSubtreeObjects();
 }

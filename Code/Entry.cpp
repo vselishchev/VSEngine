@@ -42,7 +42,7 @@ int main()
   {
     pScene->AddSceneObject(pObj);
     pObj->Scale(2.0f);
-    //pObj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
+    pObj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
     pObj->Translate(-4.0f, 0.0f, -4.0f);
   }
 
@@ -51,7 +51,7 @@ int main()
   {
     pScene->AddSceneObject(pObj);
     pObj->Scale(2.0f);
-    //pObj->Rotate(glm::vec3(1.0f, 1.0f, 0.0f), 45.0f);
+    pObj->Rotate(glm::vec3(1.0f, 1.0f, 0.0f), 45.0f);
     pObj->Translate(-16.0f, 4.0f, -4.0f);
   }
 
@@ -60,7 +60,7 @@ int main()
   {
     pScene->AddSceneObject(pObj);
     pObj->Scale(4.0f);
-    //pObj->Rotate(glm::vec3(-1.0f, 1.0f, 0.0f), 60.0f);
+    pObj->Rotate(glm::vec3(-1.0f, 1.0f, 0.0f), 60.0f);
     pObj->Translate(8.0f, 4.0f, -4.0f);
   }
   

@@ -130,13 +130,13 @@ void Renderer::Render(double time, const Scene *scene, const glm::mat4 &projMatr
 
   const std::vector<SceneObject*> sceneObjects = scene->GetSceneObjects();
 
-  for (const SceneObject *object : sceneObjects)
+  for (const SceneObject* pObject: sceneObjects)
   {
-    programShader.SetMat4("modelMatrix", object->GetTransformation());
+    programShader.SetMat4("modelMatrix", pObject->GetTransformation());
 
-    programShader.SetVec3("meshColor", object->GetObjectColor());
+    programShader.SetVec3("meshColor", pObject->GetObjectColor());
 
-    Mesh& mesh = object->GetMesh();
+    Mesh& mesh = pObject->GetMesh();
     const Material &meshMaterial = mesh.GetMaterial();
     programShader.SetInt("material.diffuseMap", 0);
     programShader.SetInt("material.specularMap", 1);
@@ -332,13 +332,13 @@ void Renderer::Initialize()
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 }
 
-void Renderer::SetLightningUniforms(const Scene *scene)
+void Renderer::SetLightningUniforms(const Scene* pScene)
 {
   size_t pointLightIndex = 0;
-  const std::vector<Light> lights = scene->GetLights();
+  const std::vector<Light>& lights = pScene->GetLights();
 
   // Set m_lights uniforms
-  for (size_t i = 0; i < scene->GetLightsCount(); ++i)
+  for (size_t i = 0; i < pScene->GetLightsCount(); ++i)
   {
     const Attenuation &attenuationParams = lights[i].GetAttenuationParamenters();
 
@@ -347,7 +347,7 @@ void Renderer::SetLightningUniforms(const Scene *scene)
     case LightType::Directional:
     {
       programShader.SetVec3("directionalLight.direction",
-                            scene->GetCamera().GetViewMatrix() * glm::vec4(lights[i].GetDirection(), 0.0f));
+                            pScene->GetCamera().GetViewMatrix() * glm::vec4(lights[i].GetDirection(), 0.0f));
 
       const glm::vec3 &lightColor = lights[i].GetColor();
       programShader.SetVec3("directionalLight.ambient", lightColor * lights[i].GetAmbient());
@@ -361,7 +361,7 @@ void Renderer::SetLightningUniforms(const Scene *scene)
       std::string indexedPointLight = "pointLights[" + std::to_string(pointLightIndex++) + "]";
 
       programShader.SetVec3(indexedPointLight + ".position",
-                            scene->GetCamera().GetViewMatrix() * glm::vec4(lights[i].GetPosition(), 1.0f));
+                            pScene->GetCamera().GetViewMatrix() * glm::vec4(lights[i].GetPosition(), 1.0f));
 
       const glm::vec3 &lightColor = lights[i].GetColor();
       programShader.SetVec3(indexedPointLight + ".ambient", lightColor * lights[i].GetAmbient());
@@ -382,11 +382,11 @@ void Renderer::SetLightningUniforms(const Scene *scene)
       programShader.SetVec3("flashlight.specular", lightColor * lights[i].GetSpecular());
 
       programShader.SetVec3("flashlight.position",
-                            scene->GetCamera().GetViewMatrix() *
-                            glm::vec4(scene->GetCamera().GetViewPosition(), 1.0f));
+                            pScene->GetCamera().GetViewMatrix() *
+                            glm::vec4(pScene->GetCamera().GetViewPosition(), 1.0f));
       programShader.SetVec3("flashlight.direction",
-                            scene->GetCamera().GetViewMatrix() *
-                            glm::vec4(-scene->GetCamera().GetViewDirection(), 0.0f));
+                            pScene->GetCamera().GetViewMatrix() *
+                            glm::vec4(-pScene->GetCamera().GetViewDirection(), 0.0f));
       programShader.SetFloat("flashlight.cutOff", lights[i].GetCutOffValue());
       programShader.SetFloat("flashlight.outerCutOff", lights[i].GetOuterCutOffValue());
 

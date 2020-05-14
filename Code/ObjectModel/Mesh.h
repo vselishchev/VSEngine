@@ -8,14 +8,17 @@
 #include <limits>
 
 #include "Renderer/RenderData.h"
+#include "Utils/GeometryUtils.h"
 
-namespace VSUtils {
+namespace VSUtils
+{
 
 class ShaderProgram;
 
 }
 
-namespace VSEngine {
+namespace VSEngine
+{
 
 enum class TextureType : char
 {
@@ -25,145 +28,71 @@ enum class TextureType : char
 
 struct Texture
 {
-  Texture(unsigned int id_, TextureType t, const std::string &pathToTexture) :
-      id(id_), type(t), path(pathToTexture) {}
-  
-  TextureType type = TextureType::Diffuse;
-  unsigned int id = 0;
+  Texture(unsigned int id_, TextureType t, const std::string& pathToTexture)
+    : path(pathToTexture)
+    , id(id_)
+    , type(t)
+  {}
+
   std::string path;
-};
-
-struct Triple
-{
-  Triple() : x(-1), y(-1), z(-1) {}
-
-  inline short& operator[](short &index)
-  {
-    return xyz[index];
-  }
-
-  union
-  {
-    short xyz[3];
-    struct
-    {
-      short x;
-      short y;
-      short z;
-    };
-  };
-};
-
-struct Triangle
-{
-  Triple vertices;
-  Triple textureCoords;
-  Triple normals;
-};
-
-struct BoundingBox
-{
-  BoundingBox() :
-    minPoint(std::numeric_limits<float>::max(), 
-             std::numeric_limits<float>::max(), 
-             std::numeric_limits<float>::max()),
-    maxPoint(std::numeric_limits<float>::min(),
-             std::numeric_limits<float>::min(),
-             std::numeric_limits<float>::min())
-  {
-  }
-
-  glm::vec3 minPoint;
-  glm::vec3 maxPoint;
-
-  void AddPoint(glm::vec3 const& point);
+  unsigned int id = 0;
+  TextureType type = TextureType::Diffuse;
 };
 
 class Mesh
 {
 public:
-  Mesh() = delete;
+  Mesh() = default;
+  Mesh(const char* szFilePath);
+  Mesh(const Mesh& other) = default;
+  Mesh(Mesh&& other) noexcept;
+  ~Mesh() = default;
 
-  // Moves vectors
-  Mesh(std::vector<Vertex>& vertices_, std::vector<Triple>& faces_,
-       bool normals = false, bool textures = false);
-  Mesh(Mesh&& m) noexcept;
-  ~Mesh();
+  Mesh& operator=(const Mesh& other);
+  Mesh& operator=(Mesh&& other) noexcept;
 
-  Mesh& operator=(Mesh&& m) noexcept;
+  void                                              AddVertex(const Vertex& vertex);
+  void                                              AddVertices(const std::vector<Vertex>& vertices);
+  [[nodiscard]] size_t                              VerticesCount() const { return m_vertices.size(); }
+  [[nodiscard]] const std::vector<Vertex>&          GetVertices() const { return m_vertices; }
 
-  Mesh Copy() const;
+  void                                              AddFace(const VSUtils::Triple& face);
+  void                                              AddFaces(const std::vector<VSUtils::Triple>& faces);
+  [[nodiscard]] size_t                              FacesCount() const { return m_faces.size(); }
+  [[nodiscard]] const std::vector<VSUtils::Triple>& GetFaces() const { return m_faces; }
 
-  size_t VerticesCount() const { return m_vertices.size(); }
-  size_t IndicesCount() const { return m_faces.size(); }
+  void                                              SetHasTextureCoordinates(bool value) { m_hasTextureCoordinates = value; }
+  [[nodiscard]] bool                                HasTextureCoordinates() const { return m_hasTextureCoordinates; }
 
-  const std::vector<Vertex>& GetVertices() const
-  {
-    return m_vertices;
-  }
+  void SetMaterial(const Material& mat) { m_material = mat; }
 
-  const std::vector<Triple>& GetFaces() const
-  {
-    return m_faces;
-  }
-
-  bool HasNormals() const
-  {
-    return m_hasNormals;
-  }
-
-  bool HasTextureCoordinates() const
-  {
-    return m_hasTextureCoordinates;
-  }
-
-  void SetMaterial(const Material &mat)
-  {
-    m_material = mat;
-  }
-
-  const Material& GetMaterial() const
-  {
-    return m_material;
-  }
+  [[nodiscard]] const Material& GetMaterial() const { return m_material; }
 
   void AddTexture(const Texture* pTexture);
-  const std::vector<const Texture*>& GetTextures() const { return m_textures; }
+  [[nodiscard]] const std::vector<const Texture*>& GetTextures() const { return m_textures; }
 
-  const BoundingBox& GetBoundingBox() const
-  {
-    return m_bBox;
-  }
+  [[nodiscard]] const VSUtils::BoundingBox& GetBoundingBox() const { return m_bBox; }
 
-  size_t GetMeshRenderDataId() const { return m_renderDataID; }
+  [[nodiscard]] size_t GetMeshRenderDataId() const { return m_renderDataID; }
 
-  const std::string& GetFilePath() const { return m_objectName; }
+  [[nodiscard]] const std::string& GetFilePath() const { return m_filePath; }
 
   void BindMesh();
-  
-// TODO: Implement own object loader
-/*private:
-  void MakeUnique(const std::vector<Point3df> &points,
-                  const std::vector<Vector3df> &normals,
-                  const std::vector<Point2df> &textureCoordinates,
-                  const std::vector<Triangle> &faces);
 
-  int GetVertexID(const Vertex &vert) const;*/
+private:
+  VSUtils::BoundingBox         m_bBox;
 
-private:  
-  BoundingBox m_bBox;
-  std::string m_objectName;
+  Material                     m_material;
 
-  std::vector<const Texture*> m_textures;
-  Material m_material;
+  size_t                       m_renderDataID = 0;
 
-  bool m_hasNormals = false;
-  bool m_hasTextureCoordinates = false;
+  std::string                  m_filePath;
 
-  size_t m_renderDataID = 0;
+  bool                         m_hasTextureCoordinates = false;
 
-  std::vector<Vertex> m_vertices;
-  std::vector<Triple> m_faces;
+  std::vector<const Texture*>  m_textures;
+  std::vector<Vertex>          m_vertices;
+  std::vector<VSUtils::Triple> m_faces;
 };
 
 }

@@ -85,10 +85,10 @@ void main()
 	vec3 viewDir = -normalize(fsIn.fragmentPosition);
 	vec3 normal = normalize(fsIn.normal);
 	vec4 diffuseTex = texture(material.diffuseMap1, fsIn.textureCoord);
-	//if (diffuseTex.a < 0.01)
-	//{
-	//	discard;
-	//}
+//	if (diffuseTex.a < 0.01)
+//	{
+//		discard;
+//	}
 
 	vec4 specularTex = texture(material.specularMap1, fsIn.textureCoord);
 

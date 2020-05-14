@@ -13,6 +13,8 @@ namespace VSEngine {
 
 class Renderer;
 
+static MeshCollection meshCollection;
+
 class Engine final
 {
 public:
@@ -30,8 +32,6 @@ public:
   {
     return m_appInfo.windowWidth;
   }
-
-  void UpdateFoV(float deltaFoV);
 
   void SetScene(Scene *scene_)
   {
@@ -70,12 +70,10 @@ public:
   MeshCollection meshCollection;
 
 private:
-  glm::mat4 m_projectionMatrix = glm::mat4(1.0f);
   ApplicationInfo m_appInfo;
   GLFWwindow *m_pWindow = nullptr;
   Scene *m_pScene = nullptr;
   Renderer *m_pRenderer = nullptr;
-  float m_fov = 45.0f;
 };
 
 }

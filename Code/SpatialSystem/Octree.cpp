@@ -1,7 +1,9 @@
 #include "Octree.h"
 
-namespace VSEngine {
-namespace SpatialSystem {
+namespace VSEngine
+{
+namespace SpatialSystem
+{
 
 void Node::UpdateTree()
 {
@@ -15,60 +17,64 @@ void Node::UpdateTree()
     return;
   }
 
-  TreeUtils::Vec3 dimensions = m_region.GetDimensions();
+  const glm::vec3 dimensions = m_region.GetDimensionsSize();
 
-  if (dimensions.LengthSq() < 1.0f)
+  if (dimensions.length() < minSize)
   {
-    for (auto &object : m_pendingObjects)
-    {
-      m_objects.push_back(object);
-    }
+    m_objects.insert(m_objects.end(), m_pendingObjects.begin(), m_pendingObjects.end());
     m_pendingObjects.clear();
 
     return;
   }
 
-  TreeUtils::Vec3 center = m_region.GetCenter();
+  const glm::vec3 center = m_region.GetCenter();
 
-  TreeUtils::BoundingBox octants[octCount];
-  octants[0] = TreeUtils::BoundingBox(m_region.m_lowerLeft, center);
-  octants[1] = TreeUtils::BoundingBox(TreeUtils::Vec3(center.x, m_region.m_lowerLeft.y, m_region.m_lowerLeft.z),
-                                      TreeUtils::Vec3(m_region.m_upperRight.x, center.y, center.z));
-  octants[2] = TreeUtils::BoundingBox(TreeUtils::Vec3(center.x, m_region.m_lowerLeft.y, center.z),
-                                      TreeUtils::Vec3(m_region.m_upperRight.x, center.y, m_region.m_upperRight.z));
-  octants[3] = TreeUtils::BoundingBox(TreeUtils::Vec3(m_region.m_lowerLeft.x, m_region.m_lowerLeft.y, center.z),
-                                      TreeUtils::Vec3(center.x, center.y, m_region.m_upperRight.z));
-  octants[4] = TreeUtils::BoundingBox(TreeUtils::Vec3(m_region.m_lowerLeft.x, center.y, m_region.m_lowerLeft.z),
-                                      TreeUtils::Vec3(center.x, m_region.m_upperRight.y, center.z));
-  octants[5] = TreeUtils::BoundingBox(TreeUtils::Vec3(center.x, center.y, m_region.m_lowerLeft.z),
-                                      TreeUtils::Vec3(m_region.m_upperRight.x, m_region.m_upperRight.y, center.z));
-  octants[6] = TreeUtils::BoundingBox(center, m_region.m_upperRight);
-  octants[7] = TreeUtils::BoundingBox(TreeUtils::Vec3(m_region.m_lowerLeft.x, center.y, center.z),
-                                      TreeUtils::Vec3(center.x, m_region.m_upperRight.y, m_region.m_upperRight.z));
+  VSUtils::BoundingBox octants[octCount];
+  octants[0] = VSUtils::BoundingBox(m_region.m_lowerLeft, center);
+  octants[1] = VSUtils::BoundingBox(glm::vec3(center.x, m_region.m_lowerLeft.y, m_region.m_lowerLeft.z),
+                                    glm::vec3(m_region.m_upperRight.x, center.y, center.z));
+  octants[2] = VSUtils::BoundingBox(glm::vec3(center.x, m_region.m_lowerLeft.y, center.z),
+                                    glm::vec3(m_region.m_upperRight.x, center.y, m_region.m_upperRight.z));
+  octants[3] = VSUtils::BoundingBox(glm::vec3(m_region.m_lowerLeft.x, m_region.m_lowerLeft.y, center.z),
+                                    glm::vec3(center.x, center.y, m_region.m_upperRight.z));
+  octants[4] = VSUtils::BoundingBox(glm::vec3(m_region.m_lowerLeft.x, center.y, m_region.m_lowerLeft.z),
+                                    glm::vec3(center.x, m_region.m_upperRight.y, center.z));
+  octants[5] = VSUtils::BoundingBox(glm::vec3(center.x, center.y, m_region.m_lowerLeft.z),
+                                    glm::vec3(m_region.m_upperRight.x, m_region.m_upperRight.y, center.z));
+  octants[6] = VSUtils::BoundingBox(center, m_region.m_upperRight);
+  octants[7] = VSUtils::BoundingBox(glm::vec3(m_region.m_lowerLeft.x, center.y, center.z),
+                                    glm::vec3(center.x, m_region.m_upperRight.y, m_region.m_upperRight.z));
 
-  std::list<const TreeUtils::Object3D*> octObjects[octCount];
+  std::vector<VSEngine::SceneObject*> octObjects[octCount];
 
-  std::list<const TreeUtils::Object3D*> delList;
+  std::vector<size_t> deleteObjectIIndices;
 
-  for (auto &object : m_pendingObjects)
+  const size_t objCount = m_pendingObjects.size();
+  for (size_t objIndex = 0; objIndex < objCount; ++objIndex)
   {
-    if (object->m_aabb.m_lowerLeft != object->m_aabb.m_upperRight)
+    VSEngine::SceneObject* pObject = m_pendingObjects[objIndex];
+    if (pObject == nullptr)
+      continue;
+
+    const VSUtils::BoundingBox objectBoundingBox = pObject->GetBoundingBox();
+    if (objectBoundingBox.m_lowerLeft != objectBoundingBox.m_upperRight)
     {
-      for (int i = 0; i < octCount; ++i)
+      for (size_t i = 0; i < octCount; ++i)
       {
-        if (octants[i].Containts(object->m_aabb))
+        if (octants[i].Contains(objectBoundingBox))
         {
-          octObjects[i].push_front(object);
-          delList.push_front(object);
+          octObjects[i].push_back(pObject);
+          deleteObjectIIndices.push_back(objIndex);
+
           break;
         }
       }
     }
   }
 
-  for (auto &object : delList)
+  for (size_t i = deleteObjectIIndices.size(); i--;)
   {
-    m_pendingObjects.remove(object);
+    m_pendingObjects.erase(m_pendingObjects.begin() + deleteObjectIIndices[i]);
   }
 
   if (m_objects.empty())
@@ -77,71 +83,71 @@ void Node::UpdateTree()
   }
   else
   {
-    for (auto &object : m_pendingObjects)
-    {
-      m_objects.push_back(object);
-    }
+    m_objects.insert(m_objects.end(), m_pendingObjects.begin(), m_pendingObjects.end());
   }
 
   m_pendingObjects.clear();
 
-  for (unsigned long long i = 0; i < octCount; ++i)
+  for (size_t i = 0; i < octCount; ++i)
   {
     if (!octObjects[i].empty())
     {
-      if (!m_childs[i])
+      if (m_children[i] == nullptr)
       {
-        m_childs[i] = new Node(octObjects[i], octants[i]);
-        m_childs[i]->m_parent = this;
+        m_children[i] = new Node(std::move(octObjects[i]), octants[i]);
+        m_children[i]->m_parent = this;
       }
       else
       {
-        m_childs[i]->m_pendingObjects = std::move(octObjects[i]);
+        m_children[i]->m_pendingObjects = std::move(octObjects[i]);
       }
 
       m_hasChildren = true;
       m_activeNodes |= static_cast<char>(1 << i);
 
-      m_childs[i]->UpdateTree();
+      m_children[i]->UpdateTree();
     }
   }
 }
 
-std::list<const TreeUtils::Object3D*> Node::GetInFrustum(const TreeUtils::Frustum &frustum) const
+std::vector<SceneObject*> Node::GetInFrustum(const VSUtils::Frustum& frustum) const
 {
-  std::list<const TreeUtils::Object3D*> objects;
+  std::vector<SceneObject*> objects;
 
-  TreeUtils::IntersectionResult res =
-    TreeUtils::FrustumAABBIntersect(frustum, m_region);
+  VSUtils::IntersectionResult res =
+    frustum.TestAABB(m_region);
 
-  if (res == TreeUtils::IntersectionResult::Inside)
+  if (res == VSUtils::IntersectionResult::Inside)
   {
-    objects.insert(objects.end(), m_objects.begin(), m_objects.begin());
+    objects.insert(objects.end(), m_objects.begin(), m_objects.end());
 
-    std::list<const TreeUtils::Object3D*> subObjects =
-      GetSubtreeObjects();
-    objects.insert(objects.end(), subObjects.begin(), subObjects.begin());
+    std::vector<SceneObject*> subObjects =
+        GetSubtreeObjects();
+    objects.insert(objects.end(), subObjects.begin(), subObjects.end());
   }
-  else if (res == TreeUtils::IntersectionResult::Intersect)
+  else if (res == VSUtils::IntersectionResult::Intersect)
   {
-    for (auto &object : m_objects)
+    for (SceneObject* pObject : m_objects)
     {
-      if (TreeUtils::FrustumAABBIntersect(frustum, object->m_aabb) !=
-          TreeUtils::IntersectionResult::Outside)
-      {
-        objects.push_back(object);
-      }
+      if (pObject == nullptr)
+        continue;
 
-      for (unsigned long long i = 0; i < octCount; ++i)
+      if (frustum.TestAABB(pObject->GetBoundingBox()) !=
+          VSUtils::IntersectionResult::Outside)
       {
-        if (m_childs[i])
+        objects.push_back(pObject);
+      }
+    }
+
+    for (size_t i = 0; i < octCount; ++i)
+    {
+      if (m_children[i])
+      {
+        std::vector<SceneObject*> subObjects =
+          m_children[i]->GetInFrustum(frustum);
+        if (!subObjects.empty())
         {
-          std::list<const TreeUtils::Object3D*> subObjects =
-            m_childs[i]->GetInFrustum(frustum);
-          if (!subObjects.empty())
-          {
-            objects.insert(objects.end(), subObjects.begin(), subObjects.end());
-          }
+          objects.insert(objects.end(), subObjects.begin(), subObjects.end());
         }
       }
     }
@@ -150,16 +156,16 @@ std::list<const TreeUtils::Object3D*> Node::GetInFrustum(const TreeUtils::Frustu
   return objects;
 }
 
-std::list<const TreeUtils::Object3D*> Node::GetSubtreeObjects() const
+std::vector<SceneObject*> Node::GetSubtreeObjects() const
 {
-  std::list<const TreeUtils::Object3D*> objects(m_objects);
+  std::vector<SceneObject*> objects(m_objects);
 
-  for (unsigned long long i = 0; i < octCount; ++i)
+  for (size_t i = 0; i < octCount; ++i)
   {
-    if (m_childs[i])
+    if (m_children[i])
     {
-      std::list<const TreeUtils::Object3D*> subObjects =
-        m_childs[i]->GetSubtreeObjects();
+      std::vector<SceneObject*> subObjects =
+        m_children[i]->GetSubtreeObjects();
       if (!subObjects.empty())
       {
         objects.insert(objects.end(), subObjects.begin(), subObjects.end());
@@ -170,14 +176,19 @@ std::list<const TreeUtils::Object3D*> Node::GetSubtreeObjects() const
   return objects;
 }
 
-Octree::Octree(const TreeUtils::BoundingBox &boundingBox)
+Octree::Octree(const VSUtils::BoundingBox& boundingBox)
 {
   m_root = new Node(boundingBox);
 }
 
-void Octree::AddObject(const TreeUtils::Object3D *object)
+Octree::~Octree()
 {
-  m_root->m_pendingObjects.push_back(object);
+  delete m_root;
+}
+
+void Octree::AddObject(SceneObject* pObject)
+{
+  m_root->m_pendingObjects.push_back(pObject);
 }
 
 void Octree::UpdateTree()
@@ -188,9 +199,15 @@ void Octree::UpdateTree()
   m_treeReady = true;
 }
 
-std::list<const TreeUtils::Object3D*> Octree::GetObjectsInside(const TreeUtils::Frustum &frustum)
+std::vector<SceneObject*> Octree::GetObjectsInside(const VSUtils::Frustum& frustum) const
 {
   return m_root->GetInFrustum(frustum);
 }
 
+std::vector<SceneObject*> Octree::GetAllObjects() const
+{
+  return m_root->GetSubtreeObjects();
+}
+
+}
 }

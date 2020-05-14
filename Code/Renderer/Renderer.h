@@ -48,7 +48,7 @@ public:
   void RenderStart();
   void RenderFinish();
 
-  size_t GenerateMeshRenderData(const Mesh * mesh);
+  size_t GenerateMeshRenderData(const Mesh& mesh);
 
   void SetShaderUniform(const std::string &name, bool value) const;
   void SetShaderUniform(const std::string &name, int value) const;

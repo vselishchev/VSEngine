@@ -20,17 +20,23 @@ bool Vertex::operator==(const Vertex &rhs) const
 
 const Vertex& Vertex::operator=(const Vertex &rhs)
 {
-  point = rhs.point;
-  normal = rhs.normal;
-  textureCoord = rhs.textureCoord;
+  if (this != &rhs)
+  {
+    point = rhs.point;
+    normal = rhs.normal;
+    textureCoord = rhs.textureCoord;
+  }
 
   return *this;
 }
 const Vertex& Vertex::operator=(Vertex &&rhs) noexcept
 {
-  point = std::move(rhs.point);
-  normal = std::move(rhs.normal);
-  textureCoord = std::move(rhs.textureCoord);
+  if (this != &rhs)
+  {
+    point = std::move(rhs.point);
+    normal = std::move(rhs.normal);
+    textureCoord = std::move(rhs.textureCoord);
+  }
 
   return *this;
 }

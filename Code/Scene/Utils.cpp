@@ -13,8 +13,10 @@
 
 extern VSEngine::Engine g_Eng;
 
-namespace VSEngine {
-namespace {
+namespace VSEngine
+{
+namespace
+{
 
 glm::vec3 GetGLMFromAssimp(const aiColor3D& color)
 {
@@ -28,25 +30,23 @@ glm::vec4 GetGLMFromAssimp(const aiColor4D& color)
 
 }
 
-// TODO: Find better place for MeshCollection.
-static MeshCollection meshCollection;
-// ~TODO
-
-void ProcessNode(aiNode* node, const aiScene* scene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile);
-Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& pathToFile);
-Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh, const std::string& pathToFile);
+void ProcessNode(aiNode* pAiNode, const aiScene* pAiScene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile);
+Mesh* ProcessMesh(aiMesh* pAiMesh, const aiScene* pAiScene, const std::string& pathToFile);
+Material ProcessMaterial(aiMaterial* pAiMat, Mesh* pMesh, const std::string& pathToFile);
 
 std::vector<SceneObject*> LoadFile(const std::string& pathToFile)
 {
   if (meshCollection.HasMeshByPath(pathToFile))
   {
     const std::vector<Mesh*>& meshes = meshCollection.GetMeshes(pathToFile);
-    std::vector<SceneObject*> sceneObjects(meshes.size());
+    std::vector<SceneObject*> sceneObjects;
+    sceneObjects.reserve(meshes.size());
     for (Mesh* pMesh : meshes)
     {
       sceneObjects.push_back(new SceneObject(*pMesh));
     }
-    return std::move(sceneObjects);
+
+    return sceneObjects;
   }
   // TODO: Replace Assimp with own object loader
   Assimp::Importer importer;
@@ -63,137 +63,131 @@ std::vector<SceneObject*> LoadFile(const std::string& pathToFile)
     return sceneObjects;
 
   ProcessNode(scene->mRootNode, scene, sceneObjects, pathToFile);
+  importer.FreeScene();
 
-  return std::move(sceneObjects);
+  return sceneObjects;
 }
 
-void ProcessNode(aiNode* node, const aiScene* scene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile)
+void ProcessNode(aiNode* pAiNode, const aiScene* pAiScene, std::vector<SceneObject*>& sceneObjects, const std::string& pathToFile)
 {
-  const size_t meshesCount = node->mNumMeshes;
+  const size_t meshesCount = pAiNode->mNumMeshes;
   for (size_t i = 0; i < meshesCount; ++i)
   {
-    Mesh* pMesh = ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene, pathToFile);
-    // TODO: Add SceneObject.
+    Mesh* pMesh = ProcessMesh(pAiScene->mMeshes[pAiNode->mMeshes[i]], pAiScene, pathToFile);
     meshCollection.AddMesh(pMesh);
     sceneObjects.push_back(new SceneObject(*pMesh));
   }
 
-  const size_t childrenCount = node->mNumChildren;
+  const size_t childrenCount = pAiNode->mNumChildren;
   for (size_t i = 0; i < childrenCount; ++i)
   {
-    ProcessNode(node->mChildren[i], scene, sceneObjects, pathToFile);
+    ProcessNode(pAiNode->mChildren[i], pAiScene, sceneObjects, pathToFile);
   }
 }
 
-Mesh* ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& pathToFile)
+Mesh* ProcessMesh(aiMesh* pAiMesh, const aiScene* pAiScene, const std::string& pathToFile)
 {
-  std::vector<VSEngine::Vertex> vertices;
-  bool hasTexture = false;
+  Mesh* pMesh = new Mesh(pathToFile.c_str());
 
-  auto verticesParse = [](aiMesh* mesh,
-                          std::vector<VSEngine::Vertex>* vertices,
-                          bool* hasTexture) {
-    for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
+  auto verticesParse = [](aiMesh* pAiMesh, Mesh* pNewMesh) {
+    for (unsigned int i = 0; i < pAiMesh->mNumVertices; ++i)
     {
-      VSEngine::Vertex vertex;
-      aiVector3D point = mesh->mVertices[i];
+      Vertex vertex;
+      const aiVector3D& point = pAiMesh->mVertices[i];
       vertex.point = glm::vec3(point.x, point.y, point.z);
 
-      aiVector3D normal = mesh->mNormals[i];
+      const aiVector3D& normal = pAiMesh->mNormals[i];
       vertex.normal = glm::vec3(normal.x, normal.y, normal.z);
 
-      if (mesh->HasTextureCoords(0))
+      if (pAiMesh->HasTextureCoords(0))
       {
-        *hasTexture = true;
-        aiVector3D textureCoord = mesh->mTextureCoords[0][i];
-        vertex.textureCoord = glm::vec2(textureCoord.x,
-                                        textureCoord.y);
+        pNewMesh->SetHasTextureCoordinates(true);
+        const aiVector3D& textureCoord = pAiMesh->mTextureCoords[0][i];
+        vertex.textureCoord = glm::vec3(textureCoord.x,
+                                        textureCoord.y,
+                                        textureCoord.z);
       }
 
-      vertices->push_back(std::move(vertex));
+      pNewMesh->AddVertex(vertex);
     }
   };
 
-  std::thread verticesThread(verticesParse, mesh, &vertices, &hasTexture);
+  std::thread verticesThread(verticesParse, pAiMesh, pMesh);
 
-  std::vector<VSEngine::Triple> indices;
-
-  auto indicesParse = [](aiMesh* mesh, std::vector<VSEngine::Triple>* indices) {
-    for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
+  auto indicesParse = [](aiMesh* pAiMesh, Mesh* pNewMesh) {
+    for (unsigned int i = 0; i < pAiMesh->mNumFaces; ++i)
     {
-      VSEngine::Triple triIndex;
-      aiFace face = mesh->mFaces[i];
+      VSUtils::Triple triIndex;
+      const aiFace& face = pAiMesh->mFaces[i];
       triIndex.x = face.mIndices[0];
       triIndex.y = face.mIndices[1];
       triIndex.z = face.mIndices[2];
 
-      indices->push_back(triIndex);
+      pNewMesh->AddFace(triIndex);
     }
   };
 
-  std::thread indicesThread(indicesParse, mesh, &indices);
+  std::thread indicesThread(indicesParse, pAiMesh, pMesh);
 
   verticesThread.join();
   indicesThread.join();
 
-  Mesh* resultingMesh = new VSEngine::Mesh(vertices, indices, true, hasTexture);
+  aiMaterial* material = pAiScene->mMaterials[pAiMesh->mMaterialIndex];
 
-  aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+  pMesh->SetMaterial(ProcessMaterial(material, pMesh, pathToFile));
 
-  resultingMesh->SetMaterial(ProcessMaterial(material, resultingMesh, pathToFile));
-
-  return resultingMesh;
+  return pMesh;
 }
 
-Material ProcessMaterial(aiMaterial* mat, VSEngine::Mesh* mesh, const std::string& pathToFile)
+Material ProcessMaterial(aiMaterial* pAiMat, Mesh* pMesh, const std::string& pathToFile)
 {
-  std::size_t found = pathToFile.find_last_of("/\\");
-  std::string fileFolder = pathToFile.substr(0, found);
+  const std::size_t found = pathToFile.find_last_of("/\\");
+  const std::string fileFolder = pathToFile.substr(0, found);
 
   VSEngine::Material vsMaterial;
 
-  unsigned int diffuseTexturesCount =
-    mat->GetTextureCount(aiTextureType_DIFFUSE);
+  const unsigned int diffuseTexturesCount =
+    pAiMat->GetTextureCount(aiTextureType_DIFFUSE);
 
   aiString texPath;
   for (unsigned int j = 0; j < diffuseTexturesCount; ++j)
   {
-    if (mat->GetTexture(aiTextureType_DIFFUSE, j, &texPath) == AI_SUCCESS)
+    if (pAiMat->GetTexture(aiTextureType_DIFFUSE, j, &texPath) == AI_SUCCESS)
     {
-      std::string diffuseTexturePath = texPath.C_Str();
-      mesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + diffuseTexturePath,
+      const std::string diffuseTexturePath = texPath.C_Str();
+      pMesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + diffuseTexturePath,
                                                            TextureType::Diffuse));
     }
   }
 
-  unsigned int specularTexturesCount =
-    mat->GetTextureCount(aiTextureType_SPECULAR);
+  const unsigned int specularTexturesCount =
+    pAiMat->GetTextureCount(aiTextureType_SPECULAR);
 
   for (unsigned int j = 0; j < specularTexturesCount; ++j)
   {
-    if (mat->GetTexture(aiTextureType_SPECULAR, j, &texPath) == AI_SUCCESS)
+    if (pAiMat->GetTexture(aiTextureType_SPECULAR, j, &texPath) == AI_SUCCESS)
     {
-      std::string specularTexturePath = texPath.C_Str();
-      mesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + specularTexturePath,
+      const std::string specularTexturePath = texPath.C_Str();
+      pMesh->AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + specularTexturePath,
                                                            TextureType::Specular));
     }
   }
 
   aiColor3D colorProperty;
-  mat->Get(AI_MATKEY_COLOR_AMBIENT, colorProperty);
+  pAiMat->Get(AI_MATKEY_COLOR_AMBIENT, colorProperty);
   vsMaterial.ambient = GetGLMFromAssimp(colorProperty);
 
-  mat->Get(AI_MATKEY_COLOR_DIFFUSE, colorProperty);
+  pAiMat->Get(AI_MATKEY_COLOR_DIFFUSE, colorProperty);
   vsMaterial.diffuse = GetGLMFromAssimp(colorProperty);
 
-  mat->Get(AI_MATKEY_COLOR_SPECULAR, colorProperty);
+  pAiMat->Get(AI_MATKEY_COLOR_SPECULAR, colorProperty);
   vsMaterial.specular = GetGLMFromAssimp(colorProperty);
 
   float shininess;
-  mat->Get(AI_MATKEY_SHININESS, shininess);
+  pAiMat->Get(AI_MATKEY_SHININESS, shininess);
   vsMaterial.shininess = shininess;
 
-  return std::move(vsMaterial);
+  return vsMaterial;
 }
 
 }

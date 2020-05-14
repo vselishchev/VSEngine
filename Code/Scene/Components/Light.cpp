@@ -10,12 +10,13 @@ namespace
 Mesh* GetBoxMesh()
 {
   static bool needCalculate = true;
-
-  static std::vector<Vertex> vertices(8);
-  static std::vector<Triple> triples(12);
+  static Mesh mesh;
 
   if (needCalculate)
   {
+    std::vector<Vertex> vertices(8);
+    std::vector<VSUtils::Triple> triples(12);
+
     vertices[0] = Vertex(glm::vec4(-1.0f, -1.0f, -1.0f, 0.0f), glm::vec4(), glm::vec3());
     vertices[1] = Vertex(glm::vec4(-1.0f, 1.0f, -1.0f, 0.0f), glm::vec4(), glm::vec3());
     vertices[2] = Vertex(glm::vec4(1.0f, -1.0f, -1.0f, 0.0f), glm::vec4(), glm::vec3());
@@ -38,10 +39,11 @@ Mesh* GetBoxMesh()
     triples[10].x = 2;  triples[10].y = 4; triples[10].z = 6;
     triples[11].x = 7;  triples[11].y = 5; triples[11].z = 3;
 
+    mesh.AddVertices(vertices);
+    mesh.AddFaces(triples);
+
     needCalculate = false;
   }
-
-  static Mesh mesh(vertices, triples, false, false);
 
   return &mesh;
 }

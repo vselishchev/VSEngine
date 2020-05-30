@@ -1,43 +1,38 @@
-#ifndef _VSENGINE_GEOMETRY_VERTEX_H_
-#define _VSENGINE_GEOMETRY_VERTEX_H_
+#pragma once
 
 #include <glm/glm.hpp>
 
-namespace VSEngine
-{
+namespace VSEngine {
 class Vertex
 {
 public:
-  Vertex() = default;
+    Vertex() = default;
 
-  Vertex(const glm::vec3 &point_,
-         const glm::vec3 &normal_,
-         const glm::vec2 &textureCoord_);
+    Vertex(const glm::vec3& point,
+           const glm::vec3& normal,
+           const glm::vec2& textureCoord);
 
-  inline Vertex(const Vertex &vertex) :
-    point(vertex.point),
-    normal(vertex.normal),
-    textureCoord(vertex.textureCoord)
-  {}
+    inline Vertex(const Vertex& vertex)
+        : point(vertex.point)
+        , normal(vertex.normal)
+        , textureCoord(vertex.textureCoord)
+    {}
 
-  inline Vertex(Vertex &&vertex)  noexcept:
-    point(std::move(vertex.point)),
-    normal(std::move(vertex.normal)),
-    textureCoord(std::move(vertex.textureCoord))
-  {
-  }
+    inline Vertex(Vertex&& vertex) noexcept
+        : point(std::move(vertex.point))
+        , normal(std::move(vertex.normal))
+        , textureCoord(std::move(vertex.textureCoord))
+    {}
 
-  bool operator==(const Vertex &rhs) const;
+    bool operator==(const Vertex& rhs) const;
 
-  const Vertex& operator=(const Vertex &rhs);
-  const Vertex& operator=(Vertex &&rhs)  noexcept;
+    const Vertex& operator=(const Vertex& rhs);
+    const Vertex& operator=(Vertex&& rhs) noexcept;
 
 public:
-  glm::vec3 point;
-  glm::vec3 normal;
-  glm::vec2 textureCoord;
+    glm::vec3 point;
+    glm::vec3 normal;
+    glm::vec2 textureCoord;
 };
 
 }
-
-#endif // _VSENGINE_GEOMETRY_VERTEX_H_

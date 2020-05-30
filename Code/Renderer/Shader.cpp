@@ -9,107 +9,104 @@
 #include <fstream>
 #include <sstream>
 
-namespace VSUtils
+namespace VSUtils {
+namespace {
+GLuint LoadShader(const std::string& name, GLenum type)
 {
-namespace
-{
-GLuint LoadShader(const std::string &name, GLenum type)
-{
-  std::string exePath = getcwd(nullptr, 260);
-  if (exePath.empty())
-  {
-    return 0;
-  }
+    std::string exePath = getcwd(nullptr, 260);
+    if (exePath.empty())
+    {
+        return 0;
+    }
 
-  // TODO: Remove hard-coded path
-  std::string path = std::string(ROOT_PATH) + "/Code/Shaders/" + name;
-  // ~TODO
+    // TODO: Remove hard-coded path
+    std::string path = std::string(ROOT_PATH) + "/Code/Shaders/" + name;
+    // ~TODO
 
-  std::replace(path.begin(), path.end(), '\\', '/');
+    std::replace(path.begin(), path.end(), '\\', '/');
 
-  std::ifstream file(path.c_str());
+    std::ifstream file(path.c_str());
 
-  GLuint shader = glCreateShader(type);
+    GLuint shader = glCreateShader(type);
 
-  if (!shader)
-  {
-    return 0;
-  }
-  std::stringstream fileStream;
-  fileStream << file.rdbuf();
-  std::string fileData = fileStream.str();
-  const char *rawFileData = fileData.c_str();
+    if (!shader)
+    {
+        return 0;
+    }
+    std::stringstream fileStream;
+    fileStream << file.rdbuf();
+    std::string fileData = fileStream.str();
+    const char* rawFileData = fileData.c_str();
 
-  glShaderSource(shader, 1, &rawFileData, nullptr);
+    glShaderSource(shader, 1, &rawFileData, nullptr);
 
-  glCompileShader(shader);
+    glCompileShader(shader);
 
-  GLint compileStatus{ 0 };
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    GLint compileStatus{ 0 };
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
 
-  if (!compileStatus)
-  {
-    char buffer[4096];
-    glGetShaderInfoLog(shader, 4096, nullptr, buffer);
+    if (!compileStatus)
+    {
+        char buffer[4096];
+        glGetShaderInfoLog(shader, 4096, nullptr, buffer);
 
-    fprintf(stderr, "%s: %s\n", path.c_str(), buffer);
+        fprintf(stderr, "%s: %s\n", path.c_str(), buffer);
 
-    glDeleteShader(shader);
+        glDeleteShader(shader);
 
-    return 0;
-  }
+        return 0;
+    }
 
-  return shader;
+    return shader;
 }
 }
 
-Shader::Shader(const std::string &fname, GLuint shaderType): 
-  fileName(fname),
-  type(shaderType),
-  shader(LoadShader(fileName, type))
-{
-}
+Shader::Shader(const std::string& fname, GLuint shaderType) :
+    fileName(fname),
+    type(shaderType),
+    shader(LoadShader(fileName, type))
+{}
 
 Shader::~Shader()
 {
-  Delete();
+    Delete();
 }
 
-void Shader::ChangeFileName(const std::string &fname)
+void Shader::ChangeFileName(const std::string& fname)
 {
-  Delete();
-  fileName = fname;
+    Delete();
+    fileName = fname;
 }
 
 void Shader::ChangeType(GLuint shaderType)
 {
-  Delete();
-  type = shaderType;
+    Delete();
+    type = shaderType;
 }
 
 GLuint Shader::GetID() const
 {
-  return shader;
+    return shader;
 }
 
 GLuint Shader::GetType() const
 {
-  return type;
+    return type;
 }
 
 GLuint Shader::Compile()
 {
-  Delete();
-  shader = LoadShader(fileName, type);
+    Delete();
+    shader = LoadShader(fileName, type);
 
-  return shader;
+    return shader;
 }
 
 void Shader::Delete()
 {
-  if (shader != 0)
-  {
-    glDeleteShader(shader);
-  }
+    if (shader != 0)
+    {
+        glDeleteShader(shader);
+    }
 }
 }

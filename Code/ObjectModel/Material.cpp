@@ -2,53 +2,119 @@
 
 #include <utility>
 
-namespace VSEngine
-{
-Material::Material(const Material& mat):
-    diffuseMaps(mat.diffuseMaps),
-    specularMaps(mat.specularMaps),
-    ambient(mat.ambient),
-    diffuse(mat.diffuse),
-    specular(mat.specular),
-    shininess(mat.shininess)
+namespace VSEngine {
+
+Material::Material(const char* materialName)
+    : m_materialName(materialName)
 {
 }
 
-Material::Material(Material&& mat) noexcept :
-  diffuseMaps(std::move(mat.diffuseMaps)),
-  specularMaps(std::move(mat.specularMaps)),
-  ambient(std::exchange(mat.ambient, glm::vec3(1.0f))),
-  diffuse(std::exchange(mat.diffuse, glm::vec3(1.0f))),
-  specular(std::exchange(mat.specular, glm::vec3(1.0f))),
-  shininess(std::exchange(mat.shininess, 32.0f))
+Material::Material(const Material& mat)
+    : m_textures(mat.m_textures)
+    , m_ambient(mat.m_ambient)
+    , m_diffuse(mat.m_diffuse)
+    , m_specular(mat.m_specular)
+    , m_shininess(mat.m_shininess)
+{}
+
+Material::Material(Material&& mat) noexcept
+    : m_textures(std::move(mat.m_textures))
+    , m_ambient(mat.m_ambient)
+    , m_diffuse(mat.m_diffuse)
+    , m_specular(mat.m_specular)
+    , m_shininess(mat.m_shininess)
+{}
+
+Material& Material::operator=(const Material& mat)
 {
+    if (this != &mat)
+    {
+        m_textures = mat.m_textures;
+        m_ambient = mat.m_ambient;
+        m_diffuse = mat.m_diffuse;
+        m_specular = mat.m_specular;
+        m_shininess = mat.m_shininess;
+    }
+
+    return *this;
 }
 
-const Material& Material::operator=(const Material &mat)
+Material& Material::operator=(Material&& mat) noexcept
 {
-  diffuseMaps = mat.diffuseMaps;
-  specularMaps = mat.specularMaps;
-  ambient = mat.ambient;
-  diffuse = mat.diffuse;
-  specular = mat.specular;
-  shininess = mat.shininess;
+    if (this != &mat)
+    {
+        m_textures = std::move(mat.m_textures);
+        m_ambient = mat.m_ambient;
+        m_diffuse = mat.m_diffuse;
+        m_specular = mat.m_specular;
+        m_shininess = mat.m_shininess;
+    }
 
-  return *this;
+    return *this;
 }
 
-const Material& Material::operator=(Material &&mat) noexcept
+size_t Material::GetTextureCount() const
 {
-  if (this != &mat)
-  {
-    diffuseMaps = std::move(mat.diffuseMaps);
-    specularMaps = std::move(mat.specularMaps);
-    ambient = std::exchange(mat.ambient, glm::vec3(1.0f));
-    diffuse = std::exchange(mat.diffuse, glm::vec3(1.0f));
-    specular = std::exchange(mat.specular, glm::vec3(1.0f));
-    shininess = std::exchange(mat.shininess, 32.0f);
-  }
+    return m_textures.size();
+}
 
-  return *this;
+const Texture* Material::GetTextureAt(size_t index) const
+{
+    if (m_textures.size() <= index)
+    {
+        return nullptr;
+    }
+
+    return m_textures[index];
+}
+
+void Material::AddTexture(Texture* pTexture)
+{
+    m_textures.push_back(pTexture);
+}
+
+void Material::SetAmbient(const glm::vec3& ambient)
+{
+    m_ambient = ambient;
+}
+
+const glm::vec3& Material::GetAmbient() const
+{
+    return m_ambient;
+}
+
+void Material::SetDiffuse(const glm::vec3& diffuse)
+{
+    m_diffuse = diffuse;
+}
+
+const glm::vec3& Material::GetDiffuse() const
+{
+    return m_diffuse;
+}
+
+void Material::SetSpecular(const glm::vec3& specular)
+{
+    m_specular = specular;
+}
+const glm::vec3& Material::GetSpecular() const
+{
+    return m_specular;
+}
+
+void Material::SetShininess(float shininess)
+{
+    m_shininess = shininess;
+}
+
+float Material::GetShininess() const
+{
+    return m_shininess;
+}
+
+const char* Material::GetMaterialName() const
+{
+    return m_materialName.c_str();
 }
 
 }

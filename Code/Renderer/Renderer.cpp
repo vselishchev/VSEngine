@@ -12,45 +12,43 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-namespace VSEngine
+namespace VSEngine {
+namespace {
+GLuint LoadTexture(const std::string& path)
 {
-namespace
-{
-GLuint LoadTexture(const std::string &path)
-{
-  int width = 0, height = 0, channelsCount = 0;
-  unsigned char *data =
-    stbi_load(path.c_str(), &width, &height, &channelsCount, 0);
+    int width = 0, height = 0, channelsCount = 0;
+    unsigned char* data =
+        stbi_load(path.c_str(), &width, &height, &channelsCount, 0);
 
-  GLuint texture = 0;
+    GLuint texture = 0;
 
-  if (data)
-  {
-    glGenTextures(1, &texture);
-
-    GLenum format = GL_RGB;
-    if (channelsCount == 1)
+    if (data)
     {
-      format = GL_R;
+        glGenTextures(1, &texture);
+
+        GLenum format = GL_RGB;
+        if (channelsCount == 1)
+        {
+            format = GL_R;
+        }
+        else if (channelsCount == 4)
+        {
+            format = GL_RGBA;
+        }
+
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
-    else if (channelsCount == 4)
-    {
-      format = GL_RGBA;
-    }
 
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data);
 
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  }
-
-  stbi_image_free(data);
-
-  return texture;
+    return texture;
 }
 
 }
@@ -64,342 +62,346 @@ void APIENTRY Renderer::DebugCallback(
     const GLchar* message,
     GLvoid* userParam)
 {
-  reinterpret_cast<Renderer*>(userParam)->OnDebugMessage(source, type, id, severity, length, message);
+    reinterpret_cast<Renderer*>(userParam)->OnDebugMessage(source, type, id, severity, length, message);
 }
 
 Renderer::Renderer()
 {
-  Initialize();
+    Initialize();
 }
 
 Renderer::Renderer(unsigned short viewportWidth, unsigned short viewportHeight)
 {
-  Initialize();
-  glViewport(0, 0, viewportWidth, viewportHeight);
+    Initialize();
+    glViewport(0, 0, viewportWidth, viewportHeight);
 }
 
 Renderer::~Renderer()
 {
-  ClearStoredObjects();
+    ClearStoredObjects();
 }
 
 void Renderer::ChangeViewportSize(unsigned short width, unsigned short height)
 {
-  glViewport(0, 0, width, height);
+    glViewport(0, 0, width, height);
 }
 
 void Renderer::RenderStart()
 {
-  programShader.SetVertexShader("vertex.vs.glsl");
-  programShader.SetFragmentShader("fragment.fs.glsl");
-  programShader.CompileProgram();
+    programShader.SetVertexShader("vertex.vs.glsl");
+    programShader.SetFragmentShader("fragment.fs.glsl");
+    programShader.CompileProgram();
 
-  lightShader.SetVertexShader("Light.vs.glsl");
-  lightShader.SetFragmentShader("Light.fs.glsl");
-  lightShader.CompileProgram();
+    lightShader.SetVertexShader("Light.vs.glsl");
+    lightShader.SetFragmentShader("Light.fs.glsl");
+    lightShader.CompileProgram();
 
-  glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
 
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Renderer::RenderFinish()
+{}
+
+void Renderer::Render(double time, const Scene* scene, const glm::mat4& projMatrix)
 {
-}
+    static const GLfloat gray[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+    static const GLfloat one = 1.0f;
 
-void Renderer::Render(double time, const Scene *scene, const glm::mat4 &projMatrix)
-{
-  static const GLfloat gray[] = { 0.3f, 0.3f, 0.3f, 1.0f };
-  static const GLfloat one = 1.0f;
-  
-  glClearBufferfv(GL_COLOR, 0, gray);
-  glClearBufferfv(GL_DEPTH, 0, &one);
+    glClearBufferfv(GL_COLOR, 0, gray);
+    glClearBufferfv(GL_DEPTH, 0, &one);
 
-  glClear(GL_STENCIL_BUFFER_BIT);
+    glClear(GL_STENCIL_BUFFER_BIT);
 
-  programShader.UseProgram();
+    programShader.UseProgram();
 
-  SetLightningUniforms(scene);
+    SetLightningUniforms(scene);
 
-  programShader.SetMat4("viewMatrix", scene->GetCamera().GetViewMatrix());
-  programShader.SetMat4("projMatrix", projMatrix);
+    programShader.SetMat4("viewMatrix", scene->GetCamera().GetViewMatrix());
+    programShader.SetMat4("projMatrix", projMatrix);
 
-  const std::vector<SceneObject*> sceneObjects = scene->GetSceneObjects();
+    const std::vector<SceneObject*> sceneObjects = scene->GetSceneObjects();
 
-  for (const SceneObject* pObject: sceneObjects)
-  {
-    programShader.SetMat4("modelMatrix", pObject->GetTransformation());
-
-    programShader.SetVec3("meshColor", pObject->GetObjectColor());
-
-    Mesh& mesh = pObject->GetMesh();
-    const Material &meshMaterial = mesh.GetMaterial();
-    programShader.SetInt("material.diffuseMap", 0);
-    programShader.SetInt("material.specularMap", 1);
-
-    programShader.SetVec3("material.ambient", meshMaterial.ambient);
-    programShader.SetVec3("material.diffuse", meshMaterial.diffuse);
-    programShader.SetVec3("material.specular", meshMaterial.specular);
-    programShader.SetFloat("material.shininess", meshMaterial.shininess);
-
-    unsigned int diffuseCounter = 0;
-    unsigned int specularCounter = 0;
-
-    const std::vector<const Texture*>& textures = mesh.GetTextures();
-    for (size_t i = 0; i < textures.size(); ++i)
+    for (const SceneObject* pObject : sceneObjects)
     {
-      glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(i));
+        programShader.SetMat4("modelMatrix", pObject->GetTransformation());
 
-      std::string uniformName;
-      if (textures[i]->type == TextureType::Diffuse)
-      {
-        uniformName = "material.diffuseMap" + std::to_string(++diffuseCounter);
-      }
-      else if (textures[i]->type == TextureType::Specular)
-      {
-        uniformName = "material.specularMap" + std::to_string(++specularCounter);
-      }
+        programShader.SetVec3("meshColor", pObject->GetObjectColor());
 
-      programShader.SetInt(uniformName, static_cast<int>(i));
+        Mesh& mesh = pObject->GetMesh();
+        const Material* pMeshMaterial = mesh.GetMaterial();
+        if (pMeshMaterial)
+        {
+            programShader.SetInt("material.diffuseMap", 0);
+            programShader.SetInt("material.specularMap", 1);
 
-      glBindTexture(GL_TEXTURE_2D, textures[i]->id);
+            programShader.SetVec3("material.ambient", pMeshMaterial->GetAmbient());
+            programShader.SetVec3("material.diffuse", pMeshMaterial->GetDiffuse());
+            programShader.SetVec3("material.specular", pMeshMaterial->GetSpecular());
+            programShader.SetFloat("material.shininess", pMeshMaterial->GetShininess());
+
+            unsigned int diffuseCounter = 0;
+            unsigned int specularCounter = 0;
+
+            const size_t textureCount = pMeshMaterial->GetTextureCount();
+            for (size_t i = 0; i < textureCount; ++i)
+            {
+                const Texture& texture = *pMeshMaterial->GetTextureAt(i);
+
+                glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(i));
+
+                std::string uniformName;
+                if (texture.type == TextureType::Diffuse)
+                {
+                    uniformName = "material.diffuseMap" + std::to_string(++diffuseCounter);
+                }
+                else if (texture.type == TextureType::Specular)
+                {
+                    uniformName = "material.specularMap" + std::to_string(++specularCounter);
+                }
+
+                programShader.SetInt(uniformName, static_cast<int>(i));
+
+                glBindTexture(GL_TEXTURE_2D, texture.id);
+            }
+        }
+
+        const RenderData* renderData = renderObjectsMap[mesh.GetMeshRenderDataId()];
+
+        glBindVertexArray(renderData->vao);
+
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.FacesCount() * 3), GL_UNSIGNED_SHORT, 0);
     }
-
-    const RenderData *renderData = renderObjectsMap[mesh.GetMeshRenderDataId()];
-
-    glBindVertexArray(renderData->vao);
-
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.FacesCount() * 3), GL_UNSIGNED_SHORT, 0);
-  }
 }
 
 size_t Renderer::GenerateMeshRenderData(const Mesh& mesh)
 {
-  if (mesh.GetMeshRenderDataId())
-  {
-    return mesh.GetMeshRenderDataId();
-  }
+    if (mesh.GetMeshRenderDataId())
+    {
+        return mesh.GetMeshRenderDataId();
+    }
 
-  renderObjectsMap.try_emplace(++renderDataIDCounter, new RenderData());
+    renderObjectsMap.try_emplace(++renderDataIDCounter, new RenderData());
 
-  RenderData* meshRenderData = renderObjectsMap[renderDataIDCounter];
+    RenderData* meshRenderData = renderObjectsMap[renderDataIDCounter];
 
-  glGenVertexArrays(1, &meshRenderData->vao);
-  glGenBuffers(1, &meshRenderData->vbo);
-  glGenBuffers(1, &meshRenderData->ebo);
+    glGenVertexArrays(1, &meshRenderData->vao);
+    glGenBuffers(1, &meshRenderData->vbo);
+    glGenBuffers(1, &meshRenderData->ebo);
 
-  glBindVertexArray(meshRenderData->vao);
+    glBindVertexArray(meshRenderData->vao);
 
-  constexpr static GLsizei sizeofVertex = sizeof(Vertex);
+    constexpr static GLsizei sizeofVertex = sizeof(Vertex);
 
-  const std::vector<Vertex>& vertices = mesh.GetVertices();
-  glBindBuffer(GL_ARRAY_BUFFER, meshRenderData->vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeofVertex * vertices.size(),
-               vertices.data(), GL_STATIC_DRAW);
+    const std::vector<Vertex>& vertices = mesh.GetVertices();
+    glBindBuffer(GL_ARRAY_BUFFER, meshRenderData->vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeofVertex * vertices.size(),
+                 vertices.data(), GL_STATIC_DRAW);
 
-  constexpr static GLsizei sizeofTriple = sizeof(VSUtils::Triple);
+    constexpr static GLsizei sizeofTriple = sizeof(VSUtils::Face);
 
-  const std::vector<VSUtils::Triple>& faces = mesh.GetFaces();
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshRenderData->ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeofTriple * faces.size(),
-               faces.data(), GL_STATIC_DRAW);
+    const std::vector<VSUtils::Face>& faces = mesh.GetFaces();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshRenderData->ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeofTriple * faces.size(),
+                 faces.data(), GL_STATIC_DRAW);
 
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                        sizeofVertex, nullptr);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                          sizeofVertex, nullptr);
 
-  constexpr static size_t normalOffset = offsetof(Vertex, normal);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                        sizeofVertex, (void*)(normalOffset));
+    constexpr static size_t normalOffset = offsetof(Vertex, normal);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                          sizeofVertex, (void*)(normalOffset));
 
-  if (mesh.HasTextureCoordinates())
-  {
-    constexpr static size_t textureOffset = offsetof(Vertex, textureCoord);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                          sizeofVertex, (void*)(textureOffset));
-  }
+    if (mesh.HasTextureCoordinates())
+    {
+        constexpr static size_t textureOffset = offsetof(Vertex, textureCoord);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                              sizeofVertex, (void*)(textureOffset));
+    }
 
-  glBindVertexArray(0);
+    glBindVertexArray(0);
 
-  return renderDataIDCounter;
+    return renderDataIDCounter;
 }
 
-void Renderer::SetShaderUniform(const std::string &name, bool value) const
+void Renderer::SetShaderUniform(const std::string& name, bool value) const
 {
-  programShader.SetBool(name, value);
+    programShader.SetBool(name, value);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, int value) const
+void Renderer::SetShaderUniform(const std::string& name, int value) const
 {
-  programShader.SetInt(name, value);
+    programShader.SetInt(name, value);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, float value) const
+void Renderer::SetShaderUniform(const std::string& name, float value) const
 {
-  programShader.SetFloat(name, value);
+    programShader.SetFloat(name, value);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, const glm::vec2 &value) const
+void Renderer::SetShaderUniform(const std::string& name, const glm::vec2& value) const
 {
-  programShader.SetVec2(name, value);
+    programShader.SetVec2(name, value);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, float x, float y) const
+void Renderer::SetShaderUniform(const std::string& name, float x, float y) const
 {
-  programShader.SetVec2(name, x, y);
+    programShader.SetVec2(name, x, y);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, const glm::vec3 &value) const
+void Renderer::SetShaderUniform(const std::string& name, const glm::vec3& value) const
 {
-  programShader.SetVec3(name, value);
+    programShader.SetVec3(name, value);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, float x, float y, float z) const
+void Renderer::SetShaderUniform(const std::string& name, float x, float y, float z) const
 {
-  programShader.SetVec3(name, x, y, z);
+    programShader.SetVec3(name, x, y, z);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, const glm::vec4 &value) const
+void Renderer::SetShaderUniform(const std::string& name, const glm::vec4& value) const
 {
-  programShader.SetVec4(name, value);
+    programShader.SetVec4(name, value);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, float x, float y, float z, float w) const
+void Renderer::SetShaderUniform(const std::string& name, float x, float y, float z, float w) const
 {
-  programShader.SetVec4(name, x, y, z, w);
+    programShader.SetVec4(name, x, y, z, w);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, const glm::mat2 &mat) const
+void Renderer::SetShaderUniform(const std::string& name, const glm::mat2& mat) const
 {
-  programShader.SetMat2(name, mat);
+    programShader.SetMat2(name, mat);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, const glm::mat3 &mat) const
+void Renderer::SetShaderUniform(const std::string& name, const glm::mat3& mat) const
 {
-  programShader.SetMat3(name, mat);
+    programShader.SetMat3(name, mat);
 }
 
-void Renderer::SetShaderUniform(const std::string &name, const glm::mat4 &mat) const
+void Renderer::SetShaderUniform(const std::string& name, const glm::mat4& mat) const
 {
-  programShader.SetMat4(name, mat);
+    programShader.SetMat4(name, mat);
 }
 
 void Renderer::Reset()
 {
-  ClearStoredObjects();
+    ClearStoredObjects();
 }
 
 void Renderer::ClearStoredObjects()
 {
-  for (auto &storedPair : renderObjectsMap)
-  {
-    delete storedPair.second;
-  }
+    for (auto& storedPair : renderObjectsMap)
+    {
+        delete storedPair.second;
+    }
 
-  renderObjectsMap.clear();
+    renderObjectsMap.clear();
 
-  for (auto &texturePair : texturesMap)
-  {
-    glDeleteTextures(1, &texturePair.second->id);
-  }
+    for (auto& texturePair : texturesMap)
+    {
+        glDeleteTextures(1, &texturePair.second->id);
+    }
 }
 
-const Texture* Renderer::GetTextureInfo(const std::string &texturePath, TextureType type)
+Texture* Renderer::GetTextureInfo(const std::string& texturePath, TextureType type)
 {
-  auto texture = texturesMap.find(texturePath);
+    auto texture = texturesMap.find(texturePath);
 
-  if (texture != texturesMap.end())
-  {
-    return texture->second;
-  }
+    if (texture != texturesMap.end())
+    {
+        return texture->second;
+    }
 
-  texturesMap.try_emplace(texturePath, 
-                          new Texture(LoadTexture(texturePath), type, texturePath));
+    texturesMap.try_emplace(texturePath,
+                            new Texture(LoadTexture(texturePath), type, texturePath.c_str()));
 
-  return texturesMap[texturePath];
+    return texturesMap[texturePath];
 }
 
 void Renderer::Initialize()
 {
-  glewInit();
-  glDebugMessageCallback((GLDEBUGPROC)DebugCallback, this);
-  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glewInit();
+    glDebugMessageCallback((GLDEBUGPROC)DebugCallback, this);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 }
 
 void Renderer::SetLightningUniforms(const Scene* pScene)
 {
-  size_t pointLightIndex = 0;
-  const std::vector<Light>& lights = pScene->GetLights();
+    size_t pointLightIndex = 0;
+    const std::vector<Light>& lights = pScene->GetLights();
 
-  // Set m_lights uniforms
-  for (size_t i = 0; i < pScene->GetLightsCount(); ++i)
-  {
-    const Attenuation &attenuationParams = lights[i].GetAttenuationParamenters();
-
-    switch (lights[i].GetLightType())
+    // Set m_lights uniforms
+    for (size_t i = 0; i < pScene->GetLightsCount(); ++i)
     {
-    case LightType::Directional:
-    {
-      programShader.SetVec3("directionalLight.direction",
-                            pScene->GetCamera().GetViewMatrix() * glm::vec4(lights[i].GetDirection(), 0.0f));
+        const Attenuation& attenuationParams = lights[i].GetAttenuationParamenters();
 
-      const glm::vec3 &lightColor = lights[i].GetColor();
-      programShader.SetVec3("directionalLight.ambient", lightColor * lights[i].GetAmbient());
-      programShader.SetVec3("directionalLight.diffuse", lightColor * lights[i].GetDiffuse());
-      programShader.SetVec3("directionalLight.specular", lightColor * lights[i].GetSpecular());
+        switch (lights[i].GetLightType())
+        {
+        case LightType::Directional:
+        {
+            programShader.SetVec3("directionalLight.direction",
+                                  pScene->GetCamera().GetViewMatrix() * glm::vec4(lights[i].GetDirection(), 0.0f));
 
-      break;
+            const glm::vec3& lightColor = lights[i].GetColor();
+            programShader.SetVec3("directionalLight.ambient", lightColor * lights[i].GetAmbient());
+            programShader.SetVec3("directionalLight.diffuse", lightColor * lights[i].GetDiffuse());
+            programShader.SetVec3("directionalLight.specular", lightColor * lights[i].GetSpecular());
+
+            break;
+        }
+        case LightType::Point:
+        {
+            std::string indexedPointLight = "pointLights[" + std::to_string(pointLightIndex++) + "]";
+
+            programShader.SetVec3(indexedPointLight + ".position",
+                                  pScene->GetCamera().GetViewMatrix() * glm::vec4(lights[i].GetPosition(), 1.0f));
+
+            const glm::vec3& lightColor = lights[i].GetColor();
+            programShader.SetVec3(indexedPointLight + ".ambient", lightColor * lights[i].GetAmbient());
+            programShader.SetVec3(indexedPointLight + ".diffuse", lightColor * lights[i].GetDiffuse());
+            programShader.SetVec3(indexedPointLight + ".specular", lightColor * lights[i].GetSpecular());
+
+            programShader.SetFloat(indexedPointLight + ".constant", attenuationParams.constant);
+            programShader.SetFloat(indexedPointLight + ".linear", attenuationParams.linear);
+            programShader.SetFloat(indexedPointLight + ".quadratic", attenuationParams.quadratic);
+            break;
+        }
+        case LightType::Spotlight:
+        {
+            // Set values for light
+            const glm::vec3& lightColor = lights[i].GetColor();
+            programShader.SetVec3("flashlight.ambient", lightColor * lights[i].GetAmbient());
+            programShader.SetVec3("flashlight.diffuse", lightColor * lights[i].GetDiffuse());
+            programShader.SetVec3("flashlight.specular", lightColor * lights[i].GetSpecular());
+
+            programShader.SetVec3("flashlight.position",
+                                  pScene->GetCamera().GetViewMatrix() *
+                                  glm::vec4(pScene->GetCamera().GetViewPosition(), 1.0f));
+            programShader.SetVec3("flashlight.direction",
+                                  pScene->GetCamera().GetViewMatrix() *
+                                  glm::vec4(-pScene->GetCamera().GetViewDirection(), 0.0f));
+            programShader.SetFloat("flashlight.cutOff", lights[i].GetCutOffValue());
+            programShader.SetFloat("flashlight.outerCutOff", lights[i].GetOuterCutOffValue());
+
+            programShader.SetFloat("flashlight.constant", attenuationParams.constant);
+            programShader.SetFloat("flashlight.linear", attenuationParams.linear);
+            programShader.SetFloat("flashlight.quadratic", attenuationParams.quadratic);
+
+            break;
+        }
+        default:
+            break;
+        }
     }
-    case LightType::Point:
-    {
-      std::string indexedPointLight = "pointLights[" + std::to_string(pointLightIndex++) + "]";
-
-      programShader.SetVec3(indexedPointLight + ".position",
-                            pScene->GetCamera().GetViewMatrix() * glm::vec4(lights[i].GetPosition(), 1.0f));
-
-      const glm::vec3 &lightColor = lights[i].GetColor();
-      programShader.SetVec3(indexedPointLight + ".ambient", lightColor * lights[i].GetAmbient());
-      programShader.SetVec3(indexedPointLight + ".diffuse", lightColor * lights[i].GetDiffuse());
-      programShader.SetVec3(indexedPointLight + ".specular", lightColor * lights[i].GetSpecular());
-
-      programShader.SetFloat(indexedPointLight + ".constant", attenuationParams.constant);
-      programShader.SetFloat(indexedPointLight + ".linear", attenuationParams.linear);
-      programShader.SetFloat(indexedPointLight + ".quadratic", attenuationParams.quadratic);
-      break;
-    }
-    case LightType::Spotlight:
-    {
-      // Set values for light
-      const glm::vec3 &lightColor = lights[i].GetColor();
-      programShader.SetVec3("flashlight.ambient", lightColor * lights[i].GetAmbient());
-      programShader.SetVec3("flashlight.diffuse", lightColor * lights[i].GetDiffuse());
-      programShader.SetVec3("flashlight.specular", lightColor * lights[i].GetSpecular());
-
-      programShader.SetVec3("flashlight.position",
-                            pScene->GetCamera().GetViewMatrix() *
-                            glm::vec4(pScene->GetCamera().GetViewPosition(), 1.0f));
-      programShader.SetVec3("flashlight.direction",
-                            pScene->GetCamera().GetViewMatrix() *
-                            glm::vec4(-pScene->GetCamera().GetViewDirection(), 0.0f));
-      programShader.SetFloat("flashlight.cutOff", lights[i].GetCutOffValue());
-      programShader.SetFloat("flashlight.outerCutOff", lights[i].GetOuterCutOffValue());
-
-      programShader.SetFloat("flashlight.constant", attenuationParams.constant);
-      programShader.SetFloat("flashlight.linear", attenuationParams.linear);
-      programShader.SetFloat("flashlight.quadratic", attenuationParams.quadratic);
-
-      break;
-    }
-    default:
-      break;
-    }
-  }
 }
 
 }

@@ -13,8 +13,6 @@ set(SRC_OBJECT_MODEL
 	"ObjectModel/Material.cpp"
 	"ObjectModel/Mesh.h"
 	"ObjectModel/Mesh.cpp"
-	"ObjectModel/MeshCollection.h"
-	"ObjectModel/MeshCollection.cpp"
 	"ObjectModel/Vertex.h"
 	"ObjectModel/Vertex.cpp")
 
@@ -52,6 +50,10 @@ set(SRC_SPATIAL_SYSTEM
 	"SpatialSystem/Octree.h"
 	"SpatialSystem/Octree.cpp")
 
+set(SRC_RESOURCE_MANAGER
+	"ResourceManager/ResourceManager.h"
+	"ResourceManager/ResourceManager.cpp")
+
 set(SRC_UTILS
 	"Utils/Color.h"
 	"Utils/Color.cpp"
@@ -67,6 +69,7 @@ source_group("Scene"             REGULAR_EXPRESSION "Scene/.*")
 source_group("Scene\\Components" REGULAR_EXPRESSION "Scene/Components/.*")
 source_group("Shaders"           REGULAR_EXPRESSION "Shaders/.*")
 source_group("SpatialSystem"     REGULAR_EXPRESSION "SpatialSystem/.*")
+source_group("ResourceManager"   REGULAR_EXPRESSION "ResourceManager/.*")
 source_group("Utils"             REGULAR_EXPRESSION "Utils/.*")
 
 set(SRC "${SRC_CORE}" 
@@ -76,6 +79,7 @@ set(SRC "${SRC_CORE}"
 		"${SRC_SCENE_COMPONENTS}"
 		"${SRC_SHADERS}"
 		"${SRC_SPATIAL_SYSTEM}"
+		"${SRC_RESOURCE_MANAGER}"
 		"${SRC_UTILS}")
 
 add_executable(${PROJECT_NAME} 

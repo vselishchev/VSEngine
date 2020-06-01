@@ -39,18 +39,20 @@ private:
     //Mesh*    ProcessShape(const tinyobj::shape_t& shape, const tinyobj::attrib_t& attributes, const std::vector<tinyobj::material_t>& materials, const std::string& pathToFile);
     //Material ProcessMaterial(const tinyobj::material_t& material, Mesh* pMesh);
 
-    void     AddMesh(Mesh* mesh);
+    void            AddMesh(Mesh* mesh);
 
     // Assimp helpers
-    void      ProcessNode(aiNode* pAiNode, const aiScene* pAiScene, std::vector<Mesh*>& meshes, const std::string& pathToFile);
-    Mesh*     ProcessMesh(aiMesh* pAiMesh, const aiScene* pAiScene, const std::string& pathToFile);
-    Material* ProcessMaterial(aiMaterial* pAiMat, Mesh* pMesh, const std::string& pathToFile);
+    void            ProcessNode(aiNode* pAiNode, const aiScene* pAiScene, std::vector<Mesh*>& meshes, const std::string& pathToFile);
+    Mesh*           ProcessMesh(aiMesh* pAiMesh, const aiScene* pAiScene, const std::string& pathToFile);
+    Material*       ProcessMaterial(aiMaterial* pAiMat, Mesh* pMesh, const std::string& pathToFile);
     // ~Assimp helpers
+
+    const Texture*  LoadTexture(const char* pathToTexture, TextureType type);
 
 private:
     std::unordered_map<std::string, std::vector<Mesh*>, std::hash<std::string>> m_meshMap;
-
-    std::unordered_map<std::string, Material, std::hash<std::string>> m_materialMap;
+    std::unordered_map<std::string, Material, std::hash<std::string>>           m_materialMap;
+    std::unordered_map<std::string, Texture, std::hash<std::string>>            m_textureMap;
 };
 
 }

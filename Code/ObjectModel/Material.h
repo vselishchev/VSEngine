@@ -14,6 +14,7 @@ enum class TextureType : char
 
 struct Texture
 {
+    Texture() = default;
     Texture(unsigned int id_, TextureType t, const char* pathToTexture)
         : id(id_)
         , type(t)
@@ -32,13 +33,14 @@ public:
     Material(const char* materialName);
     Material(const Material& mat);
     Material(Material&& mat) noexcept;
+    ~Material();
 
     Material& operator=(const Material& mat);
     Material& operator=(Material&& mat) noexcept;
 
     size_t           GetTextureCount() const;
     const Texture*   GetTextureAt(size_t index) const;
-    void             AddTexture(Texture* pTexture);
+    void             AddTexture(const Texture* pTexture);
 
     void             SetAmbient(const glm::vec3& ambient);
     const glm::vec3& GetAmbient() const;
@@ -55,7 +57,7 @@ public:
     const char*      GetMaterialName() const;
 
 private:
-    std::vector<Texture*> m_textures;
+    std::vector<const Texture*> m_textures;
 
     glm::vec3             m_ambient = glm::vec3(1.0f);
     glm::vec3             m_diffuse = glm::vec3(1.0f);

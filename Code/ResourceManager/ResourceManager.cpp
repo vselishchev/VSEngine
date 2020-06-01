@@ -14,6 +14,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 //#define TINYOBJLOADER_IMPLEMENTATION
 //#include "tiny_obj_loader.h"
 
@@ -32,6 +35,16 @@ ResourceManager::~ResourceManager()
             delete stringMeshesPair.second[i];
         }
     }
+
+    Renderer* pRenderer = g_Eng.GetRenderer();
+    if (pRenderer == nullptr)
+        return;
+
+    for (auto& texturePair : m_textureMap)
+    {
+        pRenderer->DeleteTextureRenderInfo(texturePair.second.id);
+    }
+
 }
 
 void ResourceManager::AddMesh(Mesh* mesh)
@@ -330,7 +343,7 @@ Material* ResourceManager::ProcessMaterial(aiMaterial* pAiMat, Mesh* pMesh, cons
         if (pAiMat->GetTexture(aiTextureType_DIFFUSE, j, &texPath) == AI_SUCCESS)
         {
             const std::string diffuseTexturePath = texPath.C_Str();
-            vsMaterial.AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + diffuseTexturePath,
+            vsMaterial.AddTexture(LoadTexture((fileFolder + "/" + diffuseTexturePath).c_str(),
                                   TextureType::Diffuse));
         }
     }
@@ -343,7 +356,7 @@ Material* ResourceManager::ProcessMaterial(aiMaterial* pAiMat, Mesh* pMesh, cons
         if (pAiMat->GetTexture(aiTextureType_SPECULAR, j, &texPath) == AI_SUCCESS)
         {
             const std::string specularTexturePath = texPath.C_Str();
-            vsMaterial.AddTexture(g_Eng.GetRenderer()->GetTextureInfo(fileFolder + "/" + specularTexturePath,
+            vsMaterial.AddTexture(LoadTexture((fileFolder + "/" + specularTexturePath).c_str(),
                                   TextureType::Specular));
         }
     }
@@ -365,6 +378,34 @@ Material* ResourceManager::ProcessMaterial(aiMaterial* pAiMat, Mesh* pMesh, cons
     return &vsMaterial;
 }
 
+const Texture* ResourceManager::LoadTexture(const char* pathToTexture, TextureType type)
+{
+    auto textureIt = m_textureMap.find(pathToTexture);
+
+    if (textureIt != m_textureMap.end())
+    {
+        return &textureIt->second;
+    }
+
+    Renderer* pRenderer = g_Eng.GetRenderer();
+    if (pRenderer == nullptr)
+        return nullptr;
+
+    int width = 0, height = 0, channelsCount = 0;
+    unsigned char* data = stbi_load(pathToTexture, &width, &height, &channelsCount, 0);
+
+    const unsigned int textureId = pRenderer->GetTextureRenderInfo(data, width, height, channelsCount);
+    Texture texture(textureId, type, pathToTexture);
+
+    stbi_image_free(data);
+
+    auto result = m_textureMap.emplace(pathToTexture, std::move(texture));
+
+    if (result.second == false)
+        return nullptr;
+
+    return &m_textureMap.at(pathToTexture);
+}
 
 }
 }

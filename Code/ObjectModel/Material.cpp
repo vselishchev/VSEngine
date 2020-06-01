@@ -25,6 +25,10 @@ Material::Material(Material&& mat) noexcept
     , m_shininess(mat.m_shininess)
 {}
 
+Material::~Material()
+{
+}
+
 Material& Material::operator=(const Material& mat)
 {
     if (this != &mat)
@@ -68,7 +72,7 @@ const Texture* Material::GetTextureAt(size_t index) const
     return m_textures[index];
 }
 
-void Material::AddTexture(Texture* pTexture)
+void Material::AddTexture(const Texture* pTexture)
 {
     m_textures.push_back(pTexture);
 }

@@ -65,9 +65,9 @@ public:
 
     void ClearStoredObjects();
 
-    // Retrieve the texture from textures map 
-    // or create new if not exist and add to textures
-    Texture* GetTextureInfo(const std::string& texturePath, TextureType type);
+    // Generate texture render info.
+    unsigned int GetTextureRenderInfo(const unsigned char* data, int width, int height, int channelsCount);
+    void DeleteTextureRenderInfo(unsigned int textureId);
 
 private:
     void Initialize();
@@ -80,7 +80,6 @@ public:
 
 private:
     std::unordered_map<size_t, RenderData*> renderObjectsMap;
-    std::unordered_map<std::string, Texture*, std::hash<std::string>> texturesMap; // paths to texture
 
     unsigned long renderDataIDCounter = 0;
 };

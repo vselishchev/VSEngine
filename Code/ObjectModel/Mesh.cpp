@@ -3,104 +3,101 @@
 #include "Core/Engine.h"
 #include "Renderer/Renderer.h"
 
-#include <algorithm>
-
 extern VSEngine::Engine g_Eng;
 
-namespace VSEngine
-{
+namespace VSEngine {
 
 Mesh::Mesh(const char* szFilePath)
-  : m_filePath(szFilePath)
+    : m_filePath(szFilePath)
 {}
 
 Mesh::Mesh(Mesh&& other) noexcept
-  : m_bBox(other.m_bBox)
-  , m_material(std::move(other.m_material))
-  , m_renderDataID(other.m_renderDataID)
-  , m_filePath(std::move(other.m_filePath))
-  , m_hasTextureCoordinates(other.m_hasTextureCoordinates)
-  , m_textures(std::move(other.m_textures))
-  , m_vertices(std::move(other.m_vertices))
-  , m_faces(std::move(other.m_faces))
-{}
+    : m_vertices(std::move(other.m_vertices))
+    , m_faces(std::move(other.m_faces))
+    , m_bBox(other.m_bBox)
+    , m_pMaterial(other.m_pMaterial)
+    , m_filePath(std::move(other.m_filePath))
+    , m_renderDataID(other.m_renderDataID)
+    , m_hasTextureCoordinates(other.m_hasTextureCoordinates)
+{
+    other.m_pMaterial = nullptr;
+}
 
 Mesh& Mesh::operator=(const Mesh& other)
 {
-  if (this != &other)
-  {
-    m_bBox = other.m_bBox;
-    m_material = other.m_material;
-    m_renderDataID = other.m_renderDataID;
-    m_filePath = other.m_filePath;
-    m_hasTextureCoordinates = other.m_hasTextureCoordinates;
-    m_textures = other.m_textures;
-    m_vertices = other.m_vertices;
-    m_faces = other.m_faces;
-  }
+    if (this != &other)
+    {
+        m_vertices = other.m_vertices;
+        m_faces = other.m_faces;
+        m_bBox = other.m_bBox;
+        m_pMaterial = other.m_pMaterial;
+        m_filePath = other.m_filePath;
+        m_renderDataID = other.m_renderDataID;
+        m_hasTextureCoordinates = other.m_hasTextureCoordinates;
+    }
 
-  return *this;
+    return *this;
 }
 
 Mesh& Mesh::operator=(Mesh&& other) noexcept
 {
-  if (this != &other)
-  {
-    m_bBox = other.m_bBox;
-    m_material = std::move(other.m_material);
-    m_renderDataID = other.m_renderDataID;
-    m_filePath = std::move(other.m_filePath);
-    m_hasTextureCoordinates = other.m_hasTextureCoordinates;
-    m_textures = std::move(other.m_textures);
-    m_vertices = std::move(other.m_vertices);
-    m_faces = std::move(other.m_faces);
-  }
+    if (this != &other)
+    {
+        m_vertices = other.m_vertices;
+        m_faces = other.m_faces;
+        m_bBox = other.m_bBox;
+        m_pMaterial = other.m_pMaterial;
+        m_filePath = other.m_filePath;
+        m_renderDataID = other.m_renderDataID;
+        m_hasTextureCoordinates = other.m_hasTextureCoordinates;
 
-  return *this;
+        other.m_pMaterial = nullptr;
+    }
+
+    return *this;
 }
 
 void Mesh::AddVertex(const Vertex& vertex)
 {
-  m_vertices.push_back(vertex);
-  m_bBox.AddPoint(vertex.point);
+    m_vertices.push_back(vertex);
+    m_bBox.AddPoint(vertex.point);
 }
 
 void Mesh::AddVertices(const std::vector<Vertex>& vertices)
 {
-  m_vertices.resize(m_vertices.size() + vertices.size());
-  for (const Vertex& vertex : vertices)
-  {
-    m_vertices.push_back(vertex);
-    m_bBox.AddPoint(vertex.point);
-  }
+    if (m_vertices.size() + vertices.size() > m_vertices.capacity())
+    {
+        m_vertices.reserve(m_vertices.size() + vertices.size());
+    }
+
+    for (const Vertex& vertex : vertices)
+    {
+        m_vertices.push_back(vertex);
+        m_bBox.AddPoint(vertex.point);
+    }
 }
 
-void Mesh::AddFace(const VSUtils::Triple& face)
+void Mesh::AddFace(const VSUtils::Face& face)
 {
-  m_faces.push_back(face);
-}
-
-void Mesh::AddFaces(const std::vector<VSUtils::Triple>& faces)
-{
-  m_faces.resize(m_faces.size() + faces.size());
-  for (const VSUtils::Triple& face : faces)
-  {
     m_faces.push_back(face);
-  }
 }
 
-void Mesh::AddTexture(const Texture* pTexture)
+void Mesh::AddFaces(const std::vector<VSUtils::Face>& faces)
 {
-  m_textures.push_back(pTexture);
+    m_faces.resize(m_faces.size() + faces.size());
+    for (const VSUtils::Face& face : faces)
+    {
+        m_faces.push_back(face);
+    }
 }
 
 void Mesh::BindMesh()
 {
-  VSEngine::Renderer* pRenderer = g_Eng.GetRenderer();
-  if (pRenderer == nullptr)
-    return;
+    VSEngine::Renderer* pRenderer = g_Eng.GetRenderer();
+    if (pRenderer == nullptr)
+        return;
 
-  m_renderDataID = pRenderer->GenerateMeshRenderData(*this);
+    m_renderDataID = pRenderer->GenerateMeshRenderData(*this);
 }
 
 }

@@ -1,23 +1,22 @@
-#ifndef _VSENGINE_UTILS_COMMONUTILS_H_
-#define _VSENGINE_UTILS_COMMONUTILS_H_
+#pragma once
 
 #include <string>
 #include <sstream>
 
-namespace VSUtils
+namespace VSUtils {
+
+std::string GetBasePath(const std::string& fileFullPath);
+
+template<typename Out>
+void Split(const std::string& str, char delim, Out result)
 {
-	template<typename Out>
-	void Split(const std::string& str, char delim, Out result)
-	{
-		std::stringstream ss(str);
-		std::string item;
+    std::stringstream ss(str);
+    std::string item;
     while (std::getline(ss, item, delim))
     {
-      *(result++) = item;
+        *(result++) = item;
     }
-  }
-
-  std::string ReplaceSlashes(const std::string &str);
 }
 
-#endif //_VSENGINE_UTILS_COMMONUTILS_H_
+std::string ReplaceSlashes(const std::string& str);
+}

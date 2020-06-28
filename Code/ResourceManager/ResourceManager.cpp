@@ -17,9 +17,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-//#define TINYOBJLOADER_IMPLEMENTATION
-//#include "tiny_obj_loader.h"
-
 extern VSEngine::Engine g_Eng;
 
 namespace VSEngine {
@@ -86,123 +83,6 @@ const std::vector<Mesh*>& ResourceManager::GetMeshes(const std::string& pathToOb
 
     return m_meshMap.at(pathToObject);
 }
-//
-//const std::vector<Mesh*>& ResourceManager::LoadFile(const std::string& pathToFile)
-//{
-//    if (HasMeshByPath(pathToFile))
-//    {
-//        return GetMeshes(pathToFile);
-//    }
-//
-//    tinyobj::attrib_t attributes;
-//    std::vector<tinyobj::shape_t> shapes;
-//    std::vector<tinyobj::material_t> materials;
-//
-//    std::string warnings;
-//    std::string errors;
-//    const std::string path = VSUtils::GetBasePath(pathToFile);
-//    const bool result = tinyobj::LoadObj(&attributes, &shapes, &materials, &warnings, &errors, pathToFile.c_str(), path.c_str(), true);
-//
-//    if (result == false)
-//    {
-//        static const std::vector<Mesh*> noMeshes;
-//        return noMeshes;
-//    }
-//
-//    for (const tinyobj::shape_t& shape : shapes)
-//    {
-//        ProcessShape(shape, attributes, materials, pathToFile);
-//    }
-//
-//    return m_meshMap[pathToFile];
-//}
-//
-//int GetMinIndex(const tinyobj::shape_t& shape)
-//{
-//    int minIndex = INT_MAX;
-//    for (const tinyobj::index_t& index : shape.mesh.indices)
-//    {
-//        if (index.vertex_index < minIndex)
-//            minIndex = index.vertex_index;
-//    }
-//
-//    return minIndex;
-//}
-//
-//Mesh* ResourceManager::ProcessShape(const tinyobj::shape_t& shape, const tinyobj::attrib_t& attributes, const std::vector<tinyobj::material_t>& materials, const std::string& pathToFile)
-//{
-//    Mesh* pMesh = new Mesh(pathToFile.c_str());
-//
-//    int minIndex = GetMinIndex(shape);
-//
-//    const size_t facesCount = shape.mesh.num_face_vertices.size();
-//    for (size_t faceIndex = 0; faceIndex < facesCount; ++faceIndex)
-//    {
-//        const size_t baseIndex = 3 * faceIndex;
-//        VSUtils::Face face;
-//
-//        {
-//            const tinyobj::index_t indexSet1 = shape.mesh.indices[baseIndex];
-//            const Vertex vertex1(glm::vec3(attributes.vertices[indexSet1.vertex_index],
-//                                 attributes.vertices[indexSet1.vertex_index + 1],
-//                                 attributes.vertices[indexSet1.vertex_index + 2]),
-//                                 glm::vec3(attributes.normals[indexSet1.normal_index],
-//                                 attributes.normals[indexSet1.normal_index + 1],
-//                                 attributes.normals[indexSet1.normal_index + 2]),
-//                                 glm::vec2(attributes.texcoords[indexSet1.texcoord_index],
-//                                 attributes.texcoords[indexSet1.texcoord_index + 1]));
-//            pMesh->AddVertex(vertex1);
-//            face.x = static_cast<short>(baseIndex);
-//        }
-//
-//
-//        {
-//            const tinyobj::index_t indexSet2 = shape.mesh.indices[baseIndex + 1];
-//            const Vertex vertex2(glm::vec3(attributes.vertices[indexSet2.vertex_index],
-//                                 attributes.vertices[indexSet2.vertex_index + 1],
-//                                 attributes.vertices[indexSet2.vertex_index + 2]),
-//                                 glm::vec3(attributes.normals[indexSet2.normal_index],
-//                                 attributes.normals[indexSet2.normal_index + 1],
-//                                 attributes.normals[indexSet2.normal_index + 2]),
-//                                 glm::vec2(attributes.texcoords[indexSet2.texcoord_index],
-//                                 attributes.texcoords[indexSet2.texcoord_index + 1]));
-//            pMesh->AddVertex(vertex2);
-//            face.x = static_cast<short>(baseIndex + 1);
-//        }
-//
-//        {
-//            const tinyobj::index_t indexSet3 = shape.mesh.indices[baseIndex + 2];
-//            const Vertex vertex3(glm::vec3(attributes.vertices[indexSet3.vertex_index],
-//                                 attributes.vertices[indexSet3.vertex_index + 1],
-//                                 attributes.vertices[indexSet3.vertex_index + 2]),
-//                                 glm::vec3(attributes.normals[indexSet3.normal_index],
-//                                 attributes.normals[indexSet3.normal_index + 1],
-//                                 attributes.normals[indexSet3.normal_index + 2]),
-//                                 glm::vec2(attributes.texcoords[indexSet3.texcoord_index],
-//                                 attributes.texcoords[indexSet3.texcoord_index + 1]));
-//            pMesh->AddVertex(vertex3);
-//            face.x = static_cast<short>(baseIndex + 2);
-//        }
-//
-//        pMesh->AddFace(face);
-//    }
-//
-//    if (shape.mesh.material_ids.empty())
-//    {
-//        const tinyobj::material_t& material = materials[shape.mesh.material_ids[0]];
-//    }
-//
-//    AddMesh(pMesh);
-//
-//    return pMesh;
-//}
-//
-//Material ResourceManager::ProcessMaterial(const tinyobj::material_t& material, Mesh* pMesh)
-//{
-//    Material vsMaterial;
-//    return vsMaterial;
-//}
-
 
 glm::vec3 GetGLMFromAssimp(const aiColor3D& color)
 {

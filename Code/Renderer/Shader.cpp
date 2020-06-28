@@ -1,24 +1,13 @@
 #include "Shader.h"
 
-#ifdef _WIN32
-#include <direct.h>
-#define getcwd _getcwd
-#endif
-
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 
 namespace VSUtils {
 namespace {
-GLuint LoadShader(const std::string& name, GLenum type)
+GLuint LoadShader(const char* name, GLenum type)
 {
-    std::string exePath = getcwd(nullptr, 260);
-    if (exePath.empty())
-    {
-        return 0;
-    }
-
     // TODO: Remove hard-coded path
     std::string path = std::string(ROOT_PATH) + "/Code/Shaders/" + name;
     // ~TODO
@@ -30,9 +19,8 @@ GLuint LoadShader(const std::string& name, GLenum type)
     GLuint shader = glCreateShader(type);
 
     if (!shader)
-    {
         return 0;
-    }
+
     std::stringstream fileStream;
     fileStream << file.rdbuf();
     std::string fileData = fileStream.str();
@@ -61,10 +49,10 @@ GLuint LoadShader(const std::string& name, GLenum type)
 }
 }
 
-Shader::Shader(const std::string& fname, GLuint shaderType) :
+Shader::Shader(const char* fname, GLuint shaderType) :
     fileName(fname),
     type(shaderType),
-    shader(LoadShader(fileName, type))
+    shader(LoadShader(fname, type))
 {}
 
 Shader::~Shader()
@@ -72,15 +60,13 @@ Shader::~Shader()
     Delete();
 }
 
-void Shader::ChangeFileName(const std::string& fname)
+void Shader::ChangeFileName(const char* fname)
 {
-    Delete();
     fileName = fname;
 }
 
 void Shader::ChangeType(GLuint shaderType)
 {
-    Delete();
     type = shaderType;
 }
 
@@ -96,10 +82,15 @@ GLuint Shader::GetType() const
 
 GLuint Shader::Compile()
 {
-    Delete();
-    shader = LoadShader(fileName, type);
+    shader = LoadShader(fileName.c_str(), type);
 
     return shader;
+}
+
+GLuint Shader::RecompileShader()
+{
+    Delete();
+    return Compile();
 }
 
 void Shader::Delete()

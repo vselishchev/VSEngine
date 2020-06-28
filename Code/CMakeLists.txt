@@ -41,10 +41,14 @@ set(SRC_SCENE_COMPONENTS
 	"Scene/Components/SceneObject.cpp")
 
 set(SRC_SHADERS
-	"Shaders/fragment.fs.glsl"
-	"Shaders/vertex.vs.glsl"
-	"Shaders/Light.fs.glsl"
-	"Shaders/Light.vs.glsl")
+	"Shaders/Main/Main.fs.glsl"
+	"Shaders/Main/Main.vs.glsl"
+	"Shaders/Light/Light.fs.glsl"
+	"Shaders/Light/Light.vs.glsl"
+	"Shaders/ScreenQuad/OnScreenShader.vs.glsl"
+	"Shaders/ScreenQuad/OnScreenShader.fs.glsl"
+	"Shaders/Postprocess/KernelPostprocess.vs.glsl"
+	"Shaders/Postprocess/KernelPostprocess.fs.glsl")
 
 set(SRC_SPATIAL_SYSTEM
 	"SpatialSystem/Octree.h"

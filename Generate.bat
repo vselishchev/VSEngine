@@ -1,7 +1,7 @@
 @echo OFF
 
-mkdir Output
-cd Output
+mkdir Solution
+cd Solution
 set BuildType=Release
 
 echo "Loading dependencies"

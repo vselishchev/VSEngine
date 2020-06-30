@@ -29,4 +29,5 @@
 *.opendb
 *.bak
 
-./Output
+./Solution/
+./bin/

@@ -40,10 +40,10 @@ public:
     void SetMat3(const char* name, const glm::mat3& mat) const;
     void SetMat4(const char* name, const glm::mat4& mat) const;
 private:
-    Shader vertexShader;
-    Shader fragmentShader;
+    Shader m_vertexShader;
+    Shader m_fragmentShader;
 
-    GLuint program = 0;
+    GLuint m_program = 0;
 };
 
 }

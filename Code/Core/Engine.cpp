@@ -60,7 +60,25 @@ void Engine::Start()
     Camera& camera = m_pScene->GetCamera();
     camera.RecalculateProjectionMatrix();
 
+    constexpr glm::mat3 edgeSharperKernel(2,   2, 2,
+                                          2, -15, 2,
+                                          2,   2, 2);
+
+    constexpr float divider = 1.0f / 16.0f;
+    const glm::mat3 blurKernel = glm::mat3(1, 2, 1,
+                                           2, 4, 2,
+                                           1, 2, 1) * divider;
+
+    constexpr glm::mat3 edgeDetectionKernel(1, 1, 1,
+                                            1, -8, 1,
+                                            1, 1, 1);
     m_pRenderer->RenderStart();
+    // NOTE: Apply postprocess like here.
+    //m_pRenderer->SetPostProcessShader("Postprocess/KernelPostprocess.vs.glsl", "Postprocess/KernelPostprocess.fs.glsl");
+    //m_pRenderer->ApplyPostprocess(true);
+    //m_pRenderer->SetPostprocessKernel(edgeSharperKernel);
+    // ~NOTE
+
     m_pScene->LoadScene();
 
     bool running = true;

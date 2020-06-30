@@ -19,15 +19,15 @@ int main()
     VSEngine::ResourceManager::ResourceManager& manager = g_Eng.resourceManager;
 
     const std::string filePath1 = "D:/Work/Models/nanosuit/nanosuit.obj";
-    //std::vector<VSEngine::Mesh*> meshes = manager.LoadFile(filePath1);
-    //for (VSEngine::Mesh* pMesh : meshes)
-    //{
-    //    VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
-    //    pScene->AddSceneObject(pObj);
-    //    pObj->Scale(0.4f);
-    //    pObj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
-    //    pObj->Translate(12.0f, 0.0f, 6.0f);
-    //}
+    std::vector<VSEngine::Mesh*> meshes = manager.LoadFileAssimp(filePath1);
+    for (VSEngine::Mesh* pMesh : meshes)
+    {
+        VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
+        pScene->AddSceneObject(pObj);
+        pObj->Scale(0.4f);
+        pObj->Rotate(glm::vec3(0.0f, 1.0f, 0.0f), 45.0f);
+        pObj->Translate(12.0f, 0.0f, 6.0f);
+    }
 
     const std::string filePath3 = "D:/Work/Models/sponza/sponza.obj";
     std::vector<VSEngine::Mesh*> meshes5 = manager.LoadFileAssimp(filePath3);

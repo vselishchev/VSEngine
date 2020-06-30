@@ -24,8 +24,6 @@ public:
     ResourceManager() = default;
     ~ResourceManager();
 
-    //const std::vector<Mesh*>& LoadFile(const std::string& pathToFile);
-
     size_t                    GetMeshesCount() const { return m_meshMap.size(); }
     // Single .obj file can contain multiple meshes.
     bool                      HasMeshByPath(const std::string& pathToMesh) const;
@@ -36,9 +34,6 @@ public:
     // ~Load by Assimp
 
 private:
-    //Mesh*    ProcessShape(const tinyobj::shape_t& shape, const tinyobj::attrib_t& attributes, const std::vector<tinyobj::material_t>& materials, const std::string& pathToFile);
-    //Material ProcessMaterial(const tinyobj::material_t& material, Mesh* pMesh);
-
     void            AddMesh(Mesh* mesh);
 
     // Assimp helpers

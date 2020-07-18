@@ -1,25 +1,29 @@
 #include "Core/Engine.h"
+#include "ResourceManager/ResourceManager.h"
 #include "Scene/Scene.h"
 #include "Scene/Components/SceneObject.h"
 #include "Scene/Components/Camera.h"
-#include "Scene/Utils.h"
 
 #include <glm/ext/matrix_transform.hpp>
+#include <iostream>
 
 #include <string>
 #include <vector>
 
-VSEngine::Engine g_Eng("VS Engine", 1200, 800);
-
-int main()
+void Process()
 {
+    VSEngine::Engine& engine = GetEngine();
+    engine.Initialize();
+
     VSEngine::Scene* pScene = new VSEngine::Scene();
-    g_Eng.SetScene(pScene);
+    engine.SetScene(pScene);
 
-    VSEngine::ResourceManager::ResourceManager& manager = g_Eng.resourceManager;
+    VSEngine::Resource::ResourceManager* pResourceManager = engine.GetResourceManager();
+    if (pResourceManager == nullptr)
+        return;
 
-    const std::string filePath1 = "D:/Work/Models/nanosuit/nanosuit.obj";
-    std::vector<VSEngine::Mesh*> meshes = manager.LoadFileAssimp(filePath1);
+    const char* filePath1 = "D:/Work/Models/nanosuit/nanosuit.obj";
+    std::vector<VSEngine::Mesh*> meshes = pResourceManager->LoadFileAssimp(filePath1);
     for (VSEngine::Mesh* pMesh : meshes)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -29,8 +33,8 @@ int main()
         pObj->Translate(12.0f, 0.0f, 6.0f);
     }
 
-    const std::string filePath3 = "D:/Work/Models/sponza/sponza.obj";
-    std::vector<VSEngine::Mesh*> meshes5 = manager.LoadFileAssimp(filePath3);
+    const char* filePath3 = "D:/Work/Models/sponza/sponza.obj";
+    std::vector<VSEngine::Mesh*> meshes5 = pResourceManager->LoadFileAssimp(filePath3);
     for (VSEngine::Mesh* pMesh : meshes5)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -40,8 +44,8 @@ int main()
         pObj->Translate(-4.0f, 0.0f, -4.0f);
     }
 
-    const std::string filePath2 = "D:/Work/Models/cube/cube.obj";
-    std::vector<VSEngine::Mesh*> meshes2 = manager.LoadFileAssimp(filePath2);
+    const char* filePath2 = "D:/Work/Models/cube/cube.obj";
+    std::vector<VSEngine::Mesh*> meshes2 = pResourceManager->LoadFileAssimp(filePath2);
     for (VSEngine::Mesh* pMesh : meshes2)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -51,7 +55,7 @@ int main()
         pObj->Translate(-4.0f, 0.0f, -4.0f);
     }
 
-    std::vector<VSEngine::Mesh*> meshes3 = manager.LoadFileAssimp(filePath2);
+    std::vector<VSEngine::Mesh*> meshes3 = pResourceManager->LoadFileAssimp(filePath2);
     for (VSEngine::Mesh* pMesh : meshes3)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -61,7 +65,7 @@ int main()
         pObj->Translate(-16.0f, 4.0f, -4.0f);
     }
 
-    std::vector<VSEngine::Mesh*> meshes4 = manager.LoadFileAssimp(filePath2);
+    std::vector<VSEngine::Mesh*> meshes4 = pResourceManager->LoadFileAssimp(filePath2);
     for (VSEngine::Mesh* pMesh : meshes4)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -77,7 +81,16 @@ int main()
 
     pScene->SetCamera(cam);
 
-    g_Eng.Start();
+    engine.Start();
+    engine.Execute();
+    engine.Finish();
+
+    engine.Shutdown();
+}
+
+int main()
+{
+    Process();
 
     return 0;
 }

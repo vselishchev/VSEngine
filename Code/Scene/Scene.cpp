@@ -7,9 +7,8 @@
 
 #include <GL/glew.h>
 
-extern VSEngine::Engine g_Eng;
-
 namespace VSEngine {
+
 Scene::Scene()
     : m_octree(VSUtils::BoundingBox(glm::vec3(-100.0f, -100.0f, -100.0f), glm::vec3(100.0f, 100.0f, 100.0f)))
 {}
@@ -17,7 +16,7 @@ Scene::Scene()
 Scene::~Scene()
 {}
 
-void Scene::LoadScene()
+void Scene::Load()
 {
     m_octree.UpdateTree();
 
@@ -52,6 +51,15 @@ void Scene::LoadScene()
     light2.SetAmbient(glm::vec3(0.05f));
     light2.SetDiffuse(glm::vec3(0.8f));
     light2.SetSpecular(glm::vec3(0.5f));
+}
+
+void Scene::Unload()
+{
+    std::vector<SceneObject*> objects = m_octree.GetAllObjects();
+    for (SceneObject* object : objects)
+    {
+        object->UnbindObject();
+    }
 }
 
 void Scene::RenderScene(double time, const glm::mat4& projMatrix,

@@ -10,8 +10,6 @@
 
 #include "glm/glm.hpp"
 
-extern VSEngine::Engine g_Eng;
-
 namespace VSEngine {
 
 void APIENTRY Renderer::DebugCallback(
@@ -64,12 +62,12 @@ void Renderer::RenderStart()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Generate post-process data.
-    GeneratePostProcessData();
+    InitializePostProcessData();
 }
 
 void Renderer::RenderFinish()
 {
-    glDeleteFramebuffers(1, &m_framebuffer);
+    UninitializePostProcessData();
 }
 
 void Renderer::Render(double time, const Scene* scene, const glm::mat4& projMatrix)
@@ -148,9 +146,7 @@ void Renderer::ApplyPostprocess(bool shouldApply)
 size_t Renderer::GenerateMeshRenderData(const Mesh& mesh)
 {
     if (mesh.GetMeshRenderDataId())
-    {
         return mesh.GetMeshRenderDataId();
-    }
 
     m_renderObjectsMap.try_emplace(++m_renderDataIDCounter, new RenderData());
 
@@ -196,6 +192,15 @@ size_t Renderer::GenerateMeshRenderData(const Mesh& mesh)
     glBindVertexArray(0);
 
     return m_renderDataIDCounter;
+}
+
+void Renderer::RemoveMeshRenderData(size_t renderDataId)
+{
+    auto renderDataIter = m_renderObjectsMap.find(renderDataId);
+    if (renderDataIter == m_renderObjectsMap.end())
+        return;
+
+    m_renderObjectsMap.erase(renderDataIter);
 }
 
 void Renderer::Reset()
@@ -390,14 +395,15 @@ void Renderer::SetLightningUniforms(const Scene* pScene)
     }
 }
 
-void Renderer::GeneratePostProcessData()
+void Renderer::InitializePostProcessData()
 {
     // Generate framebuffer.
     glGenFramebuffers(1, &m_framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 
-    const unsigned short height = g_Eng.GetViewportHeight();
-    const unsigned short width = g_Eng.GetViewportWidth();
+    Engine& engine = GetEngine();
+    const unsigned short height = engine.GetViewportHeight();
+    const unsigned short width = engine.GetViewportWidth();
 
     // Generate texture for framebuffer.
     glGenTextures(1, &m_framebufferTexture);
@@ -445,6 +451,14 @@ void Renderer::GeneratePostProcessData()
     postProcessShader.SetInt("screenTexture", 0);
 }
 
+void Renderer::UninitializePostProcessData()
+{
+    glDeleteTextures(1, &m_framebufferTexture);
+    glDeleteBuffers(1, &m_screenQuadVBO);
+    glDeleteVertexArrays(1, &m_screenQuadVAO);
+    glDeleteRenderbuffers(1, &m_renderbuffer);
+    glDeleteFramebuffers(1, &m_framebuffer);
+}
 
 void Renderer::SetShaderUniform(const char* name, bool value) const
 {

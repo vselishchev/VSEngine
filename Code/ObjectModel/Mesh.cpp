@@ -3,8 +3,6 @@
 #include "Core/Engine.h"
 #include "Renderer/Renderer.h"
 
-extern VSEngine::Engine g_Eng;
-
 namespace VSEngine {
 
 Mesh::Mesh(const char* szFilePath)
@@ -93,11 +91,24 @@ void Mesh::AddFaces(const std::vector<VSUtils::Face>& faces)
 
 void Mesh::BindMesh()
 {
-    VSEngine::Renderer* pRenderer = g_Eng.GetRenderer();
+    if (m_renderDataID != 0)
+        return;
+
+    Renderer* pRenderer = GetEngine().GetRenderer();
     if (pRenderer == nullptr)
         return;
 
     m_renderDataID = pRenderer->GenerateMeshRenderData(*this);
+}
+
+void Mesh::UnbindMesh()
+{
+    Renderer* pRenderer = GetEngine().GetRenderer();
+    if (pRenderer == nullptr)
+        return;
+
+    pRenderer->RemoveMeshRenderData(m_renderDataID);
+    m_renderDataID = 0;
 }
 
 }

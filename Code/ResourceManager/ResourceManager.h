@@ -16,7 +16,7 @@ namespace VSEngine {
 class Engine;
 class Mesh;
 
-namespace ResourceManager {
+namespace Resource {
 
 class ResourceManager
 {

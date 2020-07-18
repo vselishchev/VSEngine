@@ -19,6 +19,7 @@ public:
     ~SceneObject();
 
     void                        BindObject();
+    void                        UnbindObject();
 
     void                        Scale(const glm::vec3& scale_);
     void                        Scale(float scale_);

@@ -1,60 +1,58 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include <string>
 
-#include "Scene/Scene.h"
-#include "ResourceManager/ResourceManager.h"
+struct GLFWwindow;
 
 namespace VSEngine {
 
+namespace Resource {
+class ResourceManager;
+}
+
 class Renderer;
+class Scene;
+
 
 class Engine final
 {
 public:
-    Engine();
-    Engine(const std::string& title, unsigned short width, unsigned short height,
-           unsigned short majorVersion = 4, unsigned short minorVersion = 3);
+    Engine(const Engine& other) = delete;
+    Engine(Engine&& other) = delete;
     ~Engine();
 
-    unsigned short GetViewportHeight() const
-    {
-        return m_appInfo.windowHeight;
-    }
+    Engine& operator=(const Engine& other) = delete;
+    Engine& operator=(Engine&& other) = delete;
 
-    unsigned short GetViewportWidth() const
-    {
-        return m_appInfo.windowWidth;
-    }
+    void                       Initialize();
+    void                       Shutdown();
 
-    void SetScene(Scene* scene_)
-    {
-        m_pScene = scene_;
-    }
+    void                       Start();
+    void                       Execute();
+    void                       Finish();
 
-    Scene* GetScene() const
-    {
-        return m_pScene;
-    }
+    static Engine&             GetEngine();
 
-    Renderer* GetRenderer()
-    {
-        return m_pRenderer;
-    }
+    Resource::ResourceManager* GetResourceManager();
 
-    void ProcessKeyInput();
+    void                       SetViewportHeight(unsigned short height);
+    unsigned short             GetViewportHeight() const;
+    void                       SetViewportWidth(unsigned short width);
+    unsigned short             GetViewportWidth() const;
+    void                       SetTitle(const char* szTitle);
+    const char*                GetTitle() const;
 
-    void Start();
-    void Finish();
+    void                       SetScene(Scene* scene_);
+    Scene*                     GetScene() const;
+
+    Renderer*                  GetRenderer();
 
 private:
-    void Initialize();
-    void Release();
+    Engine() = default;
 
-public:
+    void                       ProcessKeyInput();
+
+private:
     struct ApplicationInfo
     {
         std::string title = "Window";
@@ -64,13 +62,18 @@ public:
         unsigned short minorVersion = 3;
     };
 
-    ResourceManager::ResourceManager resourceManager;
+    ApplicationInfo            m_appInfo;
 
-private:
-    ApplicationInfo m_appInfo;
-    GLFWwindow*     m_pWindow = nullptr;
-    Scene*          m_pScene = nullptr;
-    Renderer*       m_pRenderer = nullptr;
+    GLFWwindow*                m_pWindow = nullptr;
+    Scene*                     m_pScene = nullptr;
+    Renderer*                  m_pRenderer = nullptr;
+    Resource::ResourceManager* m_pResourceManager = nullptr;
 };
 
 }
+
+inline VSEngine::Engine& GetEngine()
+{
+    return VSEngine::Engine::GetEngine();
+}
+

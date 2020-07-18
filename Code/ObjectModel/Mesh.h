@@ -50,6 +50,7 @@ public:
     [[nodiscard]] const std::string&                  GetFilePath() const { return m_filePath; }
 
     void                                              BindMesh();
+    void                                              UnbindMesh();
 
 private:
     std::vector<Vertex>          m_vertices;

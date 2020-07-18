@@ -17,10 +17,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-extern VSEngine::Engine g_Eng;
-
 namespace VSEngine {
-namespace ResourceManager {
+namespace Resource {
 
 ResourceManager::~ResourceManager()
 {
@@ -31,9 +29,10 @@ ResourceManager::~ResourceManager()
         {
             delete stringMeshesPair.second[i];
         }
+        stringMeshesPair.second.clear();
     }
 
-    Renderer* pRenderer = g_Eng.GetRenderer();
+    Renderer* pRenderer = GetEngine().GetRenderer();
     if (pRenderer == nullptr)
         return;
 
@@ -41,7 +40,6 @@ ResourceManager::~ResourceManager()
     {
         pRenderer->DeleteTextureRenderInfo(texturePair.second.id);
     }
-
 }
 
 void ResourceManager::AddMesh(Mesh* mesh)
@@ -267,7 +265,7 @@ const Texture* ResourceManager::LoadTexture(const char* pathToTexture, TextureTy
         return &textureIt->second;
     }
 
-    Renderer* pRenderer = g_Eng.GetRenderer();
+    Renderer* pRenderer = GetEngine().GetRenderer();
     if (pRenderer == nullptr)
         return nullptr;
 

@@ -29,7 +29,9 @@ public:
     Scene& operator=(const Scene& other) = delete;
     Scene& operator=(Scene&& other) = delete;
 
-    void                                           LoadScene();
+    void                                           Load();
+    void                                           Unload();
+
     void                                           RenderScene(double time, const glm::mat4& projMatrix,
                                                                const VSUtils::ShaderProgram& shaderProgram);
 

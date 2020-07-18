@@ -5,8 +5,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
-extern VSEngine::Engine g_Eng;
-
 namespace VSEngine {
 
 Camera::Camera(const glm::vec3& pos,
@@ -253,8 +251,9 @@ void Camera::RecalculateViewMatrix()
 
 void Camera::RecalculateProjectionMatrix()
 {
-    m_aspectRatio = static_cast<float>(g_Eng.GetViewportWidth()) /
-        static_cast<float>(g_Eng.GetViewportHeight());
+    Engine& engine = GetEngine();
+    m_aspectRatio = static_cast<float>(engine.GetViewportWidth()) /
+        static_cast<float>(engine.GetViewportHeight());
     m_projectionMatrix = glm::perspective(m_fov, m_aspectRatio, m_zNear, m_zFar);
 
     RecalculateFrustum();

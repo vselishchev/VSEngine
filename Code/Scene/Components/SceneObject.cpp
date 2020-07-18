@@ -8,8 +8,6 @@
 #include "Core/Engine.h"
 #include "Renderer/Renderer.h"
 
-extern VSEngine::Engine g_Eng;
-
 namespace VSEngine
 {
 
@@ -78,6 +76,11 @@ const glm::mat4& SceneObject::GetTransformation() const
 void SceneObject::BindObject()
 {
   m_mesh.BindMesh();
+}
+
+void SceneObject::UnbindObject()
+{
+    m_mesh.UnbindMesh();
 }
 
 void SceneObject::SetObjectColor(const glm::vec3 &col)

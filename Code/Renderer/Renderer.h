@@ -52,6 +52,7 @@ public:
     void         ApplyPostprocess(bool shouldApply);
 
     size_t       GenerateMeshRenderData(const Mesh& mesh);
+    void         RemoveMeshRenderData(size_t renderDataId);
 
     void         SetShaderUniform(const char* name, bool value) const;
     void         SetShaderUniform(const char* name, int value) const;
@@ -79,7 +80,8 @@ private:
     void         RenderScene(const Scene* scene);
     void         SetLightningUniforms(const Scene* scene);
 
-    void         GeneratePostProcessData();
+    void         InitializePostProcessData();
+    void         UninitializePostProcessData();
 public:
     VSUtils::ShaderProgram programShader;
     VSUtils::ShaderProgram lightShader;

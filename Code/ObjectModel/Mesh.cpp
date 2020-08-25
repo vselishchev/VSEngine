@@ -41,8 +41,8 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
 {
     if (this != &other)
     {
-        m_vertices = other.m_vertices;
-        m_faces = other.m_faces;
+        m_vertices = std::move(other.m_vertices);
+        m_faces = std::move(other.m_faces);
         m_bBox = other.m_bBox;
         m_pMaterial = other.m_pMaterial;
         m_filePath = other.m_filePath;

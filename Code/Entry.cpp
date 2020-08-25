@@ -4,11 +4,36 @@
 #include "Scene/Components/SceneObject.h"
 #include "Scene/Components/Camera.h"
 
+#include "Core/System/BucketAllocator.h"
+
 #include <glm/ext/matrix_transform.hpp>
 #include <iostream>
 
 #include <string>
 #include <vector>
+
+#include <chrono>
+#include <iostream>
+
+void* operator new(size_t size)
+{
+    return VSEngine::System::GetAllocator().Alloc(size);
+}
+
+void* operator new[](size_t size)
+{
+    return VSEngine::System::GetAllocator().Alloc(size);
+}
+
+void operator delete(void* ptr) noexcept
+{
+    VSEngine::System::GetAllocator().Free(ptr);
+}
+
+void operator delete[](void* ptr) noexcept
+{
+    VSEngine::System::GetAllocator().Free(ptr);
+}
 
 void Process()
 {
@@ -23,7 +48,7 @@ void Process()
         return;
 
     const char* filePath1 = "D:/Work/Models/nanosuit/nanosuit.obj";
-    std::vector<VSEngine::Mesh*> meshes = pResourceManager->LoadFileAssimp(filePath1);
+    const std::vector<VSEngine::Mesh*> meshes = pResourceManager->LoadFileAssimp(filePath1);
     for (VSEngine::Mesh* pMesh : meshes)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -34,7 +59,7 @@ void Process()
     }
 
     const char* filePath3 = "D:/Work/Models/sponza/sponza.obj";
-    std::vector<VSEngine::Mesh*> meshes5 = pResourceManager->LoadFileAssimp(filePath3);
+    const std::vector<VSEngine::Mesh*> meshes5 = pResourceManager->LoadFileAssimp(filePath3);
     for (VSEngine::Mesh* pMesh : meshes5)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -45,7 +70,7 @@ void Process()
     }
 
     const char* filePath2 = "D:/Work/Models/cube/cube.obj";
-    std::vector<VSEngine::Mesh*> meshes2 = pResourceManager->LoadFileAssimp(filePath2);
+    const std::vector<VSEngine::Mesh*> meshes2 = pResourceManager->LoadFileAssimp(filePath2);
     for (VSEngine::Mesh* pMesh : meshes2)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -55,7 +80,7 @@ void Process()
         pObj->Translate(-4.0f, 0.0f, -4.0f);
     }
 
-    std::vector<VSEngine::Mesh*> meshes3 = pResourceManager->LoadFileAssimp(filePath2);
+    const std::vector<VSEngine::Mesh*>& meshes3 = pResourceManager->LoadFileAssimp(filePath2);
     for (VSEngine::Mesh* pMesh : meshes3)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -65,7 +90,7 @@ void Process()
         pObj->Translate(-16.0f, 4.0f, -4.0f);
     }
 
-    std::vector<VSEngine::Mesh*> meshes4 = pResourceManager->LoadFileAssimp(filePath2);
+    const std::vector<VSEngine::Mesh*>& meshes4 = pResourceManager->LoadFileAssimp(filePath2);
     for (VSEngine::Mesh* pMesh : meshes4)
     {
         VSEngine::SceneObject* pObj = new VSEngine::SceneObject(*pMesh);
@@ -90,7 +115,13 @@ void Process()
 
 int main()
 {
+    //const std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
     Process();
+    //const std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
 
+    //std::chrono::duration<double> duration = end - start;
+    //std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+
+    //std::cout << "Passed time: " << ms.count() << "milliseconds\n";
     return 0;
 }

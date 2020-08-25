@@ -9,8 +9,8 @@ set(SRC_CORE
 	"Core/Engine.cpp")
 
 set(SRC_CORE_SYSTEM
-	"Core/System/BucketAllocator.h"
-	"Core/System/BucketAllocator.cpp")
+	"Core/System/Arena.h"
+	"Core/System/BucketAllocator.h")
 
 set(SRC_OBJECT_MODEL 	
 	"ObjectModel/Material.h"

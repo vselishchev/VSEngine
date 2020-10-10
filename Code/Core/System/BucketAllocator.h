@@ -5,7 +5,7 @@
 namespace VSEngine {
 namespace System {
 
-constexpr size_t ArenaCount = 4;
+constexpr size_t ArenaCount = 32;
 
 template<size_t ARENA_SIZE = DefaultArenaSize, size_t ARENA_COUNT = ArenaCount>
 class BucketAllocator
@@ -13,8 +13,9 @@ class BucketAllocator
     struct ArenaHolder
     {
         Arena<ARENA_SIZE> arena;
-        ArenaHolder* pNextHolder = nullptr;
+        ArenaHolder*      pNextHolder = nullptr;
     };
+    // 48 Bytes.
 
 public:
     static BucketAllocator& GetAllocator()
@@ -25,6 +26,12 @@ public:
 
     void* Alloc(size_t size)
     {
+        if (size > DefaultArenaSize)
+        {
+            // Requested memory is too big. Just request it from OS.
+            return malloc(size);
+        }
+
         // Fast 1: Try allocate in active arena.
         void* ptr = m_pActiveArenaHolder->arena.Alloc(size);
         if (ptr)
@@ -43,12 +50,6 @@ public:
 
             m_pActiveArenaHolder = pHolder;
             return ptr;
-        }
-
-        if (size > DefaultArenaSize)
-        {
-            // Requested memory is too big. Just request it from OS.
-            return malloc(size);
         }
 
         // Create new arena.
@@ -84,7 +85,20 @@ public:
 
     void Recycle()
     {
-        
+        ArenaHolder* pHolder = m_pArenaHolders;
+        ArenaHolder* pPrevHolder = nullptr;
+        while (pHolder)
+        {
+            if (pHolder->arena.IsEmpty() && m_arenaCount > ARENA_COUNT)
+            {
+                if (pPrevHolder)
+                    pPrevHolder->pNextHolder = pHolder->pNextHolder;
+
+                free(pHolder);
+            }
+
+            pHolder->arena.Recycle();
+        }
     }
 
 private:

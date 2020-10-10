@@ -10,7 +10,9 @@ set(SRC_CORE
 
 set(SRC_CORE_SYSTEM
 	"Core/System/Arena.h"
-	"Core/System/BucketAllocator.h")
+	"Core/System/BucketAllocator.h"
+	"Core/System/SmallObjectAllocator.h"
+	"Core/System/SmallObjectAllocator.cpp")
 
 set(SRC_OBJECT_MODEL 	
 	"ObjectModel/Material.h"

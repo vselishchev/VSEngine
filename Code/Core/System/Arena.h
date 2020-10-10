@@ -37,7 +37,6 @@ public:
         , m_pCurrentTop(m_pHead)
         , m_pEnd(m_pHead + ARENA_SIZE)
     {
-        ((Block*)(m_pCurrentTop))->header.size = 0;
     }
 
     ~Arena()
@@ -75,7 +74,9 @@ public:
         {
             pBlock->header.pNext = m_pFreeList;
             pBlock->header.pPrev = nullptr;
+            ((Block*)m_pFreeList)->header.pPrev = pCharBlock;
             m_pFreeList = pCharBlock;
+
             return;
         }
 
@@ -88,8 +89,18 @@ public:
             pCurrentBlock = ((Block*)pCurrentBlock)->header.pNext;
         }
 
+        if (pCurrentBlock == nullptr)
+        {
+            // It's the last block.
+            pBlock->header.pNext = nullptr;
+        }
+        else
+        {
+            pBlock->header.pNext = pCurrentBlock;
+            ((Block*)pCurrentBlock)->header.pPrev = pCharBlock;
+        }
+
         ((Block*)pPreviousBlock)->header.pNext = pCharBlock;
-        pBlock->header.pNext = pCurrentBlock;
         pBlock->header.pPrev = pPreviousBlock;
     }
 
@@ -151,49 +162,36 @@ private:
             return nullptr;
         }
 
-        // Fast 1: Try to give memory of the first free block.
-        bool wasSplit = false;
-        void* pPointer = ReuseBlock((Block*)m_pFreeList, alignedSize, wasSplit);
+        // Fast 1: Try to give the address of the first free block.
+        void* pPointer = ReuseBlock((Block*)m_pFreeList, alignedSize);
         if (pPointer)
         {
-            if (wasSplit)
-            {
-                m_pFreeList += alignedSize;
-            }
-            else
-            {
-                m_pFreeList = ((Block*)m_pFreeList)->header.pNext;
-            }
-
             return pPointer;
         }
 
-        // Fast 2: allocate after the current top if there is still enough space.
-        const size_t lastBlockSize = reinterpret_cast<Block*>(m_pCurrentTop)->header.size;
-
-        const size_t endSize = (m_pEnd - m_pCurrentTop) - lastBlockSize;
-        if (endSize > alignedSize)
+        // Fast 2: Allocate at the current top if there is still enough space.
+        const size_t endSize = (m_pEnd - m_pCurrentTop);
+        if (endSize >= alignedSize)
         {
-            m_pCurrentTop += lastBlockSize;
+            new(m_pCurrentTop) Block();
 
-            Block* pNewBlock = reinterpret_cast<Block*>(m_pCurrentTop);
+            Block* pNewBlock = (Block*)m_pCurrentTop;
             pNewBlock->header.size = alignedSize;
             pNewBlock->header.isUsed = true;
+
+            m_pCurrentTop += alignedSize;
 
             return pNewBlock->pointer;
         }
 
         // If (m_pEnd - m_pCurrentTop < alignedSize) find the block with appropriate size in the free list.
         Block* pCurrentBlock = reinterpret_cast<Block*>(m_pFreeList);
-        while (pCurrentBlock->header.isUsed && pCurrentBlock->header.size < alignedSize)
+        while (pCurrentBlock && pCurrentBlock->header.isUsed && pCurrentBlock->header.size < alignedSize)
         {
             pCurrentBlock = (Block*)pCurrentBlock->header.pNext;
-            if (pCurrentBlock == nullptr)
-                return nullptr;
         }
 
-        wasSplit = false;
-        return ReuseBlock(pCurrentBlock, alignedSize, wasSplit);
+        return ReuseBlock(pCurrentBlock, alignedSize);
     }
 
     // Accepts value from actual payload pointer.
@@ -211,40 +209,57 @@ private:
         return size + blockSize;
     }
 
-    // Reuse block: if block size is higher than (newSize + Block size) then split blocks,
+    // If block size is higher than (newSize + Block size) then split blocks,
     // otherwise just reset "used" flag.
-    void* ReuseBlock(Block* pBlock, size_t newSize, bool& wasSplit)
+    void* ReuseBlock(Block* pBlock, size_t newSize)
     {
-        wasSplit = false;
         if (pBlock == nullptr || pBlock->header.size < newSize)
             return nullptr;
+
+        pBlock->header.isUsed = true;
+
+        const bool isBlockHead = (char*)pBlock == m_pFreeList;
 
         // If current block size smaller than (alignedSize + blockSize), just return current block pointer.
         constexpr size_t blockSize = sizeof(Block);
         const size_t reminderSize = pBlock->header.size - newSize;
         if (reminderSize < blockSize)
         {
-            pBlock->header.isUsed = true;
+            if (isBlockHead)
+                m_pFreeList = pBlock->header.pNext;
+
+            pBlock->header.pNext = nullptr;
+            pBlock->header.pPrev = nullptr;
             return pBlock->pointer;
         }
 
-        // Split blocks otherwise.
+        // Split block otherwise.
         char* pNewCharBlock = (char*)pBlock + newSize;
-        Block* pNewBlock = (Block*)(pNewCharBlock);
+        Block* pNewBlock = (Block*)pNewCharBlock;
         pNewBlock->header.size = reminderSize;
         pNewBlock->header.pNext = pBlock->header.pNext;
+        pNewBlock->header.pPrev = pBlock->header.pPrev;
 
-        //pBlock->header.pNext = nullptr;
+        pBlock->header.pNext = nullptr;
+        pBlock->header.pPrev = nullptr;
         pBlock->header.size = newSize;
 
-        Block* pPrevBlock = (Block*)pBlock->header.pPrev;
-        if (pPrevBlock)
+        // Update links with next block.
+        if (pNewBlock->header.pNext)
         {
-            pPrevBlock->header.pNext = pNewCharBlock;
-            pNewBlock->header.pPrev = (char*)pPrevBlock;
+            Block* pNextBlock = (Block*)pNewBlock->header.pNext;
+            pNextBlock->header.pPrev = pNewCharBlock;
         }
 
-        wasSplit = true;
+        // Update links with previous block.
+        if (pNewBlock->header.pPrev)
+        {
+            Block* pPrevBlock = (Block*)pNewBlock->header.pPrev;
+            pPrevBlock->header.pNext = pNewCharBlock;
+        }
+
+        if (isBlockHead)
+            m_pFreeList = pNewCharBlock;
 
         return pBlock->pointer;
     }
@@ -256,6 +271,7 @@ private:
     const char* const m_pEnd;
     unsigned int      m_maxBlockSize = ARENA_SIZE;
     int               m_blocksAllocated = 0;
+    // 40 bytes
 };
 
 } // ~System

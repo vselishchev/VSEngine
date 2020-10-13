@@ -15,26 +15,6 @@
 #include <chrono>
 #include <iostream>
 
-void* operator new(size_t size)
-{
-    return VSEngine::System::GetAllocator().Alloc(size);
-}
-
-void* operator new[](size_t size)
-{
-    return VSEngine::System::GetAllocator().Alloc(size);
-}
-
-void operator delete(void* ptr) noexcept
-{
-    VSEngine::System::GetAllocator().Free(ptr);
-}
-
-void operator delete[](void* ptr) noexcept
-{
-    VSEngine::System::GetAllocator().Free(ptr);
-}
-
 void Process()
 {
     VSEngine::Engine& engine = GetEngine();

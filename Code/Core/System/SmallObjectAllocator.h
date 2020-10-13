@@ -34,7 +34,7 @@ public:
     void*  Allocate();
     void   Deallocate(void* ptr);
 
-    size_t GetBlockSize() const { return m_blockSize; }
+    inline size_t GetBlockSize() const { return m_blockSize; }
 
 private:
     Chunk* GetDeallocationChunk(void* ptr);
@@ -51,12 +51,14 @@ private:
     unsigned char       m_blockCount;
 };
 
-constexpr size_t DEFAULT_BLOCK_SIZE = 64;
+constexpr size_t DEFAULT_MAX_BLOCK_SIZE = 64;
 
 class SmallObjectAllocator
 {
 public:
-    SmallObjectAllocator(size_t maxObjectSize = DEFAULT_BLOCK_SIZE);
+    SmallObjectAllocator(size_t maxObjectSize = DEFAULT_MAX_BLOCK_SIZE);
+    SmallObjectAllocator(const SmallObjectAllocator& other) = delete;
+    SmallObjectAllocator(SmallObjectAllocator&& other) = delete;
 
     // It's supposed size is lower than m_maxObjectSize;
     void* Allocate(size_t size);
@@ -64,11 +66,13 @@ public:
 
 private:
     std::vector<FixedSizeAllocator> m_allocators;
-    FixedSizeAllocator* m_pLastAllocator;
-    FixedSizeAllocator* m_pLastDeallocator;
+    FixedSizeAllocator*             m_pLastAllocator;
+    FixedSizeAllocator*             m_pLastDeallocator;
     
-    const size_t m_maxObjectSize;
+    const size_t                    m_maxObjectSize;
 };
+
+SmallObjectAllocator& GetSmallObjectAllocator();
 
 } // ~System
 } // ~VSEngine

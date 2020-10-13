@@ -3,9 +3,15 @@
 namespace VSEngine {
 namespace System {
 
+SmallObjectAllocator& GetSmallObjectAllocator()
+{
+    static SmallObjectAllocator smallObjectAllocator;
+    return smallObjectAllocator;
+}
+
 void Chunk::Initialize(unsigned char blockSize, unsigned char blockCount)
 {
-    pData = static_cast<unsigned char*>(malloc(blockSize * blockCount));
+    pData = static_cast<unsigned char*>(malloc(size_t(blockSize) * blockCount));
     firstAvailableBlock = 0;
     availableBlocks = blockCount;
 
@@ -27,7 +33,7 @@ void* Chunk::Allocate(unsigned char blockSize)
     if (availableBlocks == 0)
         return nullptr;
 
-    unsigned char* pResult = pData + blockSize * firstAvailableBlock;
+    unsigned char* pResult = pData + size_t(blockSize) * firstAvailableBlock;
     // Update available block index.
     firstAvailableBlock = *pResult;
     --availableBlocks;

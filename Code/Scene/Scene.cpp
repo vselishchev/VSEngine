@@ -7,6 +7,8 @@
 
 #include <GL/glew.h>
 
+#include <algorithm>
+
 namespace VSEngine {
 
 Scene::Scene()

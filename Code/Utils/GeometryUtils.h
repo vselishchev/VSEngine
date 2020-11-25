@@ -28,7 +28,11 @@ inline glm::vec3 CoordinatewiseMultiplication(const glm::vec3& lhs, const glm::v
 
 struct Face
 {
-    Face() : x(-1), y(-1), z(-1) {}
+    explicit Face() : x(-1), y(-1), z(-1) {}
+    explicit Face(short x, short y, short z)
+        : x(x)
+        , y(y)
+        , z(z) {}
 
     short& operator[](short index)
     {

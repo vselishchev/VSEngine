@@ -41,8 +41,8 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
 {
     if (this != &other)
     {
-        m_vertices = other.m_vertices;
-        m_faces = other.m_faces;
+        m_vertices = std::move(other.m_vertices);
+        m_faces = std::move(other.m_faces);
         m_bBox = other.m_bBox;
         m_pMaterial = other.m_pMaterial;
         m_filePath = other.m_filePath;
@@ -57,7 +57,7 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept
 
 void Mesh::AddVertex(const Vertex& vertex)
 {
-    m_vertices.push_back(vertex);
+    m_vertices.emplace_back(vertex);
     m_bBox.AddPoint(vertex.point);
 }
 
@@ -70,7 +70,7 @@ void Mesh::AddVertices(const std::vector<Vertex>& vertices)
 
     for (const Vertex& vertex : vertices)
     {
-        m_vertices.push_back(vertex);
+        m_vertices.emplace_back(vertex);
         m_bBox.AddPoint(vertex.point);
     }
 }
@@ -85,7 +85,7 @@ void Mesh::AddFaces(const std::vector<VSUtils::Face>& faces)
     m_faces.resize(m_faces.size() + faces.size());
     for (const VSUtils::Face& face : faces)
     {
-        m_faces.push_back(face);
+        m_faces.emplace_back(face);
     }
 }
 

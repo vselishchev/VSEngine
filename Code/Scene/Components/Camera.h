@@ -59,7 +59,7 @@ private:
     void                           RecalculateFrustum();
 
 private:
-    VSUtils::Frustum m_frustum;
+    VSUtils::Frustum m_frustum; // 96 bytes
 
     glm::mat4        m_viewMatrix = glm::mat4(1.0f);
     glm::mat4        m_projectionMatrix = glm::mat4(1.0f);

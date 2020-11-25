@@ -8,6 +8,13 @@ set(SRC_CORE
 	"Core/Engine.h"
 	"Core/Engine.cpp")
 
+set(SRC_CORE_SYSTEM
+	"Core/System/Arena.h"
+	"Core/System/BucketAllocator.h"
+	"Core/System/SmallObjectAllocator.h"
+	"Core/System/SmallObjectAllocator.cpp"
+	"Core/System/Allocator.cpp")
+
 set(SRC_OBJECT_MODEL 	
 	"ObjectModel/Material.h"
 	"ObjectModel/Material.cpp"
@@ -67,6 +74,7 @@ set(SRC_UTILS
 	"Utils/GeometryUtils.h")
 
 source_group("Core"              REGULAR_EXPRESSION "Core/.*")
+source_group("Core\\System"      REGULAR_EXPRESSION "Core/System/.*")
 source_group("ObjectModel"       REGULAR_EXPRESSION "ObjectModel/.*")
 source_group("Renderer"          REGULAR_EXPRESSION "Renderer/.*")
 source_group("Scene"             REGULAR_EXPRESSION "Scene/.*")
@@ -77,6 +85,7 @@ source_group("ResourceManager"   REGULAR_EXPRESSION "ResourceManager/.*")
 source_group("Utils"             REGULAR_EXPRESSION "Utils/.*")
 
 set(SRC "${SRC_CORE}" 
+		"${SRC_CORE_SYSTEM}"
 		"${SRC_OBJECT_MODEL}"
 		"${SRC_RENDERER}"
 		"${SRC_SCENE}"

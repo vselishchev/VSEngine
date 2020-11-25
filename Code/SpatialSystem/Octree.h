@@ -8,7 +8,7 @@
 namespace VSEngine {
 namespace SpatialSystem {
 
-static constexpr short octCount = 8;
+static constexpr short octantCount = 8;
 static constexpr float minSize = 1.0f;
 
 class Node

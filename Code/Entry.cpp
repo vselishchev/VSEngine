@@ -13,7 +13,7 @@
 #include <vector>
 
 #include <chrono>
-#include <iostream>
+#include <random>
 
 void Process()
 {
@@ -95,13 +95,7 @@ void Process()
 
 int main()
 {
-    //const std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
     Process();
-    //const std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
 
-    //std::chrono::duration<double> duration = end - start;
-    //std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
-
-    //std::cout << "Passed time: " << ms.count() << "milliseconds\n";
     return 0;
 }

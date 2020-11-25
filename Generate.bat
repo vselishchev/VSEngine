@@ -2,7 +2,7 @@
 
 mkdir Solution
 cd Solution
-set BuildType=Release
+set BuildType=Debug
 
 echo "Loading dependencies"
 conan install .. -s build_type=%BuildType%

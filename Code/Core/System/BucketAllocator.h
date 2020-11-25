@@ -24,7 +24,7 @@ public:
         return allocator;
     }
 
-    void* Alloc(size_t size)
+    void* Allocate(size_t size)
     {
         if (size > DefaultArenaSize)
         {
@@ -57,7 +57,7 @@ public:
         return pHolder->arena.Alloc(size);
     }
 
-    void Free(void* ptr)
+    void Deallocate(void* ptr)
     {
         // Fast 1: Check if active arena owns memory.
         if (m_pActiveArenaHolder->arena.Owns(ptr))

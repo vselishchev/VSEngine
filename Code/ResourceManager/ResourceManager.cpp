@@ -141,8 +141,8 @@ Mesh* ResourceManager::ProcessMesh(aiMesh* pAiMesh, const aiScene* pAiScene, con
 {
     Mesh* pMesh = new Mesh(pathToFile.c_str());
 
-    /*auto verticesParse = [](aiMesh* pAiMesh, Mesh* pNewMesh)
-    {*/
+    auto verticesParse = [](aiMesh* pAiMesh, Mesh* pNewMesh)
+    {
         for (unsigned int i = 0; i < pAiMesh->mNumVertices; ++i)
         {
             Vertex vertex;
@@ -154,21 +154,21 @@ Mesh* ResourceManager::ProcessMesh(aiMesh* pAiMesh, const aiScene* pAiScene, con
 
             if (pAiMesh->HasTextureCoords(0))
             {
-                pMesh->SetHasTextureCoordinates(true);
+                pNewMesh->SetHasTextureCoordinates(true);
                 const aiVector3D& textureCoord = pAiMesh->mTextureCoords[0][i];
                 vertex.textureCoord = glm::vec3(textureCoord.x,
                                                 textureCoord.y,
                                                 textureCoord.z);
             }
 
-            pMesh->AddVertex(vertex);
+            pNewMesh->AddVertex(vertex);
         }
-    //};
+    };
 
-    //std::thread verticesThread(verticesParse, pAiMesh, pMesh);
+    std::thread verticesThread(verticesParse, pAiMesh, pMesh);
 
-    //auto indicesParse = [](aiMesh* pAiMesh, Mesh* pNewMesh)
-    //{
+    auto indicesParse = [](aiMesh* pAiMesh, Mesh* pNewMesh)
+    {
         for (unsigned int i = 0; i < pAiMesh->mNumFaces; ++i)
         {
             VSUtils::Face triIndex;
@@ -177,14 +177,14 @@ Mesh* ResourceManager::ProcessMesh(aiMesh* pAiMesh, const aiScene* pAiScene, con
             triIndex.y = face.mIndices[1];
             triIndex.z = face.mIndices[2];
 
-            pMesh->AddFace(triIndex);
+            pNewMesh->AddFace(triIndex);
         }
-    //};
+    };
 
-    //std::thread indicesThread(indicesParse, pAiMesh, pMesh);
+    std::thread indicesThread(indicesParse, pAiMesh, pMesh);
 
-    //verticesThread.join();
-    //indicesThread.join();
+    verticesThread.join();
+    indicesThread.join();
 
     aiMaterial* material = pAiScene->mMaterials[pAiMesh->mMaterialIndex];
 

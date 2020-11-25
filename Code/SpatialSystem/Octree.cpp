@@ -27,7 +27,7 @@ void Node::UpdateTree()
 
     const glm::vec3 center = m_region.GetCenter();
 
-    VSUtils::BoundingBox octants[octCount];
+    VSUtils::BoundingBox octants[octantCount];
     octants[0] = VSUtils::BoundingBox(m_region.m_lowerLeft, center);
     octants[1] = VSUtils::BoundingBox(glm::vec3(center.x, m_region.m_lowerLeft.y, m_region.m_lowerLeft.z),
                                       glm::vec3(m_region.m_upperRight.x, center.y, center.z));
@@ -43,7 +43,7 @@ void Node::UpdateTree()
     octants[7] = VSUtils::BoundingBox(glm::vec3(m_region.m_lowerLeft.x, center.y, center.z),
                                       glm::vec3(center.x, m_region.m_upperRight.y, m_region.m_upperRight.z));
 
-    std::vector<VSEngine::SceneObject*> octObjects[octCount];
+    std::vector<VSEngine::SceneObject*> octObjects[octantCount];
 
     std::vector<size_t> deleteObjectIIndices;
 
@@ -57,7 +57,7 @@ void Node::UpdateTree()
         const VSUtils::BoundingBox objectBoundingBox = pObject->GetBoundingBox();
         if (objectBoundingBox.m_lowerLeft != objectBoundingBox.m_upperRight)
         {
-            for (size_t i = 0; i < octCount; ++i)
+            for (size_t i = 0; i < octantCount; ++i)
             {
                 if (octants[i].Contains(objectBoundingBox))
                 {
@@ -86,7 +86,7 @@ void Node::UpdateTree()
 
     m_pendingObjects.clear();
 
-    for (size_t i = 0; i < octCount; ++i)
+    for (size_t i = 0; i < octantCount; ++i)
     {
         if (!octObjects[i].empty())
         {
@@ -137,7 +137,7 @@ std::vector<SceneObject*> Node::GetInFrustum(const VSUtils::Frustum& frustum) co
             }
         }
 
-        for (size_t i = 0; i < octCount; ++i)
+        for (size_t i = 0; i < octantCount; ++i)
         {
             if (m_children[i])
             {
@@ -158,7 +158,7 @@ std::vector<SceneObject*> Node::GetSubtreeObjects() const
 {
     std::vector<SceneObject*> objects(m_objects);
 
-    for (size_t i = 0; i < octCount; ++i)
+    for (size_t i = 0; i < octantCount; ++i)
     {
         if (m_children[i])
         {

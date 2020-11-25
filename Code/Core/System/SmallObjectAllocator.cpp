@@ -5,8 +5,15 @@ namespace System {
 
 SmallObjectAllocator& GetSmallObjectAllocator()
 {
-    static SmallObjectAllocator smallObjectAllocator;
-    return smallObjectAllocator;
+    // Temporary hack. Make it smarter.
+    static SmallObjectAllocator* smallObjectAllocator = nullptr;
+    if (smallObjectAllocator == nullptr)
+    {
+        smallObjectAllocator = static_cast<SmallObjectAllocator*>(malloc(sizeof(SmallObjectAllocator)));
+        new(smallObjectAllocator) SmallObjectAllocator();
+    }
+
+    return *smallObjectAllocator;
 }
 
 void Chunk::Initialize(unsigned char blockSize, unsigned char blockCount)
@@ -106,6 +113,7 @@ void* FixedSizeAllocator::Allocate()
     {
         if (chunkIt->availableBlocks == 0)
         {
+            ++chunkIt;
             continue;
         }
 
@@ -119,6 +127,8 @@ void* FixedSizeAllocator::Allocate()
     chunk.Initialize(m_blockSize, m_blockCount);
     m_pAllocChunk = &chunk;
     m_pDeallocChunk = &chunk;
+
+    return chunk.Allocate(m_blockSize);
 }
 
 void FixedSizeAllocator::Deallocate(void* ptr)
@@ -143,7 +153,7 @@ Chunk* FixedSizeAllocator::GetDeallocationChunk(void* ptr)
     {
         if (lo)
         {
-            if (Belongs(*lo, ptr));
+            if (Belongs(*lo, ptr))
                 return lo;
 
             if (lo == loBound)
@@ -154,7 +164,7 @@ Chunk* FixedSizeAllocator::GetDeallocationChunk(void* ptr)
 
         if (hi)
         {
-            if (Belongs(*hi, ptr));
+            if (Belongs(*hi, ptr))
                 return hi;
 
             if (++hi == hiBound)
@@ -191,13 +201,11 @@ void FixedSizeAllocator::DoDeallocate(void* ptr)
     {
         lastChunk.Release();
         m_chunks.pop_back();
-        m_pAllocChunk = m_pDeallocChunk;
     }
-    else
-    {
-        std::swap(*m_pDeallocChunk, lastChunk);
-        m_pAllocChunk = &m_chunks.back();
-    }
+
+    if (m_chunks.size() > 1)
+        std::swap(*m_pDeallocChunk, m_chunks.back());
+    m_pAllocChunk = m_pDeallocChunk = &m_chunks.back();
 }
 
 inline bool FixedSizeAllocator::Belongs(Chunk& chunk, void* ptr) const
@@ -220,6 +228,9 @@ bool AllocatorComparator(const FixedSizeAllocator& allocator, size_t size)
 
 void* SmallObjectAllocator::Allocate(size_t size)
 {
+    if (size > m_maxObjectSize)
+        return malloc(size);
+
     if (m_pLastAllocator && m_pLastAllocator->GetBlockSize() == size)
         return m_pLastAllocator->Allocate();
 
@@ -240,10 +251,9 @@ void SmallObjectAllocator::Deallocate(void* ptr, size_t size)
 {
     if (size > m_maxObjectSize)
     {
-        operator delete(ptr);
+        delete ptr;
         return;
     }
-
 
     if (m_pLastDeallocator && m_pLastDeallocator->GetBlockSize() == size)
     {

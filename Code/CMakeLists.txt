@@ -15,6 +15,14 @@ set(SRC_CORE_SYSTEM
 	"Core/System/SmallObjectAllocator.cpp"
 	"Core/System/Allocator.cpp")
 
+set(SRC_ECS
+	"ECS/Utility.h"
+	"ECS/IComponent.h"
+	"ECS/IEntity.h"
+	"ECS/ISystem.h"
+	"ECS/EntityManager.h"
+	"ECS/EntityManager.cpp")
+
 set(SRC_OBJECT_MODEL 	
 	"ObjectModel/Material.h"
 	"ObjectModel/Material.cpp"
@@ -75,6 +83,7 @@ set(SRC_UTILS
 
 source_group("Core"              REGULAR_EXPRESSION "Core/.*")
 source_group("Core\\System"      REGULAR_EXPRESSION "Core/System/.*")
+source_group("ECS"               REGULAR_EXPRESSION "ECS/.*")
 source_group("ObjectModel"       REGULAR_EXPRESSION "ObjectModel/.*")
 source_group("Renderer"          REGULAR_EXPRESSION "Renderer/.*")
 source_group("Scene"             REGULAR_EXPRESSION "Scene/.*")
@@ -93,7 +102,8 @@ set(SRC "${SRC_CORE}"
 		"${SRC_SHADERS}"
 		"${SRC_SPATIAL_SYSTEM}"
 		"${SRC_RESOURCE_MANAGER}"
-		"${SRC_UTILS}")
+		"${SRC_UTILS}"
+		"${SRC_ECS}")
 
 add_executable(${PROJECT_NAME} 
 	"Entry.cpp"
